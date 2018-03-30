@@ -1,0 +1,5 @@
+﻿  cs_initializer.cpp
+  view_home.cpp
+c:\git\sem2\src\cs_component.h(92): warning C4100: 'ly': unreferenced formal parameter (compiling source file src\view_home.cpp)
+  sem2.vcxproj -> C:\Git\sem2\debug\sem2.exe
+  sem2.vcxproj -> debug\sem2.pdb (Full PDB)
