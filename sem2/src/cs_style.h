@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <QObject>
 #include <QScreen>
 #include <QDebug>
@@ -23,7 +23,7 @@ public:
 	const QString testColor07 = "#ffce44";
 
 	const QString btnSelectedStyle = "color: white; background-color: #1caf9a; font-weight: bold;";
-	const QString btnReleasedStyle = "color: white; background-color: transparent;";
+	const QString btnReleasedStyle = "color: black; background-color: #eeeeee;  border-radius:5px;";
 };
 
 class Font : public QObject
@@ -73,7 +73,7 @@ public:
 	/* VIEW SIZE */
 	int width() { return m_width; }
 	int height() { return m_height; }
-	QSize& size() { return QSize(m_width, m_height); }
+    QSize size() { return QSize(m_width, m_height); }
 
 	/* COLOR */
 	Palette* palette() { return m_palette; }
@@ -98,19 +98,19 @@ protected:
 class Button : public StyleBasic
 {
 	Q_OBJECT
-		Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+		Q_PROPERTY(const char* name READ name WRITE setName NOTIFY nameChanged)
 
 public:
-	QString name() { return m_name; }
+	const char* name() { return m_name; }
 
 	public slots :
-	void setName(QString m) { m_name = m; emit nameChanged(); }
+	void setName(const char* m) { m_name = m; emit nameChanged(); }
 
 signals:
 	void nameChanged();
 
 protected:
-	QString m_name;
+	const char* m_name;
 };
 
 class StyleMainSlide : public StyleBasic
@@ -125,6 +125,9 @@ public:
 
 	const int widthSpread = 200;
 	const int widthFold = 90;
+
+	const int wCol01 = 20;
+	const int hBtnExt = 30;	/* í™•ìž¥í•˜ê¸° ë²„íŠ¼ */
 
 	bool extended() { return m_extended; }
 
@@ -157,11 +160,12 @@ public:
 		font()->setSmall(14);
 
 		m_btnLogout = new Button();
-		m_btnLogout->setName("·Î±×¾Æ¿ô");
+		m_btnLogout->setName("ë¡œê·¸ì•„ì›ƒ");
 		m_btnLogout->setWidth(100); 
 		m_btnLogout->setHeight(40);
 	}
-	const QString txtTitle = "e-koreatech ÀÚ»ê °ü¸® ½Ã½ºÅÛ";
+	const int wCol01 = 500;
+	const char* txtTitle = "e-koreatech ìžì‚° ê´€ë¦¬ ì‹œìŠ¤í…œ";
 	Button* btnLogout() { return m_btnLogout; }
 
 private:
@@ -229,17 +233,24 @@ public:
 		m_footer = new StyleMainFooter(); 
 
 		m_header->setWidth(m_width);
-		m_body->setWidth(m_width); m_body->setHeight(m_height - m_header->height() - m_footer->height());
+		m_body->setWidth(m_width); 
+		m_body->setHeight(m_height - m_header->height() - m_footer->height());
 		m_footer->setWidth(m_width);
 
 		connect(this, SIGNAL(widthChanged()), this, SLOT(initWidthHeader()));
 		connect(this, SIGNAL(widthChanged()), this, SLOT(initWidthFooter()));
-		//connect(this, SIGNAL(heightChanged(), this, SLOT(init)))
+		connect(this, SIGNAL(widthChanged()), this, SLOT(initSizeBody()));
+		connect(this, SIGNAL(heightChanged()), this, SLOT(initSizeBody()));
 	};
 
 	public slots:
 	void initWidthHeader() { m_header->setWidth(m_width); }
 	void initWidthFooter() { m_footer->setWidth(m_width); }
+	void initSizeBody() 
+	{ 
+		m_body->setWidth(m_width); 
+		m_body->setHeight(m_height - m_header->height() - m_footer->height()); 
+	}
 
 	StyleMainHeader* header() { return m_header; }
 	StyleMainBody*   body()	  { return m_body;   }

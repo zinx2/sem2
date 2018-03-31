@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "cs_qheader.h"
 #include "cs_style.h"
 #include <QStyle>
@@ -9,9 +9,10 @@ public:
 	{
 		this->setFixedSize(width, height);
 		QFont font = this->font();
-		font.setPointSize(10);
+		font.setPointSize(12);
 		this->setFont(font);
 		this->setText(name);
+		initFontType("NanumBarunGothic");
 	}
 	QString tag() { return m_tag; }
 	Command* initStyleSheet(QString sheet) { setStyleSheet(sheet); return this; }
@@ -21,6 +22,12 @@ public:
 		this->setFont(font);
 		return this;
 	}
+	Command* initFontType(QString name) {
+		QFont oldFont = this->font();
+		this->setFont(QFont(name, oldFont.pointSize(), oldFont.weight()));
+		return this;
+	}
+	Command* initName(QString name) { setText(name); return this; }
 	Command* initIcon(QString iconPath) {
 		QPixmap pixmap(iconPath);
 		QIcon icon(pixmap);

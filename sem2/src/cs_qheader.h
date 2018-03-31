@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QDebug>
 #include <QWidget>
 #include <QPushButton>
@@ -49,7 +49,7 @@
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QPainter>
-static QString qkor(const char *strKor)
+static QString kr(const char *strKor)
 {
     static QTextCodec *codec = QTextCodec::codecForName("eucKR"); //"eucKR"
     return codec->toUnicode(strKor);
@@ -64,4 +64,17 @@ static void print(QWidget* obj)
         QPainter painter(&printer);
         obj->render(&painter);
     }
+}
+
+static void print(QString tag, int num1, int num2)
+{
+	qDebug() << tag << ": " << num1 << " / " << num2;
+}
+static void print(QString tag, int num)
+{
+	qDebug() << tag << ": " << num;
+}
+static void print(QString tag, QString str)
+{
+	qDebug() << tag << ": " << str;
 }

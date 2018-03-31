@@ -1,4 +1,4 @@
-#include "cs_style.h"
+﻿#include "cs_style.h"
 #include "cs_model.h"
 Style* Style::m_instance = nullptr;
 Model* Model::m_instance = nullptr;

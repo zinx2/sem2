@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "cs_qheader.h"
 #define DEVICE_LIST "devicelist"
 #define DEVICE_MANAGE_LIST "devicemanagelist"

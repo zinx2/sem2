@@ -22,7 +22,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_ViewHome_t {
     QByteArrayData data[3];
-    char stringdata0[17];
+    char stringdata0[19];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,11 +32,11 @@ struct qt_meta_stringdata_ViewHome_t {
 static const qt_meta_stringdata_ViewHome_t qt_meta_stringdata_ViewHome = {
     {
 QT_MOC_LITERAL(0, 0, 8), // "ViewHome"
-QT_MOC_LITERAL(1, 9, 6), // "resize"
-QT_MOC_LITERAL(2, 16, 0) // ""
+QT_MOC_LITERAL(1, 9, 8), // "updateUI"
+QT_MOC_LITERAL(2, 18, 0) // ""
 
     },
-    "ViewHome\0resize\0"
+    "ViewHome\0updateUI\0"
 };
 #undef QT_MOC_LITERAL
 
@@ -68,7 +68,7 @@ void ViewHome::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, vo
         ViewHome *_t = static_cast<ViewHome *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->resize(); break;
+        case 0: _t->updateUI(); break;
         default: ;
         }
     }

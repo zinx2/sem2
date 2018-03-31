@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QTextEdit>
 #include <QLabel>
@@ -61,6 +61,7 @@ public:
 	{
 		setFixedSize(width, height);
 		setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+		initFontType("NanumBarunGothic");
 		//setStyleSheet("background:white;");
 		//QFont f = font();
 		//f.setPointSize(10);
@@ -78,6 +79,17 @@ public:
 		this->setFont(font);
 		return this;
 	}
+	CPLabel* initFontBold() {
+		QFont font = this->font();
+		font.setBold(true);
+		this->setFont(font);
+		return this;
+	}
+	CPLabel* initFontType(QString name) {
+		QFont oldFont = this->font();		
+		this->setFont(QFont(name, oldFont.pointSize(), oldFont.weight()));
+		return this;
+	}
 	CPLabel* initStyleSheet(QString sheet)
 	{
 		setStyleSheet(sheet);
@@ -92,10 +104,10 @@ public:
 	CPWidget(int width, int height, QLayout* ly, QWidget *parent = 0) : QWidget(parent)
 	{
 		setFixedSize(width, height);
-		//setLayout(ly);
+		setLayout(ly);
 		//layout()->setAlignment(Qt::AlignVCenter);
-		//layout()->setSpacing(5);
-		//layout()->setMargin(0);
+		layout()->setSpacing(0);
+		layout()->setMargin(0);
 	}
 	CPWidget* initContentsMargins(int left, int right, int top, int bottom)
 	{
@@ -120,6 +132,11 @@ public:
 	CPWidget* initSpacing(int space)
 	{
 		layout()->setSpacing(space);
+		return this;
+	}
+	CPWidget* initWidth(int width)
+	{
+		setFixedWidth(width);
 		return this;
 	}
 	CPWidget* append(QWidget* w)

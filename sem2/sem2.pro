@@ -38,3 +38,6 @@ src/cs_style.h \
     src/cs_component.h \
     src/cs_file.h \
     src/cs_networker.h
+
+RESOURCES += \
+    resources.qrc
