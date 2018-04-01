@@ -57,7 +57,7 @@ class CPLabel : public QLabel
 {
 	Q_OBJECT
 public:
-	CPLabel(int width, int height, QString txt, QWidget *parent = 0) : QLabel(txt, parent)
+	CPLabel(int width, int height, QString txt="", QWidget *parent = 0) : QLabel(txt, parent)
 	{
 		setFixedSize(width, height);
 		setAlignment(Qt::AlignVCenter | Qt::AlignRight);
@@ -93,6 +93,11 @@ public:
 	CPLabel* initStyleSheet(QString sheet)
 	{
 		setStyleSheet(sheet);
+		return this;
+	}
+	CPLabel* initImage(QString path)
+	{
+		setPixmap(QPixmap(path));
 		return this;
 	}
 };

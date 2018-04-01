@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>fonts/NanumBarunGothic.ttf</file>
+        <file>imgs/circle.png</file>
+        <file>imgs/calendar_36dp.png</file>
+        <file>imgs/devices_36dp.png</file>
+        <file>imgs/edit_24dp.png</file>
+        <file>imgs/employee_36dp.png</file>
+        <file>imgs/imexport_36dp.png</file>
+        <file>imgs/management_36dp.png</file>
+        <file>imgs/plus_24dp.png</file>
+        <file>imgs/printer_24dp.png</file>
+        <file>imgs/remove_24dp.png</file>
+    </qresource>
+</RCC>

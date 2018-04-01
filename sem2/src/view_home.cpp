@@ -1,7 +1,7 @@
 ﻿#include "view_home.h"
 #include "cs_qheader.h"
 ViewHome::ViewHome(QWidget *parent)
-    : QWidget(parent)
+	: QWidget(parent)
 {
 	/*** GET STYLE INSTANCES. ***/
 	m_style = Style::instance()->main();
@@ -12,14 +12,50 @@ ViewHome::ViewHome(QWidget *parent)
 	m_styleSlide = m_styleBody->slide();
 	/*** GET STYLE INSTANCES. END. ***/
 
+	connect(m_styleSlide, SIGNAL(extendedChanged()), this, SLOT(onSlided()));
+
 	/*** CREATE INSTANCES. ***/
-	Command* btnSlideExt = new Command("slide_ext", "<<", m_styleSlide->wCol01, m_styleSlide->height());
-	btnSlideExt->initStyleSheet("color: white; background-color: transparent;");
-	Command* btnLogout = new Command("logout", kr(m_styleHeader->btnLogout()->name()), m_styleHeader->btnLogout()->width(), m_styleHeader->btnLogout()->height());
-	btnLogout->initStyleSheet(m_style->palette()->btnReleasedStyle);
+	Command* btnSlideExt = (new Command("slide_ext", "<<", m_styleSlide->wCol01, m_styleSlide->height()))
+		->initStyleSheet(m_styleSlide->btnExtReleasedSheet)
+		->initEffect(m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtHoverdSheet);
+
+	Button* metaBtn;
+	metaBtn = m_styleHeader->btnLogout();
+	m_btnLogout = (new Command("logout", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+	->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+	->initIcon(":/imgs/circle.png");
+
+	metaBtn = m_styleSlide->btnDVCList();
+	m_btnDVCList =
+		(new Command("device_list", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(metaBtn->icon(), metaBtn->name());
+	
+	metaBtn = m_styleSlide->btnMNGList();
+	m_btnMNGList =
+		(new Command("management_list", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(metaBtn->icon(), metaBtn->name());
+
+	metaBtn = m_styleSlide->btnMNTList();
+	m_btnMNTList =
+		(new Command("month_list", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(metaBtn->icon(), metaBtn->name());
+
+	metaBtn = m_styleSlide->btnEMPList();
+	m_btnEMPList =
+		(new Command("employee_list", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(metaBtn->icon(), metaBtn->name());
 
 	m_header = new QWidget(this);
-	m_headerCol01 = (new CPLabel(500, m_styleHeader->height(), kr(m_styleHeader->txtTitle)))
+	m_headerCol01 = (new CPLabel(m_styleHeader->wCol01, m_styleHeader->height(), kr(m_styleHeader->txtTitle)))
 		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter)
 		->initContentsMargins(15, 0, 0, 0)
 		->initFontSize(20)
@@ -28,9 +64,19 @@ ViewHome::ViewHome(QWidget *parent)
 	m_headerCol02 = (new CPWidget(m_styleHeader->width() - m_styleHeader->wCol01, m_styleHeader->height(), new QHBoxLayout))
 		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
 		->initContentsMargins(0, 10, 0, 0);
-		
-	QImage img()
-	CPLabel* lbUserInfo = (new CPLabel(m_styleHeader->width() - m_styleHeader->wCol01 - btnLogout->width() - 10, m_styleHeader->height(), kr("시스템파트 김진환님 (관리자)")))
+
+	m_contentRow1 = (new CPWidget(m_styleContent->width(), m_styleContent->hRow01, new QHBoxLayout))
+		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter)
+		->initContentsMargins(10, 0, 0, 0);
+
+	m_lbCurrentContent = (new CPLabel(m_styleContent->wGrid1_1 - 40, m_styleContent->hRow01, kr("장비목록")))
+		->initFontSize(20)
+		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+	//QLabel* lb = new QLabel(this);
+	//lb->setPixmap(QPixmap(":/imgs/plus_24dp.png"));
+
+	CPLabel* lbUserInfo = (new CPLabel(m_styleHeader->width() - m_styleHeader->wCol01 - m_btnLogout->width() - 10, m_styleHeader->height(), kr("시스템파트 김진환님 (관리자)")))
 		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
 		->initContentsMargins(0, 10, 0, 0)
 		->initFontSize(12)
@@ -38,11 +84,18 @@ ViewHome::ViewHome(QWidget *parent)
 
 	m_body = new QWidget(this);
 	m_footer = new QWidget(this);
+
 	m_content = new QWidget(this);
+	m_content->setLayout(new QVBoxLayout);
+	m_content->layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+	m_content->layout()->setMargin(0);
+	m_content->layout()->setSpacing(0);
 
 	m_slide = new QWidget(this);
 	m_slideCol01 = new QWidget(m_slide);
-	m_slideCol02 = new QWidget(m_slide);
+	m_slideCol02 = (new CPWidget(m_styleSlide->wCol01, m_styleSlide->height(), new QVBoxLayout))
+		->initAlignment(Qt::AlignRight | Qt::AlignTop)
+		->initSpacing(10)->initContentsMargins(0, 10, 10, 0);
 	/*** CREATE INSTANCES. END. ***/
 
 	/*** INITIALIZE PARENT. ***/
@@ -63,8 +116,13 @@ ViewHome::ViewHome(QWidget *parent)
 	m_body->layout()->setMargin(0);
 	m_body->layout()->setSpacing(0);
 
+	m_content->setLayout(new QVBoxLayout);
+	m_content->layout()->setMargin(0);
+	m_content->layout()->setSpacing(0);
+
 	m_slide->setLayout(new QHBoxLayout);
 	m_slideCol01->setLayout(new QVBoxLayout);
+	m_slideCol02->setLayout(new QVBoxLayout);
 
 	m_slide->layout()->setMargin(0);
 	m_slide->layout()->setSpacing(0);
@@ -72,14 +130,14 @@ ViewHome::ViewHome(QWidget *parent)
 	m_slideCol01->layout()->setMargin(0);
 	m_slideCol01->layout()->addWidget(btnSlideExt);
 	/*** SET LAYOUT. END. ***/
-	
+
 	/*** SET STYLE SHEETS. ***/
 	m_header->setStyleSheet("background: " + m_styleHeader->palette()->navy01);
 	m_body->setStyleSheet("background: orange");
 	m_footer->setStyleSheet("background: " + m_styleFooter->palette()->navy01);
 	m_content->setStyleSheet("background: yellow");
 	m_slide->setStyleSheet("background: " + m_styleHeader->palette()->navy02);
-	m_slideCol01->setStyleSheet("background: " + m_styleHeader->palette()->navy03);	
+	m_slideCol01->setStyleSheet("background: " + m_styleHeader->palette()->navy03);
 	/*** SET STYLE SHEETS. END. ***/
 
 	/*** ADD WIDGETS. ***/
@@ -87,30 +145,58 @@ ViewHome::ViewHome(QWidget *parent)
 	layout()->addWidget(m_body);
 	layout()->addWidget(m_footer);
 
-	m_headerCol02->append(lbUserInfo)->append(btnLogout);
+	m_headerCol02->append(lbUserInfo)->append(m_btnLogout);
 	m_header->layout()->addWidget(m_headerCol01);
 	m_header->layout()->addWidget(m_headerCol02);
 
 	m_body->layout()->addWidget(m_content);
 	m_body->layout()->addWidget(m_slide);
 
+	m_contentRow1->append((new CPLabel(20, 20))->initImage(":/imgs/circle.png"))
+		->initSpacing(10)
+		->append(m_lbCurrentContent);
+	m_content->layout()->addWidget(m_contentRow1);
+
 	m_slide->layout()->addWidget(m_slideCol01);
 	m_slide->layout()->addWidget(m_slideCol02);
+	m_slideCol02->append(m_btnDVCList)->append(m_btnMNGList)->append(m_btnMNTList)->append(m_btnEMPList);
 	/*** ADD WIDGETS. END. ***/
 
+	initDVCList();
+
 	/* CONNECT COMMANDS. */
-	connect(btnSlideExt, &QPushButton::clicked, [=]()
+	btnSlideExt->initFunc([=]()
 	{
 		bool extended = m_styleSlide->extended();
 		m_styleSlide->extend(!extended);
 		btnSlideExt->initName(m_styleSlide->extended() ? ">>" : "<<");
 		updateUI();
 	});
-	connect(btnLogout, &QPushButton::clicked, [=]()
+	m_btnLogout->initFunc([=]()
 	{
 		print("CMD-LOGOUT", "logout...");
 	});
 
+	m_btnDVCList->initFunc([=]()
+	{
+		print("CMD-m_btnDVCList", "m_btnDVCList...");
+		initDVCList();
+	});
+	m_btnMNGList->initFunc([=]()
+	{
+		print("CMD-m_btnMNGList", "m_btnMNGList...");
+		initMNGList();
+	});
+	m_btnMNTList->initFunc([=]()
+	{
+		print("CMD-m_btnMNTList", "m_btnMNTList...");
+		initMNTList();
+	});
+	m_btnEMPList->initFunc([=]()
+	{
+		print("CMD-m_btnEMPList", "m_btnEMPList...");
+		initEMPList();
+	});
 	/* CONNECT COMMANDS. END. */
 
 	updateUI();
@@ -155,6 +241,9 @@ void ViewHome::updateUI()
 	m_body->setFixedSize(wBody, hBody);
 	m_footer->setFixedSize(wFooter, hFooter);
 	m_content->setFixedSize(wContent, hContent);
+	m_contentRow1->initWidth(wContent);
+	if(m_contentGrid1_2 != nullptr)
+		m_contentGrid1_2->initWidth(wContent - m_styleContent->wGrid1_1);
 	m_slide->setFixedSize(wSlide, hSlide);
 	m_slideCol01->setFixedSize(wSlideCol01, hSlide);
 	m_slideCol02->setFixedSize(wSlideCol02, hSlide);
@@ -166,8 +255,106 @@ void ViewHome::updateUI()
 	print("SLIDE", wSlide, hSlide);
 	print("SLIDE-COL01", wSlideCol01, hSlide);
 	print("SLIDE-COL02", wSlideCol02, hSlide);
-}
 
+	Button* metaBtn;
+	metaBtn = m_styleSlide->btnDVCList();
+	m_btnDVCList->initWidth(metaBtn->width())->initIcon(metaBtn->icon(), kr(metaBtn->name()));
+
+	metaBtn = m_styleSlide->btnMNGList();
+	m_btnMNGList->initWidth(metaBtn->width())->initIcon(metaBtn->icon(), kr(metaBtn->name()));
+
+	metaBtn = m_styleSlide->btnMNTList();
+	m_btnMNTList->initWidth(metaBtn->width())->initIcon(metaBtn->icon(), kr(metaBtn->name()));
+
+	metaBtn = m_styleSlide->btnEMPList();
+	m_btnEMPList->initWidth(metaBtn->width())->initIcon(metaBtn->icon(), kr(metaBtn->name()));
+}
+void ViewHome::initDVCList()
+{
+	if (m_contentGrid1_2 != nullptr)
+	{
+		delete m_contentGrid1_2;
+		m_contentGrid1_2 = nullptr;
+	}
+
+	m_lbCurrentContent->setText(kr("장비목록"));
+	m_contentGrid1_2 = (new CPWidget(m_styleContent->width() - m_styleContent->wGrid1_1, m_styleContent->hRow01, new QHBoxLayout))
+		->initSpacing(10)
+		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
+		->initContentsMargins(0, 20, 0, 0);
+
+	Button* metaBtn;
+	metaBtn = m_styleContent->btnPrint();
+	m_btnPrint = (new Command("print", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(m_styleContent->btnPrint()->icon());
+
+	metaBtn = m_styleContent->btnEdit();
+	m_btnEdit = (new Command("edit", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(m_styleContent->btnEdit()->icon());
+
+	metaBtn = m_styleContent->btnRemove();
+	m_btnRemove = (new Command("remove", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(m_styleContent->btnRemove()->icon());
+
+	metaBtn = m_styleContent->btnNew();
+	m_btnNew = (new Command("new", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(m_styleContent->btnNew()->icon());
+
+	m_contentRow1->layout()->addWidget(m_contentGrid1_2);
+	m_contentGrid1_2->append(m_btnNew)->append(m_btnEdit)->append(m_btnRemove)->append(m_btnPrint);
+
+	m_btnPrint->initFunc([=]()
+	{
+		print("CMD-PRINT", "print...");
+	});
+	m_btnRemove->initFunc([=]()
+	{
+		print("CMD-btnRemove", "print...");
+	});
+	m_btnEdit->initFunc([=]()
+	{
+		print("CMD-btnEdit", "print...");
+	});
+	m_btnNew->initFunc([=]()
+	{
+		print("CMD-btnNew", "print...");
+	});
+}
+void ViewHome::initMNGList() 
+{
+	if (m_contentGrid1_2 != nullptr)
+	{
+		delete m_contentGrid1_2;
+		m_contentGrid1_2 = nullptr;
+	}
+	m_lbCurrentContent->setText(kr("관리대장"));
+}
+void ViewHome::initMNTList() 
+{
+	if (m_contentGrid1_2 != nullptr)
+	{
+		delete m_contentGrid1_2;
+		m_contentGrid1_2 = nullptr;
+	}
+	m_lbCurrentContent->setText(kr("월별대장"));
+}
+void ViewHome::initEMPList() 
+{
+	if (m_contentGrid1_2 != nullptr)
+	{
+		delete m_contentGrid1_2;
+		m_contentGrid1_2 = nullptr;
+	}
+	m_lbCurrentContent->setText(kr("직원관리"));
+}
 ViewHome::~ViewHome()
 {
 

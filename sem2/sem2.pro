@@ -40,4 +40,6 @@ src/cs_style.h \
     src/cs_networker.h
 
 RESOURCES += \
-    resources.qrc
+    res.qrc
+
+#CONFIG += resources_big

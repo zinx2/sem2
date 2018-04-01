@@ -52,6 +52,7 @@
 static QString kr(const char *strKor)
 {
     static QTextCodec *codec = QTextCodec::codecForName("eucKR"); //"eucKR"
+    //static QTextCodec *codec = QTextCodec::codecForName("UTF-8"); //"eucKR"
     return codec->toUnicode(strKor);
 }
 

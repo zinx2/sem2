@@ -23,7 +23,18 @@ public:
 	const QString testColor07 = "#ffce44";
 
 	const QString btnSelectedStyle = "color: white; background-color: #1caf9a; font-weight: bold;";
-	const QString btnReleasedStyle = "color: black; background-color: #eeeeee;  border-radius:5px;";
+	const QString btnReleasedStyle01 = "color: black; background-color: #eeeeee;  border-radius:5px;";
+	const QString btnReleasedStyle02 = "color: white; background-color: "+ navy01+";  border-radius:5px;";
+	const QString btnHoveredStyle = "color: white; background-color: blue; font-weight: bold;";
+
+	const QString btnReleasedStyleGray = "color: black; background-color: #eeeeee;  border-radius:5px;";
+	const QString btnHoveredStyleGray = btnReleasedStyleGray;
+	const QString btnSelectedStyleGray = "color: black; background-color: #9b9b9b;  border-radius:5px;";
+
+	const QString btnReleasedStyleNavy = "color: white; background-color: " + navy01 + ";  border-radius:5px;";
+	const QString btnHoveredStyleNavy = btnReleasedStyleNavy;
+	const QString btnSelectedStyleNavy = "color: white; background-color: #26708d;  border-radius:5px;";
+
 };
 
 class Font : public QObject
@@ -99,18 +110,32 @@ class Button : public StyleBasic
 {
 	Q_OBJECT
 		Q_PROPERTY(const char* name READ name WRITE setName NOTIFY nameChanged)
+		Q_PROPERTY(QString icon READ icon WRITE setIcon NOTIFY iconChanged)
 
 public:
 	const char* name() { return m_name; }
+	QString icon() { return m_icon; }
+	QString releasedStyle() { return m_releasedStyle; }
+	QString hoveredStyle() { return m_hoveredStyle; }
+	QString selectedStyle() { return m_selectedStyle; }
 
 	public slots :
 	void setName(const char* m) { m_name = m; emit nameChanged(); }
+	void setIcon(QString m) { m_icon = m; emit iconChanged(); }
+	void setReleasedStyle(QString m) { m_releasedStyle = m; }
+	void setHoveredStyle(QString m) { m_hoveredStyle = m; }
+	void setSelectedStyle(QString m) { m_selectedStyle = m; }
 
 signals:
 	void nameChanged();
+	void iconChanged();
 
 protected:
 	const char* m_name;
+	QString m_icon;
+	QString m_releasedStyle;
+	QString m_hoveredStyle;
+	QString m_selectedStyle;
 };
 
 class StyleMainSlide : public StyleBasic
@@ -121,13 +146,54 @@ public:
 	StyleMainSlide()
 	{
 		m_width = widthFold;
+
+		m_btnDVCList = new Button();
+		m_btnDVCList->setHeight(50);
+		m_btnDVCList->setIcon(":/imgs/devices_36dp.png");		
+		m_btnDVCList->setReleasedStyle(palette()->btnReleasedStyle01);
+		m_btnDVCList->setHoveredStyle(palette()->btnHoveredStyleGray);
+		m_btnDVCList->setSelectedStyle(palette()->btnSelectedStyleGray);
+
+		m_btnMNGList = new Button();
+		m_btnMNGList->setHeight(50);
+		m_btnMNGList->setIcon(":/imgs/management_36dp.png");
+		m_btnMNGList->setReleasedStyle(palette()->btnReleasedStyleGray);
+		m_btnMNGList->setHoveredStyle(palette()->btnHoveredStyleGray);
+		m_btnMNGList->setSelectedStyle(palette()->btnSelectedStyleGray);
+
+		m_btnMNTList = new Button();
+		m_btnMNTList->setHeight(50);
+		m_btnMNTList->setIcon(":/imgs/calendar_36dp.png");
+		m_btnMNTList->setReleasedStyle(palette()->btnReleasedStyleGray);
+		m_btnMNTList->setHoveredStyle(palette()->btnHoveredStyleGray);
+		m_btnMNTList->setSelectedStyle(palette()->btnSelectedStyleGray);
+
+		m_btnEMPList = new Button();
+		m_btnEMPList->setHeight(50);
+		m_btnEMPList->setIcon(":/imgs/employee_36dp.png");
+		m_btnEMPList->setReleasedStyle(palette()->btnReleasedStyleGray);
+		m_btnEMPList->setHoveredStyle(palette()->btnHoveredStyleGray);
+		m_btnEMPList->setSelectedStyle(palette()->btnSelectedStyleGray);
+
+		extend(false);
 	}
 
 	const int widthSpread = 200;
 	const int widthFold = 90;
 
+	const int wBtnExtended = 160;
+	const int wBtnFolded = 50;
+
 	const int wCol01 = 20;
 	const int hBtnExt = 30;	/* 확장하기 버튼 */
+
+	const QString btnExtReleasedSheet = "border:0px; background: transparent; color:white;";
+	const QString btnExtHoverdSheet = "border:0px; background: #1e5064; color:white;";
+
+	Button* btnDVCList() { return m_btnDVCList; }
+	Button* btnMNGList() { return m_btnMNGList; }
+	Button* btnMNTList() { return m_btnMNTList; }
+	Button* btnEMPList() { return m_btnEMPList; }
 
 	bool extended() { return m_extended; }
 
@@ -136,18 +202,44 @@ public:
 		m_extended = m;
 		if (m_extended) {
 			m_width = widthSpread;
+			m_btnDVCList->setName("장비목록");
+			m_btnMNGList->setName("관리대장");
+			m_btnMNTList->setName("월별점검");
+			m_btnEMPList->setName("직원관리");
+
+			m_btnDVCList->setWidth(wBtnExtended);
+			m_btnMNGList->setWidth(wBtnExtended);
+			m_btnMNTList->setWidth(wBtnExtended);
+			m_btnEMPList->setWidth(wBtnExtended);
 		}
 		else {
 			m_width = widthFold;
+			m_btnDVCList->setName("");
+			m_btnMNGList->setName("");
+			m_btnMNTList->setName("");
+			m_btnEMPList->setName("");
+
+			m_btnDVCList->setWidth(wBtnFolded);
+			m_btnMNGList->setWidth(wBtnFolded);
+			m_btnMNTList->setWidth(wBtnFolded);
+			m_btnEMPList->setWidth(wBtnFolded);
 		}
 		emit extendedChanged();
 	}
+
 
 signals:
 	void extendedChanged();
 
 private:
 	bool m_extended = false;
+
+	Button* m_btnDVCList;
+	Button* m_btnMNGList;
+	Button* m_btnMNTList;
+	Button* m_btnEMPList;
+
+
 
 };
 class StyleMainHeader : public StyleBasic {
@@ -163,6 +255,10 @@ public:
 		m_btnLogout->setName("로그아웃");
 		m_btnLogout->setWidth(100); 
 		m_btnLogout->setHeight(40);
+		m_btnLogout->setIcon(":/imgs/circle.png");
+		m_btnLogout->setReleasedStyle(palette()->btnReleasedStyleGray);
+		m_btnLogout->setHoveredStyle(palette()->btnHoveredStyleGray);
+		m_btnLogout->setSelectedStyle(palette()->btnSelectedStyleGray);
 	}
 	const int wCol01 = 500;
 	const char* txtTitle = "e-koreatech 자산 관리 시스템";
@@ -184,6 +280,58 @@ public:
 
 class StyleMainContent : public StyleBasic {
 	Q_OBJECT
+public:
+	StyleMainContent()
+	{
+		m_btnPrint = new Button();
+		m_btnPrint->setName("인쇄하기");
+		m_btnPrint->setWidth(110);
+		m_btnPrint->setHeight(40);
+		m_btnPrint->setIcon(":/imgs/printer_24dp.png");
+		m_btnPrint->setReleasedStyle(palette()->btnReleasedStyleNavy);
+		m_btnPrint->setHoveredStyle(palette()->btnHoveredStyleNavy);
+		m_btnPrint->setSelectedStyle(palette()->btnSelectedStyleNavy);
+
+		m_btnNew = new Button();
+		m_btnNew->setName("추가하기");
+		m_btnNew->setWidth(110);
+		m_btnNew->setHeight(40);
+		m_btnNew->setIcon(":/imgs/plus_24dp.png");
+		m_btnNew->setReleasedStyle(palette()->btnReleasedStyleNavy);
+		m_btnNew->setHoveredStyle(palette()->btnHoveredStyleNavy);
+		m_btnNew->setSelectedStyle(palette()->btnSelectedStyleNavy);
+
+		m_btnRemove = new Button();
+		m_btnRemove->setName("삭제하기");
+		m_btnRemove->setWidth(110);
+		m_btnRemove->setHeight(40);
+		m_btnRemove->setIcon(":/imgs/remove_24dp.png");
+		m_btnRemove->setReleasedStyle(palette()->btnReleasedStyleNavy);
+		m_btnRemove->setHoveredStyle(palette()->btnHoveredStyleNavy);
+		m_btnRemove->setSelectedStyle(palette()->btnSelectedStyleNavy);
+
+		m_btnEdit = new Button();
+		m_btnEdit->setName("수정하기");
+		m_btnEdit->setWidth(110);
+		m_btnEdit->setHeight(40);
+		m_btnEdit->setIcon(":/imgs/edit_24dp.png");
+		m_btnEdit->setReleasedStyle(palette()->btnReleasedStyleNavy);
+		m_btnEdit->setHoveredStyle(palette()->btnHoveredStyleNavy);
+		m_btnEdit->setSelectedStyle(palette()->btnSelectedStyleNavy);
+	}
+	const int wGrid1_1 = 350;
+	const int hRow01 = 60;
+
+	Button* btnPrint() { return m_btnPrint; }
+	Button* btnNew() { return m_btnNew; }
+	Button* btnRemove() { return m_btnRemove; }
+	Button* btnEdit() { return m_btnEdit; }
+
+private:
+	Button* m_btnPrint;
+	Button* m_btnNew;
+	Button* m_btnRemove;
+	Button* m_btnEdit;
 };
 
 class StyleMainBody : public StyleBasic {

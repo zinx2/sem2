@@ -34,13 +34,32 @@ private:
 
 	StyleMainContent* m_styleContent;
 	QWidget* m_content;
+	CPWidget* m_contentRow1;
+	CPWidget* m_contentGrid1_2;
+	CPLabel* m_lbCurrentContent;
+	CPWidget* m_contentRow02;
 
 	StyleMainSlide* m_styleSlide;
 	QWidget* m_slide;	
 	QWidget* m_slideCol01;
-	QWidget* m_slideCol02;
-	
+	CPWidget* m_slideCol02;
 	
 	StyleMainFooter* m_styleFooter;
 	QWidget* m_footer;
+
+	Command* m_btnLogout;
+	Command* m_btnPrint;
+	Command* m_btnEdit;
+	Command* m_btnRemove;
+	Command* m_btnNew;
+
+	Command* m_btnDVCList;
+	Command* m_btnMNGList;
+	Command* m_btnMNTList;
+	Command* m_btnEMPList;
+
+	void initDVCList();
+	void initMNGList();
+	void initMNTList();
+	void initEMPList();
 };

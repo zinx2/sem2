@@ -3,8 +3,7 @@
 #include <QFontDataBase>
 int main(int argc, char *argv[])
 {
-	QFontDatabase::addApplicationFont(":/fonts/fonts/NanumBarunGothic.ttf");
-	QFontDatabase::addApplicationFont(":/fonts/fonts/NanumBarunGothicBold.ttf");
+    QFontDatabase::addApplicationFont(":/NanumBarunGothic.ttf");
     QApplication a(argc, argv);
     ViewHome w;
     w.show();

@@ -2,6 +2,8 @@
 #include "cs_qheader.h"
 #include "cs_style.h"
 #include <QStyle>
+
+typedef std::function<void()> FUNC;
 class Command : public QPushButton
 {
 public:
@@ -15,7 +17,21 @@ public:
 		initFontType("NanumBarunGothic");
 	}
 	QString tag() { return m_tag; }
+	Command* initWidth(int width) { setFixedWidth(width); return this; }
 	Command* initStyleSheet(QString sheet) { setStyleSheet(sheet); return this; }
+	Command* initEffect(QString released, QString selected, QString hovered = "")
+	{
+		m_releasedSheet = released;	m_hoveredSheet  = hovered; m_selectedSheet = selected;
+		return this;
+	}
+	Command* initFunc(FUNC func) {
+		m_cmd = func;
+		return this;
+	}
+
+	Command* initStyleReleasedSheet(QString sheet) { m_releasedSheet = sheet; return this; }
+	Command* initStyleHoveredSheet(QString sheet) { m_hoveredSheet = sheet; return this; }
+	Command* initStyleSelectedSheet(QString sheet) { m_selectedSheet = sheet; return this; }
 	Command* initFontSize(int pt) {
 		QFont font = this->font();
 		font.setPointSize(pt);
@@ -43,6 +59,7 @@ public:
 	};
 	QPixmap m_pixmap;
 	QString m_txt;
+	int m_margin;
 	void paintEvent(QPaintEvent* e)
 	{
 		QPushButton::paintEvent(e);
@@ -51,17 +68,46 @@ public:
 		{
 			const int y = (height() - m_pixmap.height()) / 2; // add margin if needed
 			QPainter painter(this);
-			painter.drawPixmap(40, y, m_pixmap); // hardcoded horizontal margin
+			painter.drawPixmap(8, y, m_pixmap); // hardcoded horizontal margin
 
 			QFont font = painter.font();
-			font.setPointSize(font.pointSize() + 5);
-			font.setBold(true);
+			font.setPointSize(font.pointSize() + 2);
+			//font.setBold(true);
 			painter.setFont(font);
-			painter.drawText(100, height() / 2 + 5, m_txt);
+			painter.drawText(66, height() / 2 + 5, m_txt);
 		}
 	}
+
+protected:
+	void mousePressEvent(QMouseEvent *event) override
+	{
+		setStyleSheet(m_selectedSheet);
+	}
+	void enterEvent(QEvent * event)
+	{
+		Q_UNUSED(event);
+		setStyleSheet(m_hoveredSheet);
+		/*Qt::CursorShape type = (ori == Qt::Vertical ? Qt::SizeHorCursor : Qt::SizeVerCursor);
+		this->setCursor(QCursor(type));*/
+	}
+	void leaveEvent(QEvent * event)
+	{
+		Q_UNUSED(event);
+		setStyleSheet(m_releasedSheet);
+	}
+	void mouseReleaseEvent(QMouseEvent *event) override
+	{
+		print("", "mouseReleaseEvent");
+		setStyleSheet(m_releasedSheet);
+		m_cmd();
+	}
+
 private:
 	QString m_tag;
+	QString m_releasedSheet = "color: white; background-color: transparent;";
+	QString m_hoveredSheet = "color: white; background-color: transparent;";
+	QString m_selectedSheet = "color: white; background-color: transparent;";
+	FUNC m_cmd;
 };
 //
 //class CommandProvider : public QObject
