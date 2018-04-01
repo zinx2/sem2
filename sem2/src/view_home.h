@@ -3,6 +3,7 @@
 #include "cs_style.h"
 #include "cs_component.h"
 #include "cs_command.h"
+#include "cs_metatable.h"
 
 class ViewHome : public QWidget
 {
@@ -35,9 +36,9 @@ private:
 	StyleMainContent* m_styleContent;
 	QWidget* m_content;
 	CPWidget* m_contentRow1;
-	CPWidget* m_contentGrid1_2;
+	CPWidget* m_contentGrid1_2 = nullptr;
 	CPLabel* m_lbCurrentContent;
-	CPWidget* m_contentRow02;
+	CPWidget* m_contentRow2;
 
 	StyleMainSlide* m_styleSlide;
 	QWidget* m_slide;	
@@ -46,6 +47,9 @@ private:
 	
 	StyleMainFooter* m_styleFooter;
 	QWidget* m_footer;
+
+	MetaTableDVC* m_metaTableDVC;
+	QTableWidget* m_tableDVC;
 
 	Command* m_btnLogout;
 	Command* m_btnPrint;

@@ -69,6 +69,11 @@ ViewHome::ViewHome(QWidget *parent)
 		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter)
 		->initContentsMargins(10, 0, 0, 0);
 
+	m_contentRow2 = (new CPWidget(m_styleContent->width(), m_styleContent->height() - m_styleContent->hRow01, new QHBoxLayout))
+		->initAlignment(Qt::AlignLeft | Qt::AlignTop)
+		->initStyleSheet("background: blue;");
+
+
 	m_lbCurrentContent = (new CPLabel(m_styleContent->wGrid1_1 - 40, m_styleContent->hRow01, kr("장비목록")))
 		->initFontSize(20)
 		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -156,13 +161,13 @@ ViewHome::ViewHome(QWidget *parent)
 		->initSpacing(10)
 		->append(m_lbCurrentContent);
 	m_content->layout()->addWidget(m_contentRow1);
-
 	m_slide->layout()->addWidget(m_slideCol01);
 	m_slide->layout()->addWidget(m_slideCol02);
 	m_slideCol02->append(m_btnDVCList)->append(m_btnMNGList)->append(m_btnMNTList)->append(m_btnEMPList);
 	/*** ADD WIDGETS. END. ***/
 
 	initDVCList();
+	m_content->layout()->addWidget(m_tableDVC);
 
 	/* CONNECT COMMANDS. */
 	btnSlideExt->initFunc([=]()
@@ -268,6 +273,23 @@ void ViewHome::updateUI()
 
 	metaBtn = m_styleSlide->btnEMPList();
 	m_btnEMPList->initWidth(metaBtn->width())->initIcon(metaBtn->icon(), kr(metaBtn->name()));
+
+	m_metaTableDVC->setWidth(m_content->width());
+	m_metaTableDVC->setHeight(m_content->width() - m_contentRow1->height());
+
+	m_tableDVC->setColumnCount(m_metaTableDVC->header()->countCols());
+	m_tableDVC->setFixedSize(m_metaTableDVC->width(), m_metaTableDVC->height());
+	m_tableDVC->setHorizontalHeaderLabels(m_metaTableDVC->header()->meta());
+
+	m_tableDVC->setColumnWidth(0, m_metaTableDVC->wCol1);
+	m_tableDVC->setColumnWidth(1, m_metaTableDVC->wCol2);
+	m_tableDVC->setColumnWidth(2, m_metaTableDVC->wCol3);
+	m_tableDVC->setColumnWidth(3, m_metaTableDVC->wCol4);
+	m_tableDVC->setColumnWidth(4, m_metaTableDVC->wCol5);
+	m_tableDVC->setColumnWidth(5, m_metaTableDVC->wCol6);
+	m_tableDVC->setColumnWidth(6, m_content->width() - m_metaTableDVC->wCol1
+		- m_metaTableDVC->wCol2 - m_metaTableDVC->wCol3 - m_metaTableDVC->wCol4
+		- m_metaTableDVC->wCol5 - m_metaTableDVC->wCol6 - 2);
 }
 void ViewHome::initDVCList()
 {
@@ -327,6 +349,18 @@ void ViewHome::initDVCList()
 	{
 		print("CMD-btnNew", "print...");
 	});
+	
+	m_metaTableDVC = new MetaTableDVC();
+	m_tableDVC = new QTableWidget(this);
+	m_tableDVC->setRowCount(20);
+	m_tableDVC->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_tableDVC->setStyleSheet("border: 1px;");
+	m_tableDVC->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_tableDVC->horizontalScrollBar()->setDisabled(true);
+	m_tableDVC->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_tableDVC->verticalHeader()->hide();
+
+
 }
 void ViewHome::initMNGList() 
 {
