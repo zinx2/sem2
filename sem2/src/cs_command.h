@@ -78,7 +78,11 @@ public:
 		}
 	}
 
+	bool selected() { return m_selected; }
+	Command* select(bool m) { m_selected = m; return this; }
+
 protected:
+
 	void mousePressEvent(QMouseEvent *event) override
 	{
 		setStyleSheet(m_selectedSheet);
@@ -103,57 +107,69 @@ protected:
 	}
 
 private:
+	bool m_selected = false;
 	QString m_tag;
 	QString m_releasedSheet = "color: white; background-color: transparent;";
 	QString m_hoveredSheet = "color: white; background-color: transparent;";
 	QString m_selectedSheet = "color: white; background-color: transparent;";
 	FUNC m_cmd;
 };
-//
-//class CommandProvider : public QObject
-//{
-//public:
-//	CommandProvider()
-//	{
-//		d = Style::instance();
-//	}
-//	void releaseAll()
-//	{
-//		foreach(Command* c, m_commands)
-//		{
-//			c->setStyleSheet(d->c().btnReleasedStyle);
-//		}
-//	}
-//	void select(QString tag)
-//	{
-//		releaseAll();
-//		foreach(Command* c, m_commands)
-//		{
-//			if (!c->tag().compare(tag))
-//			{
-//				c->setStyleSheet(d->c().btnSelectedStyle);
-//			}
-//		}
-//	}
-//	void append(Command* command)
-//	{
-//		command->setStyleSheet(d->c().btnReleasedStyle);
-//		m_commands.append(command);
-//	}
-//	Command* command(QString tag)
-//	{
-//		foreach(Command* c, m_commands)
-//		{
-//			if (!c->tag().compare(tag))
-//			{
-//				return c;
-//			}
-//		}
-//		return nullptr;
-//	}
-//
-//	QList<Command*> commands() { return m_commands; }
-//private:
-//	QList<Command*> m_commands;
-//	Style* d;
-//};
+
+class CommandProvider : public QObject
+{
+public:
+	CommandProvider()
+	{
+		//d = Style::instance();
+	}
+	void releaseAll()
+	{
+		foreach(Command* c, m_commands)
+		{
+			c->select(false);
+		}
+	}
+	void select(QString tag)
+	{
+		releaseAll();
+		foreach(Command* c, m_commands)
+		{
+			if (!c->tag().compare(tag))
+			{
+				c->select(true);
+			}
+		}
+	}
+	CommandProvider* append(Command* command)
+	{
+		m_commands.append(command);
+		return this;
+	}
+	Command* command(QString tag)
+	{
+		foreach(Command* c, m_commands)
+		{
+			if (!c->tag().compare(tag))
+			{
+				return c;
+			}
+		}
+		return nullptr;
+	}
+
+	QString selectedTag() {
+		foreach(Command* c, m_commands)
+		{
+			if (c->selected())
+			{
+				return c->tag();
+			}
+		}
+		return "";
+	}
+
+	QList<Command*> commands() { return m_commands; }
+private:
+	QList<Command*> m_commands;
+	Style* d;
+};

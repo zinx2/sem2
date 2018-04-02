@@ -28,31 +28,51 @@ ViewHome::ViewHome(QWidget *parent)
 
 	metaBtn = m_styleSlide->btnDVCList();
 	m_btnDVCList =
-		(new Command("device_list", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		(new Command(TAG_DVC_LIST, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
-		->initIcon(metaBtn->icon(), metaBtn->name());
+		->initIcon(metaBtn->icon(), metaBtn->name())->select(true);
 	
 	metaBtn = m_styleSlide->btnMNGList();
 	m_btnMNGList =
-		(new Command("management_list", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		(new Command(TAG_MNG_LIST, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(metaBtn->icon(), metaBtn->name());
 
 	metaBtn = m_styleSlide->btnMNTList();
 	m_btnMNTList =
-		(new Command("month_list", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		(new Command(TAG_MNT_LIST, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(metaBtn->icon(), metaBtn->name());
 
 	metaBtn = m_styleSlide->btnEMPList();
 	m_btnEMPList =
-		(new Command("employee_list", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		(new Command(TAG_EMP_LIST, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(metaBtn->icon(), metaBtn->name());
+
+	m_cmdProvider = new CommandProvider();
+	m_cmdProvider->append(m_btnDVCList)->append(m_btnMNGList)->append(m_btnMNTList)->append(m_btnEMPList);
+
+	metaBtn = m_styleContent->btnNaviLeft();
+	m_btnNaviLeft =
+		(new Command("navi_left", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+
+	metaBtn = m_styleContent->btnNaviRight();
+	m_btnNaviRight =
+		(new Command("navi_right", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+
+	m_lbNavi = (new CPLabel(100, 30, "50/70"))->initAlignment(Qt::AlignCenter);
+	m_navi = (new CPWidget(m_styleContent->width(), 0, new QHBoxLayout))
+		->initAlignment(Qt::AlignCenter)
+		->append(m_btnNaviLeft)->append(m_lbNavi)->append(m_btnNaviRight);
 
 	m_header = new QWidget(this);
 	m_headerCol01 = (new CPLabel(m_styleHeader->wCol01, m_styleHeader->height(), kr(m_styleHeader->txtTitle)))
@@ -72,7 +92,6 @@ ViewHome::ViewHome(QWidget *parent)
 	m_contentRow2 = (new CPWidget(m_styleContent->width(), m_styleContent->height() - m_styleContent->hRow01, new QHBoxLayout))
 		->initAlignment(Qt::AlignLeft | Qt::AlignTop)
 		->initStyleSheet("background: blue;");
-
 
 	m_lbCurrentContent = (new CPLabel(m_styleContent->wGrid1_1 - 40, m_styleContent->hRow01, kr("장비목록")))
 		->initFontSize(20)
@@ -164,11 +183,13 @@ ViewHome::ViewHome(QWidget *parent)
 	m_slide->layout()->addWidget(m_slideCol01);
 	m_slide->layout()->addWidget(m_slideCol02);
 	m_slideCol02->append(m_btnDVCList)->append(m_btnMNGList)->append(m_btnMNTList)->append(m_btnEMPList);
+
+
 	/*** ADD WIDGETS. END. ***/
 
 	initDVCList();
 	m_content->layout()->addWidget(m_tableDVC);
-
+	m_content->layout()->addWidget(m_navi);
 	/* CONNECT COMMANDS. */
 	btnSlideExt->initFunc([=]()
 	{
@@ -274,22 +295,41 @@ void ViewHome::updateUI()
 	metaBtn = m_styleSlide->btnEMPList();
 	m_btnEMPList->initWidth(metaBtn->width())->initIcon(metaBtn->icon(), kr(metaBtn->name()));
 
-	m_metaTableDVC->setWidth(m_content->width());
-	m_metaTableDVC->setHeight(m_content->width() - m_contentRow1->height());
+	m_metaTable->setWidth(m_content->width());
+	m_metaTable->setHeight(m_content->height() - m_contentRow1->height() - m_navi->height());
 
-	m_tableDVC->setColumnCount(m_metaTableDVC->header()->countCols());
-	m_tableDVC->setFixedSize(m_metaTableDVC->width(), m_metaTableDVC->height());
-	m_tableDVC->setHorizontalHeaderLabels(m_metaTableDVC->header()->meta());
+	m_tableDVC->setColumnCount(m_metaTable->header()->countCols());
+	m_tableDVC->setFixedSize(m_metaTable->width(), m_metaTable->height());
+	m_tableDVC->setHorizontalHeaderLabels(m_metaTable->header()->meta());
+	m_tableDVC->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
 
-	m_tableDVC->setColumnWidth(0, m_metaTableDVC->wCol1);
-	m_tableDVC->setColumnWidth(1, m_metaTableDVC->wCol2);
-	m_tableDVC->setColumnWidth(2, m_metaTableDVC->wCol3);
-	m_tableDVC->setColumnWidth(3, m_metaTableDVC->wCol4);
-	m_tableDVC->setColumnWidth(4, m_metaTableDVC->wCol5);
-	m_tableDVC->setColumnWidth(5, m_metaTableDVC->wCol6);
-	m_tableDVC->setColumnWidth(6, m_content->width() - m_metaTableDVC->wCol1
-		- m_metaTableDVC->wCol2 - m_metaTableDVC->wCol3 - m_metaTableDVC->wCol4
-		- m_metaTableDVC->wCol5 - m_metaTableDVC->wCol6 - 2);
+	if (!m_cmdProvider->selectedTag().compare(TAG_DVC_LIST))
+	{
+		MetaTableDVC* metaTable = qobject_cast<MetaTableDVC*>(m_metaTable);
+		m_tableDVC->setColumnWidth(0, metaTable->wCol1);
+		m_tableDVC->setColumnWidth(1, metaTable->wCol2);
+		m_tableDVC->setColumnWidth(2, metaTable->wCol3);
+		m_tableDVC->setColumnWidth(3, metaTable->wCol4);
+		m_tableDVC->setColumnWidth(4, metaTable->wCol5);
+		m_tableDVC->setColumnWidth(5, metaTable->wCol6);
+		m_tableDVC->setColumnWidth(6, m_content->width() - metaTable->wCol1
+			- metaTable->wCol2 - metaTable->wCol3 - metaTable->wCol4
+			- metaTable->wCol5 - metaTable->wCol6 - 2);
+	}
+	else if (!m_cmdProvider->selectedTag().compare(TAG_EMP_LIST))
+	{
+		MetaTableEMP* metaTable = qobject_cast<MetaTableEMP*>(m_metaTable);
+		m_tableDVC->setColumnWidth(0, metaTable->wCol1);
+		m_tableDVC->setColumnWidth(1, metaTable->wCol2);
+		m_tableDVC->setColumnWidth(2, metaTable->wCol3);
+		m_tableDVC->setColumnWidth(3, metaTable->wCol4);
+		m_tableDVC->setColumnWidth(4, metaTable->wCol5);
+		m_tableDVC->setColumnWidth(5, metaTable->wCol6);
+		m_tableDVC->setColumnWidth(6, m_content->width() - metaTable->wCol1
+			- metaTable->wCol2 - metaTable->wCol3 - metaTable->wCol4
+			- metaTable->wCol5 - metaTable->wCol6 - 2);
+	}
+	m_navi->setFixedWidth(m_content->width());
 }
 void ViewHome::initDVCList()
 {
@@ -350,17 +390,18 @@ void ViewHome::initDVCList()
 		print("CMD-btnNew", "print...");
 	});
 	
-	m_metaTableDVC = new MetaTableDVC();
+	m_metaTable = new MetaTableDVC();
 	m_tableDVC = new QTableWidget(this);
 	m_tableDVC->setRowCount(20);
 	m_tableDVC->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_tableDVC->setStyleSheet("border: 1px;");
+	m_tableDVC->setStyleSheet("border: 1px; background:orange;");
 	m_tableDVC->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_tableDVC->horizontalScrollBar()->setDisabled(true);
 	m_tableDVC->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_tableDVC->verticalHeader()->hide();
 
-
+	m_navi->setFixedHeight(m_metaTable->hNavi());
+	m_cmdProvider->select(TAG_DVC_LIST);
 }
 void ViewHome::initMNGList() 
 {
@@ -370,6 +411,7 @@ void ViewHome::initMNGList()
 		m_contentGrid1_2 = nullptr;
 	}
 	m_lbCurrentContent->setText(kr("관리대장"));
+	m_cmdProvider->select(TAG_MNG_LIST);
 }
 void ViewHome::initMNTList() 
 {
@@ -379,6 +421,7 @@ void ViewHome::initMNTList()
 		m_contentGrid1_2 = nullptr;
 	}
 	m_lbCurrentContent->setText(kr("월별대장"));
+	m_cmdProvider->select(TAG_MNT_LIST);
 }
 void ViewHome::initEMPList() 
 {
@@ -388,6 +431,20 @@ void ViewHome::initEMPList()
 		m_contentGrid1_2 = nullptr;
 	}
 	m_lbCurrentContent->setText(kr("직원관리"));
+
+	m_metaTable = new MetaTableEMP();
+	m_tableDVC = new QTableWidget(this);
+	m_tableDVC->setRowCount(100);
+	m_tableDVC->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_tableDVC->setStyleSheet("border: 1px; background:orange;");
+	m_tableDVC->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_tableDVC->horizontalScrollBar()->setDisabled(true);
+	m_tableDVC->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_tableDVC->verticalHeader()->hide();
+
+	m_navi->setFixedHeight(m_metaTable->hNavi());
+	m_cmdProvider->select(TAG_EMP_LIST);
+	updateUI();
 }
 ViewHome::~ViewHome()
 {

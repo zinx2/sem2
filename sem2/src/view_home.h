@@ -5,6 +5,11 @@
 #include "cs_command.h"
 #include "cs_metatable.h"
 
+#define TAG_DVC_LIST "device_list"
+#define TAG_MNG_LIST "management_list"
+#define TAG_MNT_LIST "month_list"
+#define TAG_EMP_LIST "employee_list"
+
 class ViewHome : public QWidget
 {
     Q_OBJECT
@@ -48,8 +53,9 @@ private:
 	StyleMainFooter* m_styleFooter;
 	QWidget* m_footer;
 
-	MetaTableDVC* m_metaTableDVC;
-	QTableWidget* m_tableDVC;
+	MetaTable* m_metaTable = nullptr;
+	QTableWidget* m_tableDVC = nullptr;
+	QTableWidget* m_tableEMP = nullptr;
 
 	Command* m_btnLogout;
 	Command* m_btnPrint;
@@ -61,6 +67,12 @@ private:
 	Command* m_btnMNGList;
 	Command* m_btnMNTList;
 	Command* m_btnEMPList;
+	CommandProvider* m_cmdProvider;
+
+	CPWidget* m_navi;
+	CPLabel* m_lbNavi;
+	Command* m_btnNaviLeft;
+	Command* m_btnNaviRight;
 
 	void initDVCList();
 	void initMNGList();

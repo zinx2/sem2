@@ -111,13 +111,14 @@ class Button : public StyleBasic
 	Q_OBJECT
 		Q_PROPERTY(const char* name READ name WRITE setName NOTIFY nameChanged)
 		Q_PROPERTY(QString icon READ icon WRITE setIcon NOTIFY iconChanged)
-
+		Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
 	const char* name() { return m_name; }
 	QString icon() { return m_icon; }
 	QString releasedStyle() { return m_releasedStyle; }
 	QString hoveredStyle() { return m_hoveredStyle; }
 	QString selectedStyle() { return m_selectedStyle; }
+	bool visible() { return m_visible; }
 
 	public slots :
 	void setName(const char* m) { m_name = m; emit nameChanged(); }
@@ -125,10 +126,12 @@ public:
 	void setReleasedStyle(QString m) { m_releasedStyle = m; }
 	void setHoveredStyle(QString m) { m_hoveredStyle = m; }
 	void setSelectedStyle(QString m) { m_selectedStyle = m; }
+	void setVisible(bool m) { m_visible = m; }
 
 signals:
 	void nameChanged();
 	void iconChanged();
+	void visibleChanged();
 
 protected:
 	const char* m_name;
@@ -136,6 +139,7 @@ protected:
 	QString m_releasedStyle;
 	QString m_hoveredStyle;
 	QString m_selectedStyle;
+	bool m_visible;
 };
 
 class StyleMainSlide : public StyleBasic
@@ -318,6 +322,22 @@ public:
 		m_btnEdit->setReleasedStyle(palette()->btnReleasedStyleNavy);
 		m_btnEdit->setHoveredStyle(palette()->btnHoveredStyleNavy);
 		m_btnEdit->setSelectedStyle(palette()->btnSelectedStyleNavy);
+
+		m_btnNaviLeft = new Button();
+		m_btnNaviLeft->setName("◀");
+		m_btnNaviLeft->setWidth(30);
+		m_btnNaviLeft->setHeight(30);
+		m_btnNaviLeft->setReleasedStyle(palette()->btnReleasedStyleNavy);
+		m_btnNaviLeft->setHoveredStyle(palette()->btnHoveredStyleNavy);
+		m_btnNaviLeft->setSelectedStyle(palette()->btnSelectedStyleNavy);
+
+		m_btnNaviRight = new Button();
+		m_btnNaviRight->setName("▶");
+		m_btnNaviRight->setWidth(30);
+		m_btnNaviRight->setHeight(30);
+		m_btnNaviRight->setReleasedStyle(palette()->btnReleasedStyleNavy);
+		m_btnNaviRight->setHoveredStyle(palette()->btnHoveredStyleNavy);
+		m_btnNaviRight->setSelectedStyle(palette()->btnSelectedStyleNavy);
 	}
 	const int wGrid1_1 = 350;
 	const int hRow01 = 60;
@@ -326,12 +346,16 @@ public:
 	Button* btnNew() { return m_btnNew; }
 	Button* btnRemove() { return m_btnRemove; }
 	Button* btnEdit() { return m_btnEdit; }
+	Button* btnNaviLeft() { return m_btnNaviLeft; }
+	Button* btnNaviRight() { return m_btnNaviRight; }
 
 private:
 	Button* m_btnPrint;
 	Button* m_btnNew;
 	Button* m_btnRemove;
 	Button* m_btnEdit;
+	Button* m_btnNaviLeft;
+	Button* m_btnNaviRight;
 };
 
 class StyleMainBody : public StyleBasic {
@@ -375,7 +399,7 @@ class StyleMain : public StyleBasic {
 public:
 	StyleMain()
 	{
-		m_width = 1200; m_height = 800;
+		m_width = 1200; m_height = 840;
 		m_header = new StyleMainHeader(); 
 		m_body   = new StyleMainBody();
 		m_footer = new StyleMainFooter(); 
