@@ -96,3 +96,44 @@ public:
 	const int wCol6 = 55;
 };
 
+class MetaTableMNT : public MetaTable
+{
+	Q_OBJECT
+public:
+	MetaTableMNT()
+	{
+		QStringList metaHeader;
+		metaHeader << kr("333번호") << kr("자산번호") << kr("장비명")
+			<< kr("취득금액") << kr("취득일자") << kr("대출여부") << kr("비고");
+		header()->setMeta(metaHeader);
+		setHNavi(0);
+	}
+	const int hRow = 30;
+	const int wCol1 = 50;
+	const int wCol2 = 150;
+	const int wCol3 = 200;
+	const int wCol4 = 150;
+	const int wCol5 = 150;
+	const int wCol6 = 55;
+};
+
+class MetaTableMNG : public MetaTable
+{
+	Q_OBJECT
+public:
+	MetaTableMNG()
+	{
+		QStringList metaHeader;
+		metaHeader << kr("222번호") << kr("자산번호") << kr("장비명")
+			<< kr("취득금액") << kr("취득일자") << kr("대출여부") << kr("비고");
+		header()->setMeta(metaHeader);
+		setHNavi(50);
+	}
+	const int hRow = 30;
+	const int wCol1 = 50;
+	const int wCol2 = 150;
+	const int wCol3 = 200;
+	const int wCol4 = 150;
+	const int wCol5 = 150;
+	const int wCol6 = 55;
+};

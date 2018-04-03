@@ -69,7 +69,7 @@ private:
 	Command* m_btnEMPList;
 	CommandProvider* m_cmdProvider;
 
-	CPWidget* m_navi;
+	CPWidget* m_navi = nullptr;
 	CPLabel* m_lbNavi;
 	Command* m_btnNaviLeft;
 	Command* m_btnNaviRight;
@@ -78,4 +78,9 @@ private:
 	void initMNGList();
 	void initMNTList();
 	void initEMPList();
+
+	void newTable(int rowCount, QString tag);
+	void newNavi();
+	void newMetaTable(QString tag);
+	bool isCurrentMetaTable(QString tag);
 };
