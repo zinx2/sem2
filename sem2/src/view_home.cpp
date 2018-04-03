@@ -457,7 +457,26 @@ void ViewHome::initMNTList()
 		m_contentGrid1_2 = nullptr;
 	}
 	m_lbCurrentContent->setText(kr("월별대장"));
-	newTable(20, TAG_DVC_LIST);
+	m_contentGrid1_2 = (new CPWidget(m_styleContent->width() - m_styleContent->wGrid1_1, m_styleContent->hRow01, new QHBoxLayout))
+		->initSpacing(10)
+		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
+		->initContentsMargins(0, 20, 0, 0);
+
+	Button* metaBtn;
+	metaBtn = m_styleContent->btnNaviLeft();
+	m_btnNaviLeft =
+		(new Command("navi_left", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+
+	metaBtn = m_styleContent->btnNaviRight();
+	m_btnNaviRight =
+		(new Command("navi_right", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+
+	m_contentRow1->layout()->addWidget(m_contentGrid1_2);
+	newTable(20, TAG_MNG_LIST);
 	newNavi();
 	updateUI();
 }
@@ -498,6 +517,11 @@ void ViewHome::newMetaTable(QString tag)
 }
 void ViewHome::newNavi()
 {
+	if (m_navi != nullptr)
+	{
+		delete m_navi;
+		m_navi = nullptr;
+	}
 	m_lbNavi = (new CPLabel(100, 30, "50/70"))->initAlignment(Qt::AlignCenter);
 	m_navi = (new CPWidget(m_styleContent->width(), 0, new QHBoxLayout))
 		->initAlignment(Qt::AlignCenter)
