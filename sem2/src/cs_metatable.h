@@ -103,18 +103,17 @@ public:
 	MetaTableMNT()
 	{
 		QStringList metaHeader;
-		metaHeader << kr("333번호") << kr("자산번호") << kr("장비명")
-			<< kr("취득금액") << kr("취득일자") << kr("대출여부") << kr("비고");
+		//metaHeader << kr("333번호") << kr("자산번호") << kr("장비명")
+		//	<< kr("취득금액") << kr("취득일자") << kr("대출여부") << kr("비고");
+		for (int i = 0; i < 12; i++)
+		{
+			metaHeader << kr("담당자") << kr("관리자") << kr("보직자");
+		}
 		header()->setMeta(metaHeader);
 		setHNavi(0);
 	}
 	const int hRow = 30;
-	const int wCol1 = 50;
-	const int wCol2 = 150;
-	const int wCol3 = 200;
-	const int wCol4 = 150;
-	const int wCol5 = 150;
-	const int wCol6 = 55;
+	const int wCol = 40;
 };
 
 class MetaTableMNG : public MetaTable
