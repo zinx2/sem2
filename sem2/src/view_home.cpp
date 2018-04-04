@@ -283,17 +283,17 @@ void ViewHome::updateUI()
 		MetaTableDVC* metaTable = qobject_cast<MetaTableDVC*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
 		m_metaTable->setHeight(m_content->height() - m_contentRow1->height() - m_navi->height());
-		m_tableDVC->setColumnCount(m_metaTable->header()->countCols());
-		m_tableDVC->setFixedSize(m_metaTable->width(), m_metaTable->height());
-		m_tableDVC->setHorizontalHeaderLabels(m_metaTable->header()->meta());
-		m_tableDVC->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
-		m_tableDVC->setColumnWidth(0, metaTable->wCol1);
-		m_tableDVC->setColumnWidth(1, metaTable->wCol2);
-		m_tableDVC->setColumnWidth(2, metaTable->wCol3);
-		m_tableDVC->setColumnWidth(3, metaTable->wCol4);
-		m_tableDVC->setColumnWidth(4, metaTable->wCol5);
-		m_tableDVC->setColumnWidth(5, metaTable->wCol6);
-		m_tableDVC->setColumnWidth(6, m_content->width() - metaTable->wCol1
+		m_tableCommon->setColumnCount(m_metaTable->header()->countCols());
+		m_tableCommon->setFixedSize(m_metaTable->width(), m_metaTable->height());
+		m_tableCommon->setHorizontalHeaderLabels(m_metaTable->header()->meta());
+		m_tableCommon->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
+		m_tableCommon->setColumnWidth(0, metaTable->wCol1);
+		m_tableCommon->setColumnWidth(1, metaTable->wCol2);
+		m_tableCommon->setColumnWidth(2, metaTable->wCol3);
+		m_tableCommon->setColumnWidth(3, metaTable->wCol4);
+		m_tableCommon->setColumnWidth(4, metaTable->wCol5);
+		m_tableCommon->setColumnWidth(5, metaTable->wCol6);
+		m_tableCommon->setColumnWidth(6, m_content->width() - metaTable->wCol1
 			- metaTable->wCol2 - metaTable->wCol3 - metaTable->wCol4
 			- metaTable->wCol5 - metaTable->wCol6 - 2);
 		m_navi->setFixedWidth(m_content->width());
@@ -303,37 +303,52 @@ void ViewHome::updateUI()
 		MetaTableMNG* metaTable = qobject_cast<MetaTableMNG*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
 		m_metaTable->setHeight(m_content->height() - m_contentRow1->height() - m_navi->height());
-		m_tableDVC->setColumnCount(m_metaTable->header()->countCols());
-		m_tableDVC->setFixedSize(m_metaTable->width(), m_metaTable->height());
-		m_tableDVC->setHorizontalHeaderLabels(m_metaTable->header()->meta());
-		m_tableDVC->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
-		m_tableDVC->setColumnWidth(0, metaTable->wCol1);
-		m_tableDVC->setColumnWidth(1, metaTable->wCol2);
-		m_tableDVC->setColumnWidth(2, metaTable->wCol3);
-		m_tableDVC->setColumnWidth(3, metaTable->wCol4);
-		m_tableDVC->setColumnWidth(4, metaTable->wCol5);
-		m_tableDVC->setColumnWidth(5, metaTable->wCol6);
-		m_tableDVC->setColumnWidth(6, m_content->width() - metaTable->wCol1
+		m_tableCommon->setColumnCount(m_metaTable->header()->countCols());
+		m_tableCommon->setFixedSize(m_metaTable->width(), m_metaTable->height());
+		m_tableCommon->setHorizontalHeaderLabels(m_metaTable->header()->meta());
+		m_tableCommon->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
+		m_tableCommon->setColumnWidth(0, metaTable->wCol1);
+		m_tableCommon->setColumnWidth(1, metaTable->wCol2);
+		m_tableCommon->setColumnWidth(2, metaTable->wCol3);
+		m_tableCommon->setColumnWidth(3, metaTable->wCol4);
+		m_tableCommon->setColumnWidth(4, metaTable->wCol5);
+		m_tableCommon->setColumnWidth(5, metaTable->wCol6);
+		m_tableCommon->setColumnWidth(6, m_content->width() - metaTable->wCol1
 			- metaTable->wCol2 - metaTable->wCol3 - metaTable->wCol4
 			- metaTable->wCol5 - metaTable->wCol6 - 2);
 		m_navi->setFixedWidth(m_content->width());
+	}
+	else if (!m_cmdProvider->selectedTag().compare(TAG_MNT_LIST))
+	{
+		MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
+		m_metaTable->setWidth(m_content->width());
+		m_metaTable->setHeight(m_content->height() - m_contentRow1->height());
+		m_tableCommon->setColumnCount(m_metaTable->header()->countCols());
+		m_tableCommon->setFixedSize(m_metaTable->width(), m_metaTable->height());
+		m_tableCommon->setHorizontalHeaderLabels(m_metaTable->header()->meta());
+		m_tableCommon->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
+		for (int i = 0; i < 36; i++)
+		{
+			m_tableCommon->setColumnWidth(i, metaTable->wCol);
+		}
+		//m_navi->setFixedWidth(m_content->width());
 	}
 	else if (!m_cmdProvider->selectedTag().compare(TAG_EMP_LIST))
 	{
 		MetaTableEMP* metaTable = qobject_cast<MetaTableEMP*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
 		m_metaTable->setHeight(m_content->height() - m_contentRow1->height());
-		m_tableDVC->setColumnCount(m_metaTable->header()->countCols());
-		m_tableDVC->setFixedSize(m_metaTable->width(), m_metaTable->height());
-		m_tableDVC->setHorizontalHeaderLabels(m_metaTable->header()->meta());
-		m_tableDVC->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
-		m_tableDVC->setColumnWidth(0, metaTable->wCol1);
-		m_tableDVC->setColumnWidth(1, metaTable->wCol2);
-		m_tableDVC->setColumnWidth(2, metaTable->wCol3);
-		m_tableDVC->setColumnWidth(3, metaTable->wCol4);
-		m_tableDVC->setColumnWidth(4, metaTable->wCol5);
-		m_tableDVC->setColumnWidth(5, metaTable->wCol6);
-		m_tableDVC->setColumnWidth(6, m_content->width() - metaTable->wCol1
+		m_tableCommon->setColumnCount(m_metaTable->header()->countCols());
+		m_tableCommon->setFixedSize(m_metaTable->width(), m_metaTable->height());
+		m_tableCommon->setHorizontalHeaderLabels(m_metaTable->header()->meta());
+		m_tableCommon->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
+		m_tableCommon->setColumnWidth(0, metaTable->wCol1);
+		m_tableCommon->setColumnWidth(1, metaTable->wCol2);
+		m_tableCommon->setColumnWidth(2, metaTable->wCol3);
+		m_tableCommon->setColumnWidth(3, metaTable->wCol4);
+		m_tableCommon->setColumnWidth(4, metaTable->wCol5);
+		m_tableCommon->setColumnWidth(5, metaTable->wCol6);
+		m_tableCommon->setColumnWidth(6, m_content->width() - metaTable->wCol1
 			- metaTable->wCol2 - metaTable->wCol3 - metaTable->wCol4
 			- metaTable->wCol5 - metaTable->wCol6 - 2);
 	}
@@ -450,7 +465,7 @@ void ViewHome::initMNGList()
 }
 void ViewHome::initMNTList() 
 {
-	if (isCurrentMetaTable(TAG_MNG_LIST)) return;
+	if (isCurrentMetaTable(TAG_MNT_LIST)) return;
 	if (m_contentGrid1_2 != nullptr)
 	{
 		delete m_contentGrid1_2;
@@ -462,22 +477,28 @@ void ViewHome::initMNTList()
 		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
 		->initContentsMargins(0, 20, 0, 0);
 
-	Button* metaBtn;
-	metaBtn = m_styleContent->btnNaviLeft();
-	m_btnNaviLeft =
-		(new Command("navi_left", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
-		->initStyleSheet(metaBtn->releasedStyle())
-		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+	newMetaTable(TAG_MNT_LIST);
 
-	metaBtn = m_styleContent->btnNaviRight();
-	m_btnNaviRight =
-		(new Command("navi_right", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
-		->initStyleSheet(metaBtn->releasedStyle())
-		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+	if (m_tableCommon != nullptr)
+	{
+		delete m_tableCommon;
+		m_tableCommon = nullptr;
+	}
+	if (m_navi != nullptr)
+	{
+		delete m_navi;
+		m_navi = nullptr;
+	}
+	m_tableCommon = new QTableWidget(this);
+	m_tableCommon->setRowCount(20);
+	m_tableCommon->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_tableCommon->setStyleSheet("border: 1px; background:orange;");
+	m_tableCommon->setSelectionMode(QAbstractItemView::SingleSelection);
+	//m_tableCommon->horizontalScrollBar()->setDisabled(true);
+	//m_tableCommon->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_tableCommon->verticalHeader()->hide();
+	m_content->layout()->addWidget(m_tableCommon);
 
-	m_contentRow1->layout()->addWidget(m_contentGrid1_2);
-	newTable(20, TAG_MNG_LIST);
-	newNavi();
 	updateUI();
 }
 void ViewHome::initEMPList() 
@@ -533,18 +554,19 @@ void ViewHome::newTable(int rowCount, QString tag)
 {
 	newMetaTable(tag);
 
-	if (m_tableDVC != nullptr)
+	if (m_tableCommon != nullptr)
 	{
-		delete m_tableDVC;
-		m_tableDVC = nullptr;
+		delete m_tableCommon;
+		m_tableCommon = nullptr;
 	}
-	m_tableDVC = new QTableWidget(this);
-	m_tableDVC->setRowCount(rowCount);
-	m_tableDVC->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_tableDVC->setStyleSheet("border: 1px; background:orange;");
-	m_tableDVC->setSelectionMode(QAbstractItemView::SingleSelection);
-	m_tableDVC->horizontalScrollBar()->setDisabled(true);
-	m_tableDVC->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	m_tableDVC->verticalHeader()->hide();
-	m_content->layout()->addWidget(m_tableDVC);
+	m_tableCommon = new QTableWidget(this);
+	m_tableCommon->setRowCount(rowCount);
+	m_tableCommon->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_tableCommon->setStyleSheet("border: 1px; background:orange;");
+	m_tableCommon->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_tableCommon->horizontalScrollBar()->setDisabled(true);
+	m_tableCommon->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	//m_tableCommon->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_tableCommon->verticalHeader()->hide();
+	m_content->layout()->addWidget(m_tableCommon);
 }

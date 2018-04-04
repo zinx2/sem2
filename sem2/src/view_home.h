@@ -54,7 +54,7 @@ private:
 	QWidget* m_footer;
 
 	MetaTable* m_metaTable = nullptr;
-	QTableWidget* m_tableDVC = nullptr;
+	QTableWidget* m_tableCommon = nullptr;
 	QTableWidget* m_tableEMP = nullptr;
 
 	Command* m_btnLogout;
