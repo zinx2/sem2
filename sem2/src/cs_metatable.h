@@ -121,6 +121,8 @@ class MetaTableCheck : public QObject
 	Q_OBJECT
 		Q_PROPERTY(int wView READ wView WRITE setWView NOTIFY wViewChanged)
 		Q_PROPERTY(int hView READ hView WRITE setHView NOTIFY hViewChanged)
+		Q_PROPERTY(int wCell READ wCell WRITE setWCell NOTIFY wCellChanged)
+		Q_PROPERTY(int wMonth READ wMonth WRITE setWMonth NOTIFY wMonthChanged)
 public:
 	MetaTableCheck()
 	{
@@ -139,10 +141,10 @@ public:
 	const int wTable = 1180;
 	const int hTable = 12 * 30 + 4;
 	const int wPart = 100;
-	const int wMonth = 90;
+	//const int wMonth = 90;
 	const int wSignatory = 30;
 	const int hCol = 290;
-	const int wCell = 30;
+	//const int wCell = 30;
 	const int hCell = 30;
 
 	QList<QString> metaMonths;
@@ -156,19 +158,26 @@ public:
 
 	int wView() { return m_wView; }
 	int hView() { return m_hView; }
+	int wCell() { return m_wCell; }
+	int wMonth() { return m_wMonth; }
 
 	public slots:
-	void setWView(int w) { m_wView = w; emit wViewChanged(); }
-	void setHView(int h) { m_hView = h; emit hViewChanged(); }
+	void setWView(int m) { m_wView = m; emit wViewChanged(); }
+	void setHView(int m) { m_hView = m; emit hViewChanged(); }
+	void setWCell(int m) { m_wCell = m; emit wCellChanged(); }
+	void setWMonth(int m) { m_wMonth = m; emit wMonthChanged(); }
 
 signals:
 	void wViewChanged();
 	void hViewChanged();
+	void wCellChanged();
 
 private:
 	QList<QString> m_parts;
 	int m_wView = 980;
 	int m_hView = 12 * 30 + 24;
+	int m_wCell = 30;
+	int m_wMonth = m_wCell*3;
 };
 
 class MetaTableMNG : public MetaTable
