@@ -1,5 +1,6 @@
 ﻿#include "view_home.h"
 #include "cs_qheader.h"
+#include "cs_checktable.h"
 ViewHome::ViewHome(QWidget *parent)
 	: QWidget(parent)
 {
@@ -23,8 +24,8 @@ ViewHome::ViewHome(QWidget *parent)
 	metaBtn = m_styleHeader->btnLogout();
 	m_btnLogout = (new Command("logout", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
-	->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
-	->initIcon(":/imgs/circle.png");
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(":/imgs/circle.png");
 
 	metaBtn = m_styleSlide->btnDVCList();
 	m_btnDVCList =
@@ -32,7 +33,7 @@ ViewHome::ViewHome(QWidget *parent)
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(metaBtn->icon(), metaBtn->name());
-	
+
 	metaBtn = m_styleSlide->btnMNGList();
 	m_btnMNGList =
 		(new Command(TAG_MNG_LIST, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
@@ -251,7 +252,7 @@ void ViewHome::updateUI()
 	m_footer->setFixedSize(wFooter, hFooter);
 	m_content->setFixedSize(wContent, hContent);
 	m_contentRow1->initWidth(wContent);
-	if(m_contentGrid1_2 != nullptr)
+	if (m_contentGrid1_2 != nullptr)
 		m_contentGrid1_2->initWidth(wContent - m_styleContent->wGrid1_1);
 	m_slide->setFixedSize(wSlide, hSlide);
 	m_slideCol01->setFixedSize(wSlideCol01, hSlide);
@@ -323,15 +324,11 @@ void ViewHome::updateUI()
 		MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
 		m_metaTable->setHeight(m_content->height() - m_contentRow1->height());
-		m_tableCommon->setColumnCount(m_metaTable->header()->countCols());
-		m_tableCommon->setFixedSize(m_metaTable->width(), m_metaTable->height());
-		m_tableCommon->setHorizontalHeaderLabels(m_metaTable->header()->meta());
-		m_tableCommon->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
-		for (int i = 0; i < 36; i++)
-		{
-			m_tableCommon->setColumnWidth(i, metaTable->wCol);
-		}
-		//m_navi->setFixedWidth(m_content->width());
+
+		m_checkTable->initSize(m_content->width()-20);
+		m_mntStack->setFixedSize(m_content->width()-20, m_checkTable->height());
+		m_mntScrArea->setFixedSize(m_mntStack->width()+20, m_mntStack->height());
+		m_mntScrArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	}
 	else if (!m_cmdProvider->selectedTag().compare(TAG_EMP_LIST))
 	{
@@ -356,18 +353,7 @@ void ViewHome::updateUI()
 }
 void ViewHome::initDVCList()
 {
-	if (isCurrentMetaTable(TAG_DVC_LIST)) return;
-	if (m_contentGrid1_2 != nullptr)
-	{
-		delete m_contentGrid1_2;
-		m_contentGrid1_2 = nullptr;
-	}
-
-	m_lbCurrentContent->setText(kr("장비목록"));
-	m_contentGrid1_2 = (new CPWidget(m_styleContent->width() - m_styleContent->wGrid1_1, m_styleContent->hRow01, new QHBoxLayout))
-		->initSpacing(10)
-		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
-		->initContentsMargins(0, 20, 0, 0);
+	if (!initPage(TAG_DVC_LIST, kr("장비목록"))) return;
 
 	Button* metaBtn;
 	metaBtn = m_styleContent->btnPrint();
@@ -394,19 +380,6 @@ void ViewHome::initDVCList()
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(m_styleContent->btnNew()->icon());
 
-	metaBtn = m_styleContent->btnNaviLeft();
-	m_btnNaviLeft =
-		(new Command("navi_left", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
-		->initStyleSheet(metaBtn->releasedStyle())
-		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
-
-	metaBtn = m_styleContent->btnNaviRight();
-	m_btnNaviRight =
-		(new Command("navi_right", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
-		->initStyleSheet(metaBtn->releasedStyle())
-		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
-
-	m_contentRow1->layout()->addWidget(m_contentGrid1_2);
 	m_contentGrid1_2->append(m_btnNew)->append(m_btnEdit)->append(m_btnRemove)->append(m_btnPrint);
 
 	m_btnPrint->initFunc([=]()
@@ -425,60 +398,51 @@ void ViewHome::initDVCList()
 	{
 		print("CMD-btnNew", "print...");
 	});
-	
+
 	newTable(20, TAG_DVC_LIST);
 	newNavi();
 	updateUI();
 }
-void ViewHome::initMNGList() 
+void ViewHome::initMNGList()
 {
-	if (isCurrentMetaTable(TAG_MNG_LIST)) return;
-	if (m_contentGrid1_2 != nullptr)
-	{
-		delete m_contentGrid1_2;
-		m_contentGrid1_2 = nullptr;
-	}
-	m_lbCurrentContent->setText(kr("관리대장"));
-	m_contentGrid1_2 = (new CPWidget(m_styleContent->width() - m_styleContent->wGrid1_1, m_styleContent->hRow01, new QHBoxLayout))
-		->initSpacing(10)
-		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
-		->initContentsMargins(0, 20, 0, 0);
+	if (!initPage(TAG_MNG_LIST, kr("관리대장"))) return;
 
-	Button* metaBtn;
-	metaBtn = m_styleContent->btnNaviLeft();
-	m_btnNaviLeft =
-		(new Command("navi_left", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
-		->initStyleSheet(metaBtn->releasedStyle())
-		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
-
-	metaBtn = m_styleContent->btnNaviRight();
-	m_btnNaviRight =
-		(new Command("navi_right", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
-		->initStyleSheet(metaBtn->releasedStyle())
-		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
-
-	m_contentRow1->layout()->addWidget(m_contentGrid1_2);
 
 	newTable(20, TAG_MNG_LIST);
 	newNavi();
 	updateUI();
 }
-void ViewHome::initMNTList() 
+void ViewHome::initMNTList()
 {
-	if (isCurrentMetaTable(TAG_MNT_LIST)) return;
+	if (!initPage(TAG_MNT_LIST, kr("월별대장"))) return;
+	newMetaTable(TAG_MNT_LIST);
+
+	m_mntStack = (new CPWidget(m_content->width(), m_content->height(), new QVBoxLayout))
+		->initAlignment(Qt::AlignLeft | Qt::AlignTop)
+		->initStyleSheet("background: green;");
+	m_mntScrArea = new QScrollArea(this);
+	m_mntScrArea->setWidget(m_mntStack);
+	m_content->layout()->addWidget(m_mntScrArea);
+
+	m_checkTable = new CheckTable();
+	m_mntStack->layout()->addWidget(m_checkTable);
+
+	updateUI();
+}
+void ViewHome::initEMPList()
+{
+	if (!initPage(TAG_EMP_LIST, kr("직원관리"))) return;
+	newTable(100, TAG_EMP_LIST);
+	updateUI();
+}
+bool ViewHome::initPage(QString tag, QString titleTxt)
+{
+	if (isCurrentMetaTable(tag)) return false;
 	if (m_contentGrid1_2 != nullptr)
 	{
 		delete m_contentGrid1_2;
 		m_contentGrid1_2 = nullptr;
 	}
-	m_lbCurrentContent->setText(kr("월별대장"));
-	m_contentGrid1_2 = (new CPWidget(m_styleContent->width() - m_styleContent->wGrid1_1, m_styleContent->hRow01, new QHBoxLayout))
-		->initSpacing(10)
-		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
-		->initContentsMargins(0, 20, 0, 0);
-
-	newMetaTable(TAG_MNT_LIST);
-
 	if (m_tableCommon != nullptr)
 	{
 		delete m_tableCommon;
@@ -489,36 +453,29 @@ void ViewHome::initMNTList()
 		delete m_navi;
 		m_navi = nullptr;
 	}
-	m_tableCommon = new QTableWidget(this);
-	m_tableCommon->setRowCount(20);
-	m_tableCommon->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_tableCommon->setStyleSheet("border: 1px; background:orange;");
-	m_tableCommon->setSelectionMode(QAbstractItemView::SingleSelection);
-	//m_tableCommon->horizontalScrollBar()->setDisabled(true);
-	//m_tableCommon->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	m_tableCommon->verticalHeader()->hide();
-	m_content->layout()->addWidget(m_tableCommon);
-
-	updateUI();
-}
-void ViewHome::initEMPList() 
-{
-	if (isCurrentMetaTable(TAG_EMP_LIST)) return;
-	if (m_contentGrid1_2 != nullptr)
+	if (m_checkTable != nullptr)
 	{
-		delete m_contentGrid1_2;
-		m_contentGrid1_2 = nullptr;
+		delete m_checkTable;
+		m_checkTable = nullptr;
 	}
-	m_lbCurrentContent->setText(kr("직원관리"));
-
-	if (m_navi != nullptr)
+	if (m_mntStack != nullptr)
 	{
-		delete m_navi;
-		m_navi = nullptr;
+		delete m_mntStack;
+		m_mntStack = nullptr;
 	}
+	if (m_mntScrArea != nullptr)
+	{
+		delete m_mntScrArea;
+		m_mntScrArea	 = nullptr;
+	}
+	m_lbCurrentContent->setText(titleTxt);
+	m_contentGrid1_2 = (new CPWidget(m_styleContent->width() - m_styleContent->wGrid1_1, m_styleContent->hRow01, new QHBoxLayout))
+		->initSpacing(10)
+		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
+		->initContentsMargins(0, 20, 0, 0);
+	m_contentRow1->layout()->addWidget(m_contentGrid1_2);
 
-	newTable(100, TAG_EMP_LIST);
-	updateUI();
+	return true;
 }
 ViewHome::~ViewHome()
 {
@@ -531,7 +488,7 @@ bool ViewHome::isCurrentMetaTable(QString tag)
 void ViewHome::newMetaTable(QString tag)
 {
 	m_cmdProvider->select(tag);
-		 if (!tag.compare(TAG_DVC_LIST)) m_metaTable = new MetaTableDVC();
+	if (!tag.compare(TAG_DVC_LIST)) m_metaTable = new MetaTableDVC();
 	else if (!tag.compare(TAG_MNG_LIST)) m_metaTable = new MetaTableMNG();
 	else if (!tag.compare(TAG_MNT_LIST)) m_metaTable = new MetaTableMNT();
 	else if (!tag.compare(TAG_EMP_LIST)) m_metaTable = new MetaTableEMP();
@@ -543,6 +500,18 @@ void ViewHome::newNavi()
 		delete m_navi;
 		m_navi = nullptr;
 	}
+	Button* metaBtn;
+	metaBtn = m_styleContent->btnNaviLeft();
+	m_btnNaviLeft =
+		(new Command("navi_left", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+
+	metaBtn = m_styleContent->btnNaviRight();
+	m_btnNaviRight =
+		(new Command("navi_right", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
 	m_lbNavi = (new CPLabel(100, 30, "50/70"))->initAlignment(Qt::AlignCenter);
 	m_navi = (new CPWidget(m_styleContent->width(), 0, new QHBoxLayout))
 		->initAlignment(Qt::AlignCenter)

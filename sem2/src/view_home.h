@@ -10,6 +10,7 @@
 #define TAG_MNT_LIST "month_list"
 #define TAG_EMP_LIST "employee_list"
 
+class CheckTable;
 class ViewHome : public QWidget
 {
     Q_OBJECT
@@ -74,10 +75,15 @@ private:
 	Command* m_btnNaviLeft;
 	Command* m_btnNaviRight;
 
+	CheckTable* m_checkTable = nullptr;
+	CPWidget* m_mntStack = nullptr;
+	QScrollArea* m_mntScrArea = nullptr;
+
 	void initDVCList();
 	void initMNGList();
 	void initMNTList();
 	void initEMPList();
+	bool initPage(QString tag, QString titleTxt);
 
 	void newTable(int rowCount, QString tag);
 	void newNavi();

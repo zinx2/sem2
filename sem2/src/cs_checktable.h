@@ -1,80 +1,102 @@
 #pragma once
 #include "cs_qheader.h"
-
+#include "cs_metatable.h"
+#include "cs_component.h"
 class CheckTable : public QWidget
 {
 	Q_OBJECT
 public:
 	CheckTable()
 	{
-		setFixedSize(500, 12 * 30 + 24);
+		meta = new MetaTableCheck();
+		connect(meta, &MetaTableCheck::wViewChanged, [=]() { 		
+			setFixedSize(meta->wView(), meta->hView());			
+		});
+		connect(meta, &MetaTableCheck::hViewChanged, [=]() {
+			setFixedSize(meta->wView(), meta->hView());
+		});
+
+		setFixedSize(meta->wView(), meta->hView());
 		setLayout(new QVBoxLayout);
 		layout()->setSpacing(0);
 		layout()->setMargin(0);
 		layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
-		QWidget* main = new QWidget(this);
-		main->setFixedSize(1080, 12 * 30 + 4);
-		main->setLayout(new QVBoxLayout);
-		main->layout()->setSpacing(0);
-		main->layout()->setMargin(0);
-		main->layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-		scrollArea = new QScrollArea(this);
-		scrollArea->setWidget(main);
-		layout()->addWidget(scrollArea);
+		CPWidget* wdPart = 
+			(new CPWidget(meta->wPart, (meta->parts().size() + 2) * meta->hCell, new QVBoxLayout))
+			->initAlignment(Qt::AlignLeft | Qt::AlignTop);
 
-		QWidget* hwd = new QWidget(this);
-		hwd->setFixedSize(1080, 30);
-		hwd->setLayout(new QHBoxLayout);
-		hwd->layout()->setSpacing(0);
-		hwd->layout()->setMargin(0);
-		hwd->layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-		hwd->setStyleSheet("background:yellow");
-		main->layout()->addWidget(hwd);
+		wdPart->layout()->addWidget(
+			(new CPLabel(meta->wPart, meta->hCell - 1, ""))
+			->initAlignment(Qt::AlignCenter)->initStyleSheet("border-bottom:1px solid gray; background:white"));
 
-		for (int i = 0; i < 12; i++)
+		wdPart->layout()->addWidget(
+			(new CPLabel(meta->wPart, meta->hCell, kr("서명인")))
+			->initAlignment(Qt::AlignCenter)->initStyleSheet("border-bottom:1px solid gray; background:#eeeeee"));
+
+		for (int i = 0; i < 10; i++)
 		{
-			QString mthTxt = QString("%1").arg(i + 1) + kr("월");
-			QLabel* lbMth = new QLabel(mthTxt);
-			lbMth->setFixedSize(90, 30);
-			lbMth->setAlignment(Qt::AlignCenter);
-			//lbMth->layout()->setAlignment(Qt::AlignCenter);
-			lbMth->setStyleSheet("border:1px solid gray; background:#eeeeee");
-			hwd->layout()->addWidget(lbMth);
+			wdPart->layout()->addWidget(
+				(new CPLabel(meta->wPart, meta->hCell, meta->parts().at(i)))
+				->initAlignment(Qt::AlignCenter)->initStyleSheet("border-bottom:1px solid gray; background:#eeeeee"));
 		}
 
-		QWidget* wd = new QWidget(this);
-		wd->setFixedSize(1080, 11 * 30 + 2);
-		wd->setLayout(new QHBoxLayout);
-		wd->layout()->setSpacing(0);
-		wd->layout()->setMargin(0);
-		wd->layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-		main->layout()->addWidget(wd);
+		CPWidget* main = (new CPWidget(meta->wTable - meta->wPart, meta->hTable, new QVBoxLayout))
+			->initAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+		scrollArea = new QScrollArea(this);
+		scrollArea->setWidget(
+			(new CPWidget(meta->wTable, meta->hTable, new QHBoxLayout))
+			->initAlignment(Qt::AlignLeft | Qt::AlignTop)
+			->append(wdPart)
+			->append(main));
+		layout()->addWidget(scrollArea);
+
+
+		CPWidget* hwd = (new CPWidget(meta->wTable - meta->wPart, meta->hCell, new QHBoxLayout))
+			->initAlignment(Qt::AlignLeft | Qt::AlignTop);
+		main->layout()->addWidget(hwd);
+
+		QLabel* lbMth;
+		for (int i = 0; i < 12; i++)
+		{
+			hwd->layout()->addWidget(
+				(new CPLabel(meta->wCell * 3, meta->hCell, QString("%1").arg(i + 1) + kr("월")))
+				->initAlignment(Qt::AlignCenter)->initStyleSheet("border-right:1px solid gray; border-left:1px solid gray; background:#eeeeee"));
+		}
+
+		CPWidget* wd = (new CPWidget(meta->wTable - meta->wPart, (meta->parts().size() + 1) * meta->hCell + 2, new QHBoxLayout))
+			->initAlignment(Qt::AlignLeft | Qt::AlignTop);
+		main->append(wd);
 
 		for (int i = 0; i < 12; i++)
 		{
 			QTableWidget* table = new QTableWidget(this);
-			table->setRowCount(10);
-			//m_monthTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+			table->setRowCount(meta->parts().size());
 			table->horizontalHeader()->setStyleSheet("QHeaderView::section { background-color:#eeeeee }");
-			table->setStyleSheet("background:orange;");
+			table->setStyleSheet("QTableView {border-right:0px solid white;}");
 			table->setSelectionMode(QAbstractItemView::NoSelection);
 			table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 			table->verticalHeader()->hide();
 			wd->layout()->addWidget(table);
 
-			table->setFixedWidth(90);
-			table->setFixedHeight(11 * 30 + 2);
+			table->setFixedWidth(meta->wCell * 3);
+			table->setFixedHeight((meta->parts().size() + 1) * meta->hCell + 2);
 			table->setColumnCount(3);
-			QStringList head; head << "A" << "B" << "C";
-			table->setHorizontalHeaderLabels(head);
-			table->horizontalHeader()->setFixedHeight(30);
-			table->setColumnWidth(0, 30);
-			table->setColumnWidth(1, 30);
-			table->setColumnWidth(2, 30);
+			table->setHorizontalHeaderLabels(meta->metaSignatory);
+			table->horizontalHeader()->setFixedHeight(meta->hCell);
+			table->setColumnWidth(0, meta->wCell);
+			table->setColumnWidth(1, meta->wCell);
+			table->setColumnWidth(2, meta->wCell);
 		}
+	}
+
+	void initSize(int w, int h=0) {
+		meta->setWView(w);
+		meta->setHView(meta->hView());
 	}
 private:
 	QList<QTableWidget*> m_monthTables;
 	QScrollArea* scrollArea;
+	MetaTableCheck* meta = nullptr;
 };

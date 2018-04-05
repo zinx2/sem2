@@ -116,6 +116,61 @@ public:
 	const int wCol = 40;
 };
 
+class MetaTableCheck : public QObject
+{
+	Q_OBJECT
+		Q_PROPERTY(int wView READ wView WRITE setWView NOTIFY wViewChanged)
+		Q_PROPERTY(int hView READ hView WRITE setHView NOTIFY hViewChanged)
+public:
+	MetaTableCheck()
+	{
+		for (int i = 0; i < 12; i++)
+		{
+			QString mthTxt = QString("%1").arg(i + 1) + kr("월");
+			metaMonths << mthTxt;
+		}
+		metaSignatory << kr("담") << kr("관") << kr("보");
+		m_parts.append(kr("A파트")); m_parts.append(kr("B파트")); m_parts.append(kr("C파트"));
+		m_parts.append(kr("D파트")); m_parts.append(kr("E파트")); m_parts.append(kr("F파트"));
+		m_parts.append(kr("G파트")); m_parts.append(kr("H파트")); m_parts.append(kr("I파트"));
+		m_parts.append(kr("J파트"));
+	}
+
+	const int wTable = 1180;
+	const int hTable = 12 * 30 + 4;
+	const int wPart = 100;
+	const int wMonth = 90;
+	const int wSignatory = 30;
+	const int hCol = 290;
+	const int wCell = 30;
+	const int hCell = 30;
+
+	QList<QString> metaMonths;
+	QList<QString> metaSignatory;
+	QList<QString> parts() { return m_parts; }
+	void setParts(QList<QString> m) 
+	{
+		m_parts.clear();
+		m_parts = m;
+	}
+
+	int wView() { return m_wView; }
+	int hView() { return m_hView; }
+
+	public slots:
+	void setWView(int w) { m_wView = w; emit wViewChanged(); }
+	void setHView(int h) { m_hView = h; emit hViewChanged(); }
+
+signals:
+	void wViewChanged();
+	void hViewChanged();
+
+private:
+	QList<QString> m_parts;
+	int m_wView = 980;
+	int m_hView = 12 * 30 + 24;
+};
+
 class MetaTableMNG : public MetaTable
 {
 	Q_OBJECT
