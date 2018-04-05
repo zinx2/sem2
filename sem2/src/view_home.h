@@ -58,6 +58,9 @@ private:
 	QTableWidget* m_tableCommon = nullptr;
 	QTableWidget* m_tableEMP = nullptr;
 
+	Command* m_btnCheckExt;
+	CommandProvider* m_cmdProviderExt;
+
 	Command* m_btnLogout;
 	Command* m_btnPrint;
 	Command* m_btnEdit;

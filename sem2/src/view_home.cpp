@@ -143,7 +143,6 @@ ViewHome::ViewHome(QWidget *parent)
 	m_header->setStyleSheet("background: " + m_styleHeader->palette()->navy01);
 	m_body->setStyleSheet("background: orange");
 	m_footer->setStyleSheet("background: " + m_styleFooter->palette()->navy01);
-	m_content->setStyleSheet("background: yellow");
 	m_slide->setStyleSheet("background: " + m_styleHeader->palette()->navy02);
 	m_slideCol01->setStyleSheet("background: " + m_styleHeader->palette()->navy03);
 	/*** SET STYLE SHEETS. END. ***/
@@ -324,9 +323,9 @@ void ViewHome::updateUI()
 		MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
 		m_metaTable->setHeight(m_content->height() - m_contentRow1->height());
-
 		m_checkTable->initSize(m_content->width()-20);
-		m_mntStack->setFixedSize(m_content->width()-20, m_checkTable->height());
+		m_btnCheckExt->setFixedWidth(m_content->width() - 20);
+		m_mntStack->setFixedSize(m_content->width()-20, m_checkTable->height() + metaTable->hExt);
 		m_mntScrArea->setFixedSize(m_mntStack->width()+20, m_mntStack->height());
 		m_mntScrArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	}
@@ -417,15 +416,30 @@ void ViewHome::initMNTList()
 	if (!initPage(TAG_MNT_LIST, kr("월별대장"))) return;
 	newMetaTable(TAG_MNT_LIST);
 
+	MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
+	m_btnCheckExt = (new Command("check_ext", metaTable->txt1, m_content->width(), metaTable->hExt))
+		->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", metaTable->txt2)
+		->initEffect(metaTable->btnExtReleasedSheet, metaTable->btnExtHoverdSheet, metaTable->btnExtHoverdSheet)
+		->initFunc([=]() {	
+
+		bool folded = m_btnCheckExt->selected();
+		int h = folded ? (12 * 30 + 24) : 0;
+		m_checkTable->initHeight(h);
+		m_btnCheckExt->initName(folded ? metaTable->txt1 : metaTable->txt2);
+		m_btnCheckExt->select(!folded);
+		updateUI();
+	});
+	m_cmdProviderExt = new CommandProvider();
+	m_cmdProviderExt->append(m_btnCheckExt);
+
 	m_mntStack = (new CPWidget(m_content->width(), m_content->height(), new QVBoxLayout))
-		->initAlignment(Qt::AlignLeft | Qt::AlignTop)
-		->initStyleSheet("background: green;");
+		->initAlignment(Qt::AlignLeft | Qt::AlignTop);
 	m_mntScrArea = new QScrollArea(this);
 	m_mntScrArea->setWidget(m_mntStack);
 	m_content->layout()->addWidget(m_mntScrArea);
 
 	m_checkTable = new CheckTable();
-	m_mntStack->layout()->addWidget(m_checkTable);
+	m_mntStack->append(m_btnCheckExt)->append(m_checkTable);
 
 	updateUI();
 }
