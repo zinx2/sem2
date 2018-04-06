@@ -1,7 +1,7 @@
 ﻿#include "view_home.h"
 #include "cs_qheader.h"
 #include "cs_checktable.h"
-#include "cs_extendabletable.h"
+
 ViewHome::ViewHome(QWidget *parent)
 	: QWidget(parent)
 {
