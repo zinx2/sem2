@@ -6,6 +6,7 @@
 #include <QBoxLayout>
 #include <QLineEdit>
 #include "cs_file.h"
+#include "cs_metatable.h"
 class CPTextEdit : public QTextEdit
 {
 	Q_OBJECT
@@ -217,4 +218,78 @@ public:
 		setContentsMargins(left, top, right, bottom);
 		return this;
 	}
+};
+
+class CPTable : public QWidget
+{
+	Q_OBJECT
+public:
+	CPTable(MetaTable* meta, int itemCount)
+	{
+		m_meta = meta;
+		m_itemCount = itemCount;
+		setStyleSheet("background:#2dd0d2");
+		setLayout(new QVBoxLayout);
+		layout()->setSpacing(0);
+		layout()->setMargin(0);
+		layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+		m_table = new QTableWidget(this);
+		m_table->setRowCount(m_itemCount);
+		m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
+		m_table->setSelectionMode(QAbstractItemView::SingleSelection);
+		m_table->horizontalScrollBar()->setDisabled(true);
+		m_table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		m_table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		m_table->verticalHeader()->hide();
+		m_table->setColumnCount(m_meta->cols().size());
+
+		m_table->setHorizontalHeaderLabels(m_meta->header()->meta());
+	}
+	CPTable* resize()
+	{
+		int idx = 0; int w = m_meta->width();
+		qDebug() << "SIZE : " << w;
+		while (idx < m_meta->cols().size()-1)
+		{
+			m_table->setColumnWidth(idx, m_meta->cols()[idx]);
+			w = w - m_meta->cols()[idx++];
+		}
+		m_table->setColumnWidth(idx, w);	
+
+		if (m_visible)
+		{
+			m_table->setFixedSize(m_meta->width(), m_meta->header()->height() + m_meta->hRow() * m_itemCount);
+			setFixedSize(m_meta->width(), m_meta->header()->height() + m_meta->hRow() * m_itemCount);
+		}
+		else
+		{
+			m_table->setFixedSize(0, 0);
+			setFixedSize(0, 0);
+		}
+		return this;
+	}
+	CPTable* initVible(bool visible)
+	{
+		m_visible = visible;
+		return this;
+	}
+	CPTable* initWidth(int w)
+	{
+		m_meta->setWidth(w);
+		return this;
+	}
+	int metaHeight()
+	{
+		return m_meta->height();
+	}
+
+	MetaTable* meta() { return m_meta; }
+
+private:
+	MetaTable* m_meta = nullptr;
+	//CPWidget* m_main = nullptr;
+	QTableWidget* m_table = nullptr;
+	int m_itemCount = 0;
+	bool m_visible = false;
 };

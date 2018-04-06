@@ -1,6 +1,7 @@
 ﻿#include "view_home.h"
 #include "cs_qheader.h"
 #include "cs_checktable.h"
+#include "cs_extendabletable.h"
 ViewHome::ViewHome(QWidget *parent)
 	: QWidget(parent)
 {
@@ -167,6 +168,16 @@ ViewHome::ViewHome(QWidget *parent)
 	m_slide->layout()->addWidget(m_slideCol02);
 	m_slideCol02->append(m_btnDVCList)->append(m_btnMNGList)->append(m_btnMNTList)->append(m_btnEMPList);
 
+	m_emptyArea = (new CPLabel(0, 0, ""));
+
+	metaBtn = m_styleSlide->btnImExport();
+	m_btnImExport = (new Command(TAG_IMEXPORT, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(metaBtn->icon(), metaBtn->name());
+	m_slideCol02->append(m_emptyArea);
+	m_slideCol02->append(m_btnImExport);
+	m_cmdProvider->append(m_btnImExport);
 
 	/*** ADD WIDGETS. END. ***/
 
@@ -204,6 +215,11 @@ ViewHome::ViewHome(QWidget *parent)
 	m_btnEMPList->initFunc([=]()
 	{
 		print("CMD-m_btnEMPList", "m_btnEMPList...");
+		initEMPList();
+	});
+	m_btnImExport->initFunc([=]()
+	{
+		print("CMD-m_btnImExport", "m_btnImExport...");
 		initEMPList();
 	});
 	/* CONNECT COMMANDS. END. */
@@ -256,6 +272,7 @@ void ViewHome::updateUI()
 	m_slide->setFixedSize(wSlide, hSlide);
 	m_slideCol01->setFixedSize(wSlideCol01, hSlide);
 	m_slideCol02->setFixedSize(wSlideCol02, hSlide);
+	m_emptyArea->setFixedSize(1, hSlide - m_cmdProvider->totalHeight() - 10 * (m_cmdProvider->count()+2));
 
 	print("HEADER", wHeader, hHeader);
 	print("FOOTER", wFooter, hFooter);
@@ -277,6 +294,9 @@ void ViewHome::updateUI()
 
 	metaBtn = m_styleSlide->btnEMPList();
 	m_btnEMPList->initWidth(metaBtn->width())->initIcon(metaBtn->icon(), kr(metaBtn->name()));
+
+	metaBtn = m_styleSlide->btnImExport();
+	m_btnImExport->initWidth(metaBtn->width())->initIcon(metaBtn->icon(), kr(metaBtn->name()));
 
 	if (!m_cmdProvider->selectedTag().compare(TAG_DVC_LIST))
 	{
@@ -325,9 +345,21 @@ void ViewHome::updateUI()
 		m_metaTable->setHeight(m_content->height() - m_contentRow1->height());
 		m_checkTable->initSize(m_content->width()-20);
 		m_btnCheckExt->setFixedWidth(m_content->width() - 20);
-		m_mntStack->setFixedSize(m_content->width()-20, m_checkTable->height() + metaTable->hExt);
-		m_mntScrArea->setFixedSize(m_mntStack->width()+20, m_mntStack->height());
+
+		int hMntStack = m_checkTable->height() + metaTable->hExt * (m_checkTable->meta()->parts().size() + 1);
+		for (int i = 0; i < m_mntTables.size(); i++)
+		{
+			Command* cmd = m_cmdProviderExt->command(i);
+			cmd->initWidth(m_content->width());
+
+			CPTable* tb = m_mntTables.at(i);
+			tb->initWidth(m_content->width())->initVible(cmd->selected())->resize();
+			hMntStack = hMntStack + cmd->height() + tb->height();
+		}
+		m_mntStack->setFixedSize(m_content->width() - 20, hMntStack);
+		m_mntScrArea->setFixedSize(m_mntStack->width() + 20, m_content->height() - m_contentRow1->height());
 		m_mntScrArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		
 	}
 	else if (!m_cmdProvider->selectedTag().compare(TAG_EMP_LIST))
 	{
@@ -441,6 +473,25 @@ void ViewHome::initMNTList()
 	m_checkTable = new CheckTable();
 	m_mntStack->append(m_btnCheckExt)->append(m_checkTable);
 
+	m_mntTables.clear();
+	for (int i = 0; i < 8; i++)
+	{
+		Command* m_btnExt = (new Command("ext_" + QString("%1").arg(i), metaTable->txt1, m_content->width(), metaTable->hExt))
+			->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", metaTable->txt2)
+			->initEffect(metaTable->btnExtReleasedSheet, metaTable->btnExtHoverdSheet, metaTable->btnExtHoverdSheet)
+			->initFunc([=]() {
+			Command* cmd = m_cmdProviderExt->command(i);
+			bool folded = cmd->selected();
+			cmd->select(!folded);
+			updateUI();
+		});
+		m_cmdProviderExt->append(m_btnExt);
+		m_mntStack->append(m_btnExt);
+
+		CPTable* table = (new CPTable(new MetaTableExtendable, 30))->initWidth(m_content->width())->resize();
+		m_mntTables.append(table);
+		m_mntStack->append(table);
+	}
 	updateUI();
 }
 void ViewHome::initEMPList()

@@ -167,7 +167,19 @@ public:
 		}
 		return "";
 	}
+	Command* command(int idx) { return m_commands.at(idx); }
+	int totalHeight() { 
+		int size = m_commands.size();
+		if (size == 0) return 0;
+		else {
+			int h = 0;
+			foreach(Command* c, m_commands)
+				h += c->height();
+			return h;
+		}
 
+	}
+	int count() { return m_commands.size(); }
 	QList<Command*> commands() { return m_commands; }
 private:
 	QList<Command*> m_commands;

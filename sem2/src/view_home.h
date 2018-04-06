@@ -9,6 +9,7 @@
 #define TAG_MNG_LIST "management_list"
 #define TAG_MNT_LIST "month_list"
 #define TAG_EMP_LIST "employee_list"
+#define TAG_IMEXPORT "im_export" 
 
 class CheckTable;
 class ViewHome : public QWidget
@@ -50,6 +51,7 @@ private:
 	QWidget* m_slide;	
 	QWidget* m_slideCol01;
 	CPWidget* m_slideCol02;
+	CPLabel* m_emptyArea;
 	
 	StyleMainFooter* m_styleFooter;
 	QWidget* m_footer;
@@ -59,7 +61,10 @@ private:
 	QTableWidget* m_tableEMP = nullptr;
 
 	Command* m_btnCheckExt;
+	QList<Command*> m_btnsPartExt;
 	CommandProvider* m_cmdProviderExt;
+
+	QList<CPTable*> m_mntTables;
 
 	Command* m_btnLogout;
 	Command* m_btnPrint;
@@ -71,6 +76,7 @@ private:
 	Command* m_btnMNGList;
 	Command* m_btnMNTList;
 	Command* m_btnEMPList;
+	Command* m_btnImExport;
 	CommandProvider* m_cmdProvider;
 
 	CPWidget* m_navi = nullptr;

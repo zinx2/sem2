@@ -179,6 +179,13 @@ public:
 		m_btnEMPList->setHoveredStyle(palette()->btnHoveredStyleGray);
 		m_btnEMPList->setSelectedStyle(palette()->btnSelectedStyleGray);
 
+		m_btnImExport = new Button();
+		m_btnImExport->setHeight(50);
+		m_btnImExport->setIcon(":/imgs/imexport_36dp.png");
+		m_btnImExport->setReleasedStyle(palette()->btnReleasedStyleGray);
+		m_btnImExport->setHoveredStyle(palette()->btnHoveredStyleGray);
+		m_btnImExport->setSelectedStyle(palette()->btnSelectedStyleGray);
+
 		extend(false);
 	}
 
@@ -198,6 +205,7 @@ public:
 	Button* btnMNGList() { return m_btnMNGList; }
 	Button* btnMNTList() { return m_btnMNTList; }
 	Button* btnEMPList() { return m_btnEMPList; }
+	Button* btnImExport() { return m_btnImExport; }
 
 	bool extended() { return m_extended; }
 
@@ -210,11 +218,13 @@ public:
 			m_btnMNGList->setName("관리대장");
 			m_btnMNTList->setName("월별점검");
 			m_btnEMPList->setName("직원관리");
+			m_btnImExport->setName("대출/반납");
 
 			m_btnDVCList->setWidth(wBtnExtended);
 			m_btnMNGList->setWidth(wBtnExtended);
 			m_btnMNTList->setWidth(wBtnExtended);
 			m_btnEMPList->setWidth(wBtnExtended);
+			m_btnImExport->setWidth(wBtnExtended);
 		}
 		else {
 			m_width = widthFold;
@@ -222,15 +232,16 @@ public:
 			m_btnMNGList->setName("");
 			m_btnMNTList->setName("");
 			m_btnEMPList->setName("");
+			m_btnImExport->setName("");
 
 			m_btnDVCList->setWidth(wBtnFolded);
 			m_btnMNGList->setWidth(wBtnFolded);
 			m_btnMNTList->setWidth(wBtnFolded);
 			m_btnEMPList->setWidth(wBtnFolded);
+			m_btnImExport->setWidth(wBtnFolded);
 		}
 		emit extendedChanged();
 	}
-
 
 signals:
 	void extendedChanged();
@@ -242,9 +253,7 @@ private:
 	Button* m_btnMNGList;
 	Button* m_btnMNTList;
 	Button* m_btnEMPList;
-
-
-
+	Button* m_btnImExport;
 };
 class StyleMainHeader : public StyleBasic {
 public:

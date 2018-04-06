@@ -1,4 +1,4 @@
-#pragma once
+ο»Ώ#pragma once
 #include "cs_qheader.h"
 #include "cs_metatable.h"
 #include "cs_component.h"
@@ -31,7 +31,7 @@ public:
 			->initAlignment(Qt::AlignCenter)->initStyleSheet("border-bottom:1px solid gray; background:white"));
 
 		m_wdPart->layout()->addWidget(
-			(new CPLabel(m_meta->wPart, m_meta->hCell, kr("Ό­ΈνΐΞ")))
+			(new CPLabel(m_meta->wPart, m_meta->hCell, kr("μ„λª…μΈ")))
 			->initAlignment(Qt::AlignCenter)->initStyleSheet("border-bottom:1px solid gray; background:#eeeeee"));
 
 		for (int i = 0; i < 10; i++)
@@ -60,7 +60,7 @@ public:
 		for (int i = 0; i < 12; i++)
 		{
 			m_wdMnt->layout()->addWidget(
-				(new CPLabel(m_meta->wCell() * 3, m_meta->hCell, QString("%1").arg(i + 1) + kr("Ώω")))
+				(new CPLabel(m_meta->wCell() * 3, m_meta->hCell, QString("%1").arg(i + 1) + kr("μ›”")))
 				->initAlignment(Qt::AlignCenter)->initStyleSheet("border-right:1px solid gray; border-left:1px solid gray; background:#eeeeee"));
 		}
 

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "cs_qheader.h"
 
 class Meta : public QObject
@@ -50,9 +50,18 @@ public:
 	MetaHeader* header() { return m_header; }
 	int hNavi() { return m_hNavi; }
 	void setHNavi(int m) { m_hNavi = m; }
+
+	QVector<int> cols() { return m_cols; }
+	void setCols(QVector<int> m) { m_cols = m; }
+
+	int hRow() { return m_hRow; }
+	void setHRow(int m) { m_hRow = m; }
+
 private:
 	int m_hNavi = 0;
+	int m_hRow = 30;
 	MetaHeader* m_header;
+	QVector<int> m_cols;
 };
 class MetaTableDVC : public MetaTable
 {
@@ -61,8 +70,8 @@ public:
 	MetaTableDVC()
 	{
 		QStringList metaHeader; 
-		metaHeader << kr("¹øÈ£") << kr("ÀÚ»ê¹øÈ£") << kr("Àåºñ¸í")
-			<< kr("Ãëµæ±Ý¾×") << kr("ÃëµæÀÏÀÚ") << kr("´ëÃâ¿©ºÎ") << kr("ºñ°í");
+		metaHeader << kr("ë²ˆí˜¸") << kr("ìžì‚°ë²ˆí˜¸") << kr("ìž¥ë¹„ëª…")
+			<< kr("ì·¨ë“ê¸ˆì•¡") << kr("ì·¨ë“ì¼ìž") << kr("ëŒ€ì¶œì—¬ë¶€") << kr("ë¹„ê³ ");
 		header()->setMeta(metaHeader);
 		setHNavi(50);
 	}
@@ -82,8 +91,8 @@ public:
 	MetaTableEMP()
 	{
 		QStringList metaHeader;
-		metaHeader << kr("¹øÈ£") << kr("ÀÚ»ê¹øÈ£") << kr("Àåºñ¸í")
-			<< kr("Ãëµæ±Ý¾×") << kr("ÃëµæÀÏÀÚ") << kr("´ëÃâ¿©ºÎ") << kr("ºñ°í");
+		metaHeader << kr("ë²ˆí˜¸") << kr("ìžì‚°ë²ˆí˜¸") << kr("ìž¥ë¹„ëª…")
+			<< kr("ì·¨ë“ê¸ˆì•¡") << kr("ì·¨ë“ì¼ìž") << kr("ëŒ€ì¶œì—¬ë¶€") << kr("ë¹„ê³ ");
 		header()->setMeta(metaHeader);
 		setHNavi(0);
 	}
@@ -103,16 +112,16 @@ public:
 	MetaTableMNT()
 	{
 		QStringList metaHeader;
-		metaHeader << kr("¹øÈ£") << kr("ÀÚ»ê¹øÈ£") << kr("Àåºñ¸í")
-			<< kr("Ãëµæ±Ý¾×") << kr("ÃëµæÀÏÀÚ") << kr("´ëÃâ¿©ºÎ") << kr("ºñ°í");
+		metaHeader << kr("ë²ˆí˜¸") << kr("ìžì‚°ë²ˆí˜¸") << kr("ìž¥ë¹„ëª…")
+			<< kr("ì·¨ë“ê¸ˆì•¡") << kr("ì·¨ë“ì¼ìž") << kr("ëŒ€ì¶œì—¬ë¶€") << kr("ë¹„ê³ ");
 		header()->setMeta(metaHeader);
 		setHNavi(0);
 	}
 
 	const QString btnExtReleasedSheet = "text-align:left; border:0px; color: white; background-color: #143246;";
 	const QString btnExtHoverdSheet = "text-align:left; border:0px; color: white; background-color: #1e5064;";
-	const QString txt1 = kr("  ¡å  ¿ùº°´ëÀå");
-	const QString txt2 = kr("  ¡ã  ¿ùº°´ëÀå");
+	const QString txt1 = kr("  â–¼  ì›”ë³„ëŒ€ìž¥");
+	const QString txt2 = kr("  â–²  ì›”ë³„ëŒ€ìž¥");
 
 	const int hRow = 30;
 	const int wCol1 = 50;
@@ -122,6 +131,61 @@ public:
 	const int wCol5 = 150;
 	const int wCol6 = 55;
 	const int hExt = 25;
+};
+
+class MetaTableExtendable : public MetaTable
+{
+	Q_OBJECT
+		//Q_PROPERTY(bool extended READ extended WRITE extend NOTIFY extendedChanged)
+		//Q_PROPERTY(int wView READ wView WRITE setWView NOTIFY wViewChanged)
+		//Q_PROPERTY(int hView READ hView WRITE setHView NOTIFY hViewChanged)
+		//Q_PROPERTY(int hTable READ hTable WRITE setHTable NOTIFY hTableChanged)
+
+public:
+	MetaTableExtendable()
+	{
+		QStringList metaHeader;
+		metaHeader << kr("ë²ˆí˜¸") << kr("ìžì‚°ë²ˆí˜¸") << kr("ìž¥ë¹„ëª…")
+			<< kr("ì·¨ë“ê¸ˆì•¡") << kr("ì·¨ë“ì¼ìž") << kr("ëŒ€ì¶œì—¬ë¶€") << kr("ë¹„ê³ ");
+		header()->setMeta(metaHeader);
+		setHNavi(0);
+		setCols({ 50, 150, 200, 150, 150, 55, 200 });
+		setHRow(30);
+	}
+	//const int hExt = 25;
+	
+	//bool extended() { return m_extended; }
+	//int wView() { return m_wView; }
+	//int hView() { return m_hView; }
+	//int hTable() { return m_hTable; }
+	//QString name() { return m_name; }
+	//QString btnTxt() { 
+	//	QString txt = m_extended ? "  â–¼  " + m_name : "  â–²  " + m_name;
+	//	return txt;
+	//}
+
+	//const QString btnExtReleasedSheet = "text-align:left; border:0px; color: white; background-color: #143246;";
+	//const QString btnExtHoverdSheet = "text-align:left; border:0px; color: white; background-color: #1e5064;";
+
+	//public slots:
+	//void setWView(int m) { m_wView = m; emit wViewChanged(); }
+	//void setHView(int m) { m_hView = m; emit hViewChanged(); }
+	//void setHTable(int m) { m_hTable = m; emit hTableChanged(); }
+	//void setName(QString m) { m_name = m; }
+	//void extend(bool m) { m_extended = m; emit extendedChanged(); }
+
+//signals:
+	//void wViewChanged();
+	//void hViewChanged();
+	//void hTableChanged();
+	//void extendedChanged();
+
+//private:
+	//bool m_extended = false;
+	//int m_wView = wCol1 + wCol2 + wCol3 + wCol4 + wCol5 + wCol6;
+	//int m_hView = 0;
+	//int m_hTable = 0;
+	//QString m_name = "";
 };
 
 class MetaTableCheck : public QObject
@@ -137,14 +201,14 @@ public:
 	{
 		for (int i = 0; i < 12; i++)
 		{
-			QString mthTxt = QString("%1").arg(i + 1) + kr("¿ù");
+			QString mthTxt = QString("%1").arg(i + 1) + kr("ì›”");
 			metaMonths << mthTxt;
 		}
-		metaSignatory << kr("´ã´çÀÚ") << kr("°ü¸®ÀÚ") << kr("º¸Á÷ÀÚ");
-		m_parts.append(kr("AÆÄÆ®")); m_parts.append(kr("BÆÄÆ®")); m_parts.append(kr("CÆÄÆ®"));
-		m_parts.append(kr("DÆÄÆ®")); m_parts.append(kr("EÆÄÆ®")); m_parts.append(kr("FÆÄÆ®"));
-		m_parts.append(kr("GÆÄÆ®")); m_parts.append(kr("HÆÄÆ®")); m_parts.append(kr("IÆÄÆ®"));
-		m_parts.append(kr("JÆÄÆ®"));
+		metaSignatory << kr("ë‹´ë‹¹ìž") << kr("ê´€ë¦¬ìž") << kr("ë³´ì§ìž");
+		m_parts.append(kr("AíŒŒíŠ¸")); m_parts.append(kr("BíŒŒíŠ¸")); m_parts.append(kr("CíŒŒíŠ¸"));
+		m_parts.append(kr("DíŒŒíŠ¸")); m_parts.append(kr("EíŒŒíŠ¸")); m_parts.append(kr("FíŒŒíŠ¸"));
+		m_parts.append(kr("GíŒŒíŠ¸")); m_parts.append(kr("HíŒŒíŠ¸")); m_parts.append(kr("IíŒŒíŠ¸"));
+		m_parts.append(kr("JíŒŒíŠ¸"));
 	}
 
 	//const int wTable = 1180;
@@ -201,8 +265,8 @@ public:
 	MetaTableMNG()
 	{
 		QStringList metaHeader;
-		metaHeader << kr("222¹øÈ£") << kr("ÀÚ»ê¹øÈ£") << kr("Àåºñ¸í")
-			<< kr("Ãëµæ±Ý¾×") << kr("ÃëµæÀÏÀÚ") << kr("´ëÃâ¿©ºÎ") << kr("ºñ°í");
+		metaHeader << kr("222ë²ˆí˜¸") << kr("ìžì‚°ë²ˆí˜¸") << kr("ìž¥ë¹„ëª…")
+			<< kr("ì·¨ë“ê¸ˆì•¡") << kr("ì·¨ë“ì¼ìž") << kr("ëŒ€ì¶œì—¬ë¶€") << kr("ë¹„ê³ ");
 		header()->setMeta(metaHeader);
 		setHNavi(50);
 	}
