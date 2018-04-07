@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #pragma once
 #include "cs_qheader.h"
 #include "cs_component.h"
