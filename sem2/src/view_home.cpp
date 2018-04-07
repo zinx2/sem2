@@ -22,7 +22,7 @@ ViewHome::ViewHome(QWidget *parent)
 		->initEffect(m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtHoverdSheet);
 
 	Button* metaBtn;
-	metaBtn = m_styleHeader->btnLogout();
+    metaBtn = m_styleHeader->btnLogout();
 	m_btnLogout = (new Command("logout", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())

@@ -35,9 +35,9 @@ class CPLineEdit : public QLineEdit
 {
 	Q_OBJECT
 public:
-	CPLineEdit(int width, QWidget *parent = 0) : QLineEdit(parent)
+    CPLineEdit(int width, int height=25, QWidget *parent = 0) : QLineEdit(parent)
 	{
-		setFixedSize(width, 25);
+        setFixedSize(width, height);
 		setStyleSheet("background:white;");
 		QFont f = font();
 		f.setPointSize(10);
@@ -292,4 +292,35 @@ private:
 	QTableWidget* m_table = nullptr;
 	int m_itemCount = 0;
 	bool m_visible = false;
+};
+
+class CPDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit CPDialog(QString title, int w, int h, QWidget *parent=0) : QDialog(parent)
+    {
+        Qt::WindowFlags flags = windowFlags();
+        Qt::WindowFlags helpFlag = Qt::WindowContextHelpButtonHint;
+        flags = flags & (~helpFlag);
+
+        setWindowTitle(title);
+        setWindowFlags(flags);
+        setFixedSize(w, h);
+        setStyleSheet("background: orange");
+        setLayout(new QVBoxLayout);
+
+        m_wdContents = (new CPWidget(w, h-40, new QVBoxLayout))->initAlignment(Qt::AlignTop);
+        layout()->addWidget(m_wdContents);
+
+        m_wdTail = (new CPWidget(w, 50, new QHBoxLayout))->initSpacing(10)->initContentsMargins(0,0,10,0)
+                    ->initAlignment(Qt::AlignVCenter|Qt::AlignRight);
+        layout()->addWidget(m_wdTail);
+
+
+    }
+private:
+    CPWidget* m_wdContents = nullptr;
+    CPWidget* m_wdTail = nullptr;
 };

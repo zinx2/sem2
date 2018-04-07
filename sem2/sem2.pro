@@ -34,14 +34,14 @@ src/view_home.h \
 src/cs_qheader.h \
 src/cs_model.h \
 src/cs_style.h \
-src/cs_dialog.h \
 src/cs_component.h \
 src/cs_file.h \
 src/cs_networker.h \
 src/cs_checktable.h \
 src/cs_command.h \
-src/cs_dialog.h \
-src/cs_metatable.h
+src/cs_metatable.h \
+    src/cs_dialog.h \
+    src/cs_login.h
 
 RESOURCES += \
     res.qrc
