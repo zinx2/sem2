@@ -28,7 +28,11 @@ public:
 		m_cmd = func;
 		return this;
 	}
-
+	Command* initContentsMargins(int left, int right, int top, int bottom)
+	{
+		this->setContentsMargins(left, top, right, bottom);
+		return this;
+	}
 	Command* initStyleReleasedSheet(QString sheet) { m_releasedSheet = sheet; return this; }
 	Command* initStyleHoveredSheet(QString sheet) { m_hoveredSheet = sheet; return this; }
 	Command* initStyleSelectedSheet(QString sheet) { m_selectedSheet = sheet; return this; }

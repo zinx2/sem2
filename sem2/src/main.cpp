@@ -3,7 +3,7 @@
 #include <QApplication>
 #include <QFontDataBase>
 
-#include "cs_login.h".h"
+#include "cs_login.h"
 int main(int argc, char *argv[])
 {
     QFontDatabase::addApplicationFont(":/NanumBarunGothic.ttf");

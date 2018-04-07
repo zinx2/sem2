@@ -35,6 +35,10 @@ public:
 	const QString btnHoveredStyleNavy = btnReleasedStyleNavy;
 	const QString btnSelectedStyleNavy = "color: white; background-color: #26708d;  border-radius:5px;";
 
+	const QString btnReleasedStyleNavyNoRadius = "color: white; background-color: " + navy01;
+	const QString btnHoveredStyleNavyNoRadius = "color: white; background-color: #1e5064";
+	const QString btnSelectedStyleNavyNoRadius = "color: white; background-color: #26708d";
+
 };
 
 class Font : public QObject
