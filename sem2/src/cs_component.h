@@ -317,9 +317,18 @@ public:
         m_wdTail = (new CPWidget(w, 50, new QHBoxLayout))->initSpacing(10)->initContentsMargins(0,0,10,0)
                     ->initAlignment(Qt::AlignVCenter|Qt::AlignRight);
         layout()->addWidget(m_wdTail);
-
-
     }
+
+    virtual void notify(int index) {};
+
+public slots:
+    virtual void confirm() {};
+    virtual void cancel() {};
+
+signals:
+    void yes();
+    void no();
+
 private:
     CPWidget* m_wdContents = nullptr;
     CPWidget* m_wdTail = nullptr;
