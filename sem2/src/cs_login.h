@@ -9,23 +9,24 @@ class CPLogin : public QWidget
 public:
     CPLogin(QWidget* parent = 0) : QWidget(parent)
     {
-        setFixedSize(400, 300);
+		//setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+        setFixedSize(380, 280);
         setLayout(new QVBoxLayout);
         layout()->setMargin(0);
         layout()->setSpacing(10);
         layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
         Palette* p = new Palette();
-        m_btnClose = (new Command("close", "X", 40, 30))->initFontSize(18)->initStyleSheet(p->btnReleasedStyleNavyNoRadius)
+        //m_btnClose = (new Command("close", "X", 40, 30))->initFontSize(18)->initStyleSheet(p->btnReleasedStyleNavyNoRadius)
+        //        ->initEffect(p->btnReleasedStyleNavyNoRadius, p->btnSelectedStyleNavyNoRadius, p->btnHoveredStyleNavyNoRadius);
+        m_btnLogin = (new Command("login", kr("·Î±×ÀÎ"), 90, 90))->initFontSize(20)->initStyleSheet(p->btnReleasedStyleNavyNoRadius)
                 ->initEffect(p->btnReleasedStyleNavyNoRadius, p->btnSelectedStyleNavyNoRadius, p->btnHoveredStyleNavyNoRadius);
-        m_btnLogin = (new Command("login", kr("ë¡œê·¸ì¸"), 90, 90))->initFontSize(20)->initStyleSheet(p->btnReleasedStyleNavyNoRadius)
+        m_btnSearch = (new Command("search", kr("¾ÆÀÌµð/ºñ¹Ð¹øÈ£ Ã£±â"), 190, 30))->initFontSize(13)->initStyleSheet(p->btnReleasedStyleNavyNoRadius)
                 ->initEffect(p->btnReleasedStyleNavyNoRadius, p->btnSelectedStyleNavyNoRadius, p->btnHoveredStyleNavyNoRadius);
-        m_btnSearch = (new Command("search", kr("ì•„ì´ë””/ë¹„ë°€ë²ˆí˜¸ ì°¾ê¸°"), 190, 30))->initFontSize(13)->initStyleSheet(p->btnReleasedStyleNavyNoRadius)
-                ->initEffect(p->btnReleasedStyleNavyNoRadius, p->btnSelectedStyleNavyNoRadius, p->btnHoveredStyleNavyNoRadius);
-        m_btnJoin = (new Command("join", kr("íšŒì›ê°€ìž…"), 100, 30))->initFontSize(13)->initStyleSheet(p->btnReleasedStyleNavyNoRadius)
+        m_btnJoin = (new Command("join", kr("È¸¿ø°¡ÀÔ"), 100, 30))->initFontSize(13)->initStyleSheet(p->btnReleasedStyleNavyNoRadius)
                 ->initEffect(p->btnReleasedStyleNavyNoRadius, p->btnSelectedStyleNavyNoRadius, p->btnHoveredStyleNavyNoRadius);
 
-        m_row1 = (new CPWidget(width(), 30, new QHBoxLayout))->initAlignment(Qt::AlignRight | Qt::AlignVCenter)->append(m_btnClose);
+        m_row1 = (new CPWidget(width(), 5, new QHBoxLayout))->initAlignment(Qt::AlignRight | Qt::AlignVCenter);
         layout()->addWidget(m_row1);
 
         m_row2 = (new CPWidget(width(), 6, new QHBoxLayout))->initAlignment(Qt::AlignLeft | Qt::AlignVCenter)
@@ -36,7 +37,7 @@ public:
         m_row3 = (new CPWidget(width(), 25, new QHBoxLayout))->initAlignment(Qt::AlignLeft | Qt::AlignVCenter)
                 ->initContentsMargins(40, 0, 0, 0);
 
-        m_row3->append((new CPLabel(m_row3->width(), m_row3->height(), kr("ì˜¨ë¼ì¸í‰ìƒêµìœ¡ì› ìžì‚° ê´€ë¦¬ ì‹œìŠ¤í…œ")))
+        m_row3->append((new CPLabel(m_row3->width(), m_row3->height(), kr("¿Â¶óÀÎÆò»ý±³À°¿ø ÀÚ»ê °ü¸® ½Ã½ºÅÛ")))
                        ->initAlignment(Qt::AlignLeft|Qt::AlignVCenter)->initFontSize(16));
         layout()->addWidget(m_row3);
 
@@ -45,10 +46,10 @@ public:
         layout()->addWidget(m_row4);
 
         m_edID = (new CPLineEdit(200, 40))->initAlignment(Qt::AlignCenter);
-        m_edID->setPlaceholderText(kr("ì•„ì´ë””"));
+        m_edID->setPlaceholderText(kr("¾ÆÀÌµð"));
 
         m_edPass = (new CPLineEdit(200, 40))->initAlignment(Qt::AlignCenter);
-        m_edPass->setPlaceholderText(kr("ë¹„ë°€ë²ˆí˜¸"));
+        m_edPass->setPlaceholderText(kr("ºñ¹Ð¹øÈ£"));
 
         m_row4->append((new CPWidget(200, 90, new QVBoxLayout))->initAlignment(Qt::AlignLeft | Qt::AlignTop)
                        ->initSpacing(10)->append(m_edID)->append(m_edPass))->append(m_btnLogin);
@@ -56,20 +57,17 @@ public:
         m_row5 = (new CPWidget(width(), 20, new QHBoxLayout))->initAlignment(Qt::AlignLeft | Qt::AlignCenter)
                 ->initContentsMargins(40, 0, 0, 0);
 
-        m_checkBox = new QCheckBox(kr("ë¡œê·¸ì¸ ìœ ì§€"));
+        m_checkBox = new QCheckBox(kr("·Î±×ÀÎ À¯Áö"));
         m_row5->layout()->addWidget(m_checkBox);
         layout()->addWidget(m_row5);
 
-        m_row6 = (new CPWidget(width(), 20, new QHBoxLayout))->initAlignment(Qt::AlignLeft | Qt::AlignCenter)
-                ->initContentsMargins(40, 0, 0, 10)->append((new CPLabel(300, 1))->initStyleSheet("background: " + p->navy01));
+        m_row6 = (new CPWidget(width(), 1, new QHBoxLayout))->initAlignment(Qt::AlignLeft | Qt::AlignCenter)
+                ->initContentsMargins(40, 0, 0, 0)->append((new CPLabel(300, 1))->initStyleSheet("background: " + p->navy01));
         layout()->addWidget(m_row6);
-
+		//layout()->setSpacing(0);
         m_row7 = (new CPWidget(width(), 30, new QHBoxLayout))->initAlignment(Qt::AlignLeft | Qt::AlignCenter)
-                ->initContentsMargins(0, 0, 0, 10)->initSpacing(10)->append(m_btnSearch)->append(m_btnJoin);
+                ->initContentsMargins(40, 0, 0, 0)->initSpacing(10)->append(m_btnSearch)->append(m_btnJoin);
         layout()->addWidget(m_row7);
-
-
-        layout()->addWidget(new CPWidget(width(), 1, new QHBoxLayout));
     }
 
 private:
