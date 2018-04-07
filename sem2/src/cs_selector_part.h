@@ -1,4 +1,4 @@
-#ifndef CS_SELECTOR_PART_H
+﻿#ifndef CS_SELECTOR_PART_H
 #define CS_SELECTOR_PART_H
 
 #endif // CS_SELECTOR_PART_H
