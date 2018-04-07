@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include "cs_file.h"
 #include "cs_metatable.h"
+
 class CPTextEdit : public QTextEdit
 {
 	Q_OBJECT
@@ -319,6 +320,15 @@ public:
         layout()->addWidget(m_wdTail);
     }
 
+    explicit CPDialog(int w, int h, QWidget *parent=0) : QDialog(parent)
+    {
+        Qt::WindowFlags flags = windowFlags();
+        Qt::WindowFlags helpFlag = Qt::WindowContextHelpButtonHint;
+        flags = flags & (~helpFlag);
+
+        setFixedSize(w, h);
+    }
+
     virtual void notify(int index) {};
 
 public slots:
@@ -329,7 +339,7 @@ signals:
     void yes();
     void no();
 
-private:
+protected:
     CPWidget* m_wdContents = nullptr;
     CPWidget* m_wdTail = nullptr;
 };

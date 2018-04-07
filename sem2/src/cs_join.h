@@ -3,11 +3,11 @@
 #include "cs_component.h"
 #include "cs_command.h"
 #include "cs_style.h"
-class CPJoin : public QWidget
+class CPJoin : public CPDialog
 {
     Q_OBJECT
 public:
-    CPJoin(QWidget* parent = 0) : QWidget(parent)
+    CPJoin() : CPDialog(400, 435)
     {
         setFixedSize(400, 435);
         setLayout(new QVBoxLayout);
@@ -16,24 +16,24 @@ public:
         layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
         Palette* p = new Palette();
-        m_btnConfirm = (new Command("id_confirm", kr("중복확인"), 100, 40))->initFontSize(15)->initStyleSheet(p->btnReleasedStyleNavy)
-				->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)->initFontSize(12)->initFunc([=]() 
+        m_btnConfirm = (new Command("id_confirm", kr("중복확인"), 100, 40))->initFontSize(12)->initStyleSheet(p->btnReleasedStyleNavy)
+                ->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)->initFunc([=]()
 				{
 				});
-        m_btnEmp = (new Command("search_employee", kr("직원찾기"), 100, 40))->initFontSize(15)->initStyleSheet(p->btnReleasedStyleNavy)
-                ->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)->initFontSize(12)->initFunc([=]() 
+        m_btnEmp = (new Command("search_employee", kr("직원찾기"), 100, 40))->initFontSize(12)->initStyleSheet(p->btnReleasedStyleNavy)
+                ->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)->initFunc([=]()
 				{
 				});
-        m_btnPart = (new Command("search_part", kr("부서찾기"), 100, 40))->initFontSize(15)->initStyleSheet(p->btnReleasedStyleNavy)
-                ->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)->initFontSize(12)->initFunc([=]() 
+        m_btnPart = (new Command("search_part", kr("부서찾기"), 100, 40))->initFontSize(12)->initStyleSheet(p->btnReleasedStyleNavy)
+                ->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)->initFunc([=]()
 				{
 				});
-        m_btnClear = (new Command("edit_clear", kr("초기화"), 100, 40))->initFontSize(15)->initStyleSheet(p->btnReleasedStyleNavy)
-                ->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)->initFontSize(12)->initFunc([=]() 
+        m_btnClear = (new Command("edit_clear", kr("초기화"), 100, 40))->initFontSize(12)->initStyleSheet(p->btnReleasedStyleNavy)
+                ->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)->initFunc([=]()
 				{
 				});
-        m_btnJoin = (new Command("edit_finish", kr("완료하기"), 100, 40))->initFontSize(15)->initStyleSheet(p->btnReleasedStyleNavy)
-                ->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)->initFontSize(12)->initFunc([=]() 
+        m_btnJoin = (new Command("edit_finish", kr("완료하기"), 100, 40))->initFontSize(12)->initStyleSheet(p->btnReleasedStyleNavy)
+                ->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)->initFunc([=]()
 				{
 				});
 

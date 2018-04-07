@@ -61,6 +61,10 @@ public:
 		m_txt = txt;
 		return this;
 	};
+    Command* initEnabled(bool enabled) {
+        setEnabled(enabled);
+        return this;
+    };
 	QPixmap m_pixmap;
 	QString m_txt;
 	int m_margin;

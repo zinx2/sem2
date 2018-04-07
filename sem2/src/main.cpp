@@ -5,6 +5,7 @@
 
 #include "cs_login.h"
 #include "cs_join.h"
+#include "cs_selector_part.h"
 int main(int argc, char *argv[])
 {
     QFontDatabase::addApplicationFont(":/NanumBarunGothic.ttf");
@@ -15,8 +16,11 @@ int main(int argc, char *argv[])
 //    CPLogin* login = new CPLogin();
 //    login->show();
 
-    CPJoin* join = new CPJoin();
-    join->show();
+//    CPJoin* join = new CPJoin();
+//    join->show();
+
+    SelectorPart* part = new SelectorPart(kr("부서찾기"), 400, 500);
+    part->show();
 
     return a.exec();
 }
