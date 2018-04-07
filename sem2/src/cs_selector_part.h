@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #pragma once
 #include "cs_qheader.h"
 #include "cs_component.h"
@@ -12,6 +11,7 @@ class SelectorPart : public CPDialog
 public:
     explicit SelectorPart(QString title, int width, int height, QWidget* parent=0) : CPDialog(title, width, height, parent)
     {
+        m = Model::instance();
         setWindowTitle(title);
 //        setFixedSize(width, height);
 
@@ -29,7 +29,7 @@ public:
                     close();
                 });
 
-        m_btnConfirm = (new Command("btn_cancel", kr("취소"), 80, 40))->initFontSize(12)->initStyleSheet(p->btnReleasedStyleNavy)
+        m_btnCancel = (new Command("btn_cancel", kr("취소"), 80, 40))->initFontSize(12)->initStyleSheet(p->btnReleasedStyleNavy)
                 ->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)->initFunc([=]()
                 {
                     close();

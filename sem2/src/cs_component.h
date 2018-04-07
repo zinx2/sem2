@@ -295,7 +295,7 @@ private:
 	bool m_visible = false;
 };
 
-class CPDialog : public QDialog
+class   CPDialog : public QDialog
 {
     Q_OBJECT
 
@@ -309,7 +309,7 @@ public:
         setWindowTitle(title);
         setWindowFlags(flags);
         setFixedSize(w, h);
-        setStyleSheet("background: orange");
+//        setStyleSheet("background: orange");
         setLayout(new QVBoxLayout);
 
         m_wdContents = (new CPWidget(w, h-40, new QVBoxLayout))->initAlignment(Qt::AlignTop);

@@ -22,50 +22,50 @@ NetWorker::~NetWorker()
 
 void NetWorker::request()
 {
-    //if (m_hosts.isEmpty())
-    //	return;
+    if (m_hosts.isEmpty())
+        return;
 
-    //NetHost* host = m_hosts.front();
-    //QNetworkRequest req;
+    NetHost* host = m_hosts.front();
+    QNetworkRequest req;
 
-    //if (!host->type().compare("post"))
-    //{
-    //	req = createRequest(host->addr(), host->queries());
-    //	m_netReply = m_netManager.post(req, req.url().query().toUtf8());
-    //}
-    //else if (!host->type().compare("get"))
-    //{
-    //	req = createRequest(host->addr(), host->queries());
-    //	m_netReply = m_netManager.get(req);
-    //}
-    //else if (!host->type().compare("file"))
-    //{
-    //	QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
-    //	QHttpPart imagePart;
-    //	imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/jpeg")); /*jpeg*/
-    //	imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"" + host->file() + "\""));
+    if (!host->type().compare("post"))
+    {
+        req = createRequest(host->addr(), host->queries());
+        m_netReply = m_netManager.post(req, req.url().query().toUtf8());
+    }
+    else if (!host->type().compare("get"))
+    {
+        req = createRequest(host->addr(), host->queries());
+        m_netReply = m_netManager.get(req);
+    }
+    else if (!host->type().compare("file"))
+    {
+        QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+        QHttpPart imagePart;
+        imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/jpeg")); /*jpeg*/
+        imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"" + host->file() + "\""));
 
-    //	QFile *file = new QFile(host->file());
-    //	file->open(QIODevice::ReadOnly);
-    //	imagePart.setBodyDevice(file);
-    //	file->setParent(multiPart);
-    //	multiPart->append(imagePart);
+        QFile *file = new QFile(host->file());
+        file->open(QIODevice::ReadOnly);
+        imagePart.setBodyDevice(file);
+        file->setParent(multiPart);
+        multiPart->append(imagePart);
 
-    //	QUrl url(DOMAIN_NAME + host->addr());
-    //	if (!host->queries().isEmpty())
-    //		url.setQuery(host->queries());
+        QUrl url(DOMAIN_NAME + host->addr());
+        if (!host->queries().isEmpty())
+            url.setQuery(host->queries());
 
-    //	req.setUrl(url);
-    //	m_netReply = m_netManager.post(req, multiPart);
-    //	multiPart->setParent(m_netReply);
-    //}
-    //else return;
+        req.setUrl(url);
+        m_netReply = m_netManager.post(req, multiPart);
+        multiPart->setParent(m_netReply);
+    }
+    else return;
 
-    //qDebug() << "[" << host->type() << "] Called Function: " + req.url().toString();
-    //connect(m_netReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, QOverload<QNetworkReply::NetworkError>::of(&NetWorker::httpError));
-    //connect(m_netReply, &QNetworkReply::finished, host->func());
-    //connect(m_netReply, SIGNAL(uploadProgress(qint64, qint64)), this, SLOT(progress(qint64, qint64)));
-    //m_hosts.pop_front();
+    qDebug() << "[" << host->type() << "] Called Function: " + req.url().toString();
+    connect(m_netReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, QOverload<QNetworkReply::NetworkError>::of(&NetWorker::httpError));
+    connect(m_netReply, &QNetworkReply::finished, host->func());
+    connect(m_netReply, SIGNAL(uploadProgress(qint64, qint64)), this, SLOT(progress(qint64, qint64)));
+    m_hosts.pop_front();
 }
 
 void NetWorker::done()
