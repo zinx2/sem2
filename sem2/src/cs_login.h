@@ -3,6 +3,7 @@
 #include "cs_component.h"
 #include "cs_command.h"
 #include "cs_style.h"
+#include "cs_join.h"
 class CPLogin : public QWidget
 {
     Q_OBJECT
@@ -23,7 +24,10 @@ public:
         m_btnSearch = (new Command("search", kr("아이디/비밀번호 찾기"), 190, 30))->initFontSize(13)->initStyleSheet(p->btnReleasedStyleNavyNoRadius)
                 ->initEffect(p->btnReleasedStyleNavyNoRadius, p->btnSelectedStyleNavyNoRadius, p->btnHoveredStyleNavyNoRadius);
         m_btnJoin = (new Command("join", kr("회원가입"), 100, 30))->initFontSize(13)->initStyleSheet(p->btnReleasedStyleNavyNoRadius)
-                ->initEffect(p->btnReleasedStyleNavyNoRadius, p->btnSelectedStyleNavyNoRadius, p->btnHoveredStyleNavyNoRadius);
+                ->initEffect(p->btnReleasedStyleNavyNoRadius, p->btnSelectedStyleNavyNoRadius, p->btnHoveredStyleNavyNoRadius)
+                ->initFunc([=]() {
+                    (new CPJoin())->show();
+                });
 
         m_row1 = (new CPWidget(width(), 30, new QHBoxLayout))->initAlignment(Qt::AlignRight | Qt::AlignVCenter)->append(m_btnClose);
         layout()->addWidget(m_row1);
