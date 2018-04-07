@@ -3,3 +3,5 @@ build-sem2-Desktop_Qt_5_10_0_clang_64bit-Debug
 sem2/debug
 sem2/GeneratedFiles
 sem2/release
+sem2/.vs
+sem2/x64
