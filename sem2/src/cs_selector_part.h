@@ -9,13 +9,14 @@ class SelectorPart : public CPDialog
 {
     Q_OBJECT
 public:
-    explicit SelectorPart(QString title, int width, int height, QWidget* parent=0) : CPDialog(title, width, height, parent)
+    explicit SelectorPart(QWidget* parent=0) : CPDialog(kr("부서찾기"), 400, 500, parent)
     {
         m = Model::instance();
-        setWindowTitle(title);
+//        setWindowTitle(title);
 //        setFixedSize(width, height);
 
-        m_width = width; m_height = height;
+        m_width = 400; m_height = 500;
+//        setStyleSheet("background:#dedede");
         setModal(true);
 
         NetWorker* n = NetWorker::instance();
@@ -35,9 +36,11 @@ public:
                     close();
                 });
 
-        m_wdTail->layout()->addWidget((new CPLabel(m_width-150, 25, kr("파트를 선택하세요.")))->initAlignment(Qt::AlignCenter));
+
+        m_wdTail->layout()->addWidget((new CPLabel(m_width-180, 25, kr("파트를 선택하세요.")))->initAlignment(Qt::AlignCenter));
         m_wdTail->layout()->addWidget(m_btnConfirm);
-        m_wdTail->layout()->addWidget(m_btnConfirm);
+        m_wdTail->layout()->addWidget(m_btnCancel);
+        m_wdTail->setStyleSheet("background: #dedede");
 
         m_zoneParts = new QWidget(this);
         m_zoneParts->setLayout(new QVBoxLayout);
@@ -46,6 +49,8 @@ public:
         m_zoneParts->layout()->setMargin(0);
         m_zoneParts->layout()->setSpacing(0);
         m_zoneParts->layout()->addWidget(m_wdTail);
+        m_zoneParts->setStyleSheet("background: #dedede");
+        m_wdContents->setStyleSheet("background: #dedede");
 
         refresh();
         connect(m, SIGNAL(partsChanged()), this, SLOT(refresh()));
@@ -69,9 +74,11 @@ public slots:
         m_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
         m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
         m_table->setSelectionMode(QAbstractItemView::SingleSelection);
-        m_table->setFixedSize(m_width, m_height);
+        m_table->setFixedSize(m_width, m_cellHeight * cnt + m_table->horizontalHeader()->height());
         m_table->horizontalScrollBar()->setDisabled(true);
         m_table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        m_table->setStyleSheet("background: white");
+        m_table->horizontalHeader()->setStyleSheet("QHeaderView::section { background-color:#eeeeee }");
         updateTable();
         m_table->setHorizontalHeaderLabels(tableHeader);
         m_table->verticalHeader()->hide();
@@ -91,6 +98,8 @@ public slots:
             QTableWidgetItem* item2 = new QTableWidgetItem(dv->system() ? "O" : "X");
             item2->setTextAlignment(Qt::AlignCenter);
             m_table->setItem(row, 2, item2);
+
+            m_cellHeight = m_table->cellWidget(0, 0)->height();
         }
         m_zoneParts->layout()->addWidget(m_table);
         update();
@@ -110,14 +119,15 @@ private:
 
     int m_width;
     int m_height;
+    int m_cellHeight = 0;
 
     void updateTable()
     {
         m_table->setFixedSize(m_width, m_height);
-        m_table->setColumnWidth(0, m_table->width() * 0.10);
-        m_table->setColumnWidth(1, m_table->width() * 0.70);
-        m_table->setColumnWidth(2, m_table->width() * 0.20 - 10);
-        m_table->setStyleSheet("border: 0px;");
+        m_table->setColumnWidth(0, 50);
+        m_table->setColumnWidth(1, 300);
+        m_table->setColumnWidth(2, 50);
+//        m_table->setStyleSheet("border: 0px;");
     }
 
 };

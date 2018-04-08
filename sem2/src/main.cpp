@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 //    CPJoin* join = new CPJoin();
 //    join->show();
 
-    SelectorPart* part = new SelectorPart(kr("부서찾기"), 400, 500);
+    SelectorPart* part = new SelectorPart();
     part->show();
 
     return a.exec();
