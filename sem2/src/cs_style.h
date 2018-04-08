@@ -41,6 +41,9 @@ public:
 
 	const QString btnEnable = "color: white; background-color: #dedede";
 
+	const QString btnReleasedStyleGrayNoRadius = "background: #dedede;";
+	const QString btnHoveredStyleGrayNoRadius = "background: #c4c4c4;";
+	const QString btnSelectedStyleGrayNoRadius = "background: #dedede;";
 };
 
 class Font : public QObject

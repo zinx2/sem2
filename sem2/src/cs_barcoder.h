@@ -19,28 +19,32 @@ public:
 		btnInit->setStyleSheet("background: #e1e1e1;");
 
 		m_palette = new Palette();
-		m_btnBorrow = (new Command("btn_borrow", kr("대출하기"), 80, 40))->initFontSize(12)->initStyleSheet(m_palette->btnEnable)
-			->initEffect(m_palette->btnEnable, m_palette->btnEnable, m_palette->btnEnable)->initFunc([=]()
+		m_btnBorrow = (new Command("btn_borrow", kr("대출하기"), 80, 40))->initFontSize(12)
+			->initStyleSheet(m_palette->btnReleasedStyleGrayNoRadius)->initEffect(m_palette->btnReleasedStyleGrayNoRadius, m_palette->btnHoveredStyleGrayNoRadius, m_palette->btnSelectedStyleGrayNoRadius)
+			->initFunc([=]()
 		{
 			//DialogFormDeviceReturn* wddSignature = new DialogFormDeviceReturn(m_noDevice, "반납하기", 500, 540, this);
 			//wddSignature->setData(edBarcode->toPlainText());
 			//wddSignature->show();
 		})->initEnabled(false);
-		m_btnReturn = (new Command("btn_return", kr("반납하기"), 80, 40))->initFontSize(12)->initStyleSheet(m_palette->btnEnable)
-			->initEffect(m_palette->btnEnable, m_palette->btnEnable, m_palette->btnEnable)->initFunc([=]()
+		m_btnReturn = (new Command("btn_return", kr("반납하기"), 80, 40))->initFontSize(12)
+			->initStyleSheet(m_palette->btnReleasedStyleGrayNoRadius)->initEffect(m_palette->btnReleasedStyleGrayNoRadius, m_palette->btnHoveredStyleGrayNoRadius, m_palette->btnSelectedStyleGrayNoRadius)
+			->initFunc([=]()
 		{
 			//DialogFormDeviceReturn* wddSignature = new DialogFormDeviceReturn(m_noDevice, "반납하기", 500, 540, this);
 			//wddSignature->setData(edBarcode->toPlainText());
 			//wddSignature->show();
 		})->initEnabled(false);
 
-		m_btnCancel = (new Command("btn_cancel", kr("취소"), 80, 40))->initFontSize(12)->initStyleSheet(m_palette->btnReleasedStyleNavy)
-			->initEffect(m_palette->btnReleasedStyleNavy, m_palette->btnSelectedStyleNavy, m_palette->btnHoveredStyleNavy)->initFunc([=]()
+		m_btnCancel = (new Command("btn_cancel", kr("취소"), 80, 40))->initFontSize(12)
+			->initStyleSheet(m_palette->btnReleasedStyleGrayNoRadius)->initEffect(m_palette->btnReleasedStyleGrayNoRadius, m_palette->btnHoveredStyleGrayNoRadius, m_palette->btnSelectedStyleGrayNoRadius)
+			->initFunc([=]()
 		{
 			cancel();
 		});
-		m_btnSearch = (new Command("btn_search", kr("검색"), 80, 40))->initFontSize(12)->initStyleSheet(m_palette->btnReleasedStyleNavy)
-			->initEffect(m_palette->btnReleasedStyleNavy, m_palette->btnSelectedStyleNavy, m_palette->btnHoveredStyleNavy)->initFunc([=]()
+		m_btnSearch = (new Command("btn_search", kr("검색"), 80, 40))->initFontSize(12)
+			->initStyleSheet(m_palette->btnReleasedStyleGrayNoRadius)->initEffect(m_palette->btnReleasedStyleGrayNoRadius, m_palette->btnHoveredStyleGrayNoRadius, m_palette->btnSelectedStyleGrayNoRadius)
+			->initFunc([=]()
 		{
 			QString barcode = m_edBarcode->text();
 			if (barcode.size() == 0) {

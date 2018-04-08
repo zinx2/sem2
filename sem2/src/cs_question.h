@@ -2,6 +2,8 @@
 #include "cs_qheader.h"
 #include "cs_component.h"
 #include "cs_command.h"
+#include "cs_style.h"
+
 typedef std::function<void()> FUNC;
 class Question : public CPDialog
 {
@@ -17,12 +19,13 @@ public:
 		layout()->setSpacing(0);
 		layout()->setAlignment(Qt::AlignTop);
 
+		Palette* p = new Palette();
 		Command* btnConfirm = (new Command("confirm", kr("확인"), 80, 40))
-			->initStyleSheet("background: #dedede;")->initEffect("background: #dedede;", "background: #c4c4c4;", "background: #dedede;")
+			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
 			->initFunc([=]() { confirm(); });
 
 		Command* btnCancel = (new Command("cancel", kr("취소"), 80, 40))
-			->initStyleSheet("background: #dedede;")->initEffect("background: #dedede;", "background: #c4c4c4;", "background: #dedede;")
+			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
 			->initFunc([=]() { cancel(); });
 
 		m_lbMessage = (new CPLabel(width, height - 60, message))->initContentsMargins(20, 20, 20, 20)->initAlignment(Qt::AlignTop | Qt::AlignLeft);

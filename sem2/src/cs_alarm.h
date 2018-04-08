@@ -2,6 +2,7 @@
 #include "cs_qheader.h"
 #include "cs_component.h"
 #include "cs_command.h"
+#include "cs_style.h"
 
 class Alarm : public CPDialog
 {
@@ -17,8 +18,9 @@ public:
 		layout()->setSpacing(0);
 		layout()->setAlignment(Qt::AlignTop);
 		
+		Palette* p = new Palette();
 		Command* btnConfirm = (new Command("confirm", kr("È®ÀÎ"), 80, 40))
-			->initStyleSheet("background: #dedede;")->initEffect("background: #dedede;", "background: #c4c4c4;", "background: #dedede;")
+			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
 			->initFunc([=]() { confirm(); });
 		
 		m_lbMessage = (new CPLabel(width, height - 60, message))->initContentsMargins(20, 20, 20, 20)->initAlignment(Qt::AlignTop | Qt::AlignLeft);

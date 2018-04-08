@@ -1,7 +1,9 @@
 ﻿#include "view_home.h"
 #include "cs_qheader.h"
 #include "cs_checktable.h"
-
+#include "cs_form_add.h"
+#include "cs_form_edit.h"
+#include "cs_barcoder.h"
 
 ViewHome::ViewHome(QWidget *parent)
 	: QWidget(parent)
@@ -231,28 +233,24 @@ void ViewHome::init()
 
 	m_btnDVCList->initFunc([=]()
 	{
-		print("CMD-m_btnDVCList", "m_btnDVCList...");
 		initDVCList();
 	});
 	m_btnMNGList->initFunc([=]()
 	{
-		print("CMD-m_btnMNGList", "m_btnMNGList...");
 		initMNGList();
 	});
 	m_btnMNTList->initFunc([=]()
-	{
-		print("CMD-m_btnMNTList", "m_btnMNTList...");
+	{		
 		initMNTList();
 	});
 	m_btnEMPList->initFunc([=]()
-	{
-		print("CMD-m_btnEMPList", "m_btnEMPList...");
+	{		
 		initEMPList();
 	});
 	m_btnImExport->initFunc([=]()
 	{
-		print("CMD-m_btnImExport", "m_btnImExport...");
-		initEMPList();
+		m_barcoder = new Barcoder(kr("대출/반납하기"), 520, 230);
+		m_barcoder->show();
 	});
 	/* CONNECT COMMANDS. END. */
 
@@ -479,19 +477,40 @@ void ViewHome::initDVCList()
 
 	m_btnPrint->initFunc([=]()
 	{
-		print("CMD-PRINT", "print...");
+		print(m_tableCommon);
 	});
 	m_btnRemove->initFunc([=]()
 	{
-		print("CMD-btnRemove", "print...");
+		if (m_tableCommon->currentRow() < 0) {
+			m_alarm->initSize(350, 120)->setMessage(kr("삭제할 장비를 선택하세요."));
+			m_alarm->show();
+			return;
+		}
+		if (!m_tableCommon->item(m_tableCommon->currentRow(), 0)->isSelected()) {
+			m_alarm->initSize(350, 120)->setMessage(kr("삭제할 장비를 선택하세요."));
+			m_alarm->show();
+			return;
+		}
+		for (int i = 0; i < m_tableCommon->columnCount(); i++)
+			m_tableCommon->item(m_tableCommon->currentRow(), i)->setSelected(false);
+
+		QString strNameDevice = m->devices().at(m_tableCommon->currentRow())->nameDevice();
+		QString strNoAsset = m->devices().at(m_tableCommon->currentRow())->noAsset();
+		m_question->initSize(350, 120)->setMessage(kr("선택한 장비를 삭제 하시겠습니까?\n\n장비명: ") + strNameDevice + kr("\n자산번호: ") + strNoAsset);
+		m_question->func = [=]() {
+			
+		};
+		m_question->show();
 	});
 	m_btnEdit->initFunc([=]()
 	{
-		print("CMD-btnEdit", "print...");
+		FormAdd* f = new FormAdd(410, 340);
+		f->show();
 	});
 	m_btnNew->initFunc([=]()
 	{
-		print("CMD-btnNew", "print...");
+		FormAdd* f = new FormAdd(410, 340);
+		f->show();		
 	});
 
 	newTable(20, TAG_DVC_LIST);

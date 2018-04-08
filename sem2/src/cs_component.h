@@ -15,7 +15,7 @@ class CPTextEdit : public QTextEdit
 public:
 	CPTextEdit(int width, QWidget *parent = 0) : QTextEdit(parent)
 	{
-		setFixedSize(width, 25);
+		setFixedSize(width, 35);
 		setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 		setStyleSheet("background:white;");
 		QFont f = font();

@@ -10,6 +10,7 @@
 #include "cs_settings.h"
 #include "cs_networker.h"
 #include "cs_question.h"
+#include "cs_barcoder.h"
 
 #define TAG_DVC_LIST "device_list"
 #define TAG_MNG_LIST "management_list"
@@ -40,7 +41,7 @@ private:
 
 	Alarm* m_alarm;
 	Question* m_question;
-	//CPJoin* m_join;
+	Barcoder* m_barcoder;
 	CPLogin* m_login = nullptr;
 
 	Model* m;

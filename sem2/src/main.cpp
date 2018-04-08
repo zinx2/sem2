@@ -10,12 +10,18 @@
 #include "cs_login.h"
 #include "view_home.h"
 
+#include "cs_form_add.h"
+
 int main(int argc, char *argv[])
 {
     QFontDatabase::addApplicationFont(":/NanumBarunGothic.ttf");
     QApplication a(argc, argv);
     ViewHome w;
     w.show();
+
+	//FormAdd* f = new FormAdd(410, 340);
+	//f->show();
+
 	//CPLogin* m_login = new CPLogin();
 	//m_login->show();
 	//FormBorrow* f = new FormBorrow("대출하기", 500, 540);
