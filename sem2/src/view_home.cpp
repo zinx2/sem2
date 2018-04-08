@@ -520,7 +520,7 @@ bool ViewHome::initPage(QString tag, QString titleTxt)
 	}
 	if (m_checkTable != nullptr)
 	{
-		delete m_checkTable;
+        delete m_checkTable;
 		m_checkTable = nullptr;
 	}
 	if (m_mntStack != nullptr)

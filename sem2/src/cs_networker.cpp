@@ -161,7 +161,7 @@ NetWorker* NetWorker::getPartList()
             Part* d = new Part();
             d->setNoPart(obj["part_no"].toInt());
             d->setNamePart(obj["part_name"].toString());
-            d->isSystem(obj["is_system_part"].toBool());
+            d->isSystem(obj["is_system_part"].toInt());
             qDebug() << d->noPart() << "/" << d->namePart() << "/" << d->system();
             list.append(d);
         }

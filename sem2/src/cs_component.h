@@ -315,7 +315,7 @@ public:
         m_wdContents = (new CPWidget(w, h-40, new QVBoxLayout))->initAlignment(Qt::AlignTop);
         layout()->addWidget(m_wdContents);
 
-        m_wdTail = (new CPWidget(w, 50, new QHBoxLayout))->initSpacing(10)->initContentsMargins(0,0,10,0)
+        m_wdTail = (new CPWidget(w, 60, new QHBoxLayout))->initSpacing(10)->initContentsMargins(0,10,0,0)
                     ->initAlignment(Qt::AlignVCenter|Qt::AlignRight);
         layout()->addWidget(m_wdTail);
     }
