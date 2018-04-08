@@ -8,3 +8,8 @@ sem2/x64
 sem-debug
 sem2/.DS_Store
 .DS_Store
+sem2/.vs/sem2/v14/.suo
+sem2/GeneratedFiles/Debug/moc_cs_component.cpp
+sem2/GeneratedFiles/Debug/moc_cs_component.cpp
+sem2/GeneratedFiles/Debug/moc_cs_networker.cpp
+sem2/src/cs_qheader.h
