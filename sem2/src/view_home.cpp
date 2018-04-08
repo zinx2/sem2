@@ -5,6 +5,19 @@
 ViewHome::ViewHome(QWidget *parent)
 	: QWidget(parent)
 {
+	m = Model::instance();
+	m_alarm = new Alarm(kr("알림"), "", 350, 200);
+	connect(m, SIGNAL(alarmedChanged()), this, SLOT(handler()));
+
+	m_login = new CPLogin();
+	m_login->setParent(this);
+	m_login->show();
+
+	setFixedSize(0, 0);
+	//run();
+}
+void ViewHome::run()
+{
 	/*** GET STYLE INSTANCES. ***/
 	m_style = Style::instance()->main();
 	m_styleHeader = m_style->header();
@@ -22,7 +35,7 @@ ViewHome::ViewHome(QWidget *parent)
 		->initEffect(m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtHoverdSheet);
 
 	Button* metaBtn;
-    metaBtn = m_styleHeader->btnLogout();
+	metaBtn = m_styleHeader->btnLogout();
 	m_btnLogout = (new Command("logout", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
@@ -226,7 +239,6 @@ ViewHome::ViewHome(QWidget *parent)
 
 	updateUI();
 }
-
 void ViewHome::resizeEvent(QResizeEvent *e)
 {
 	if (!initedUI) {
@@ -603,4 +615,66 @@ void ViewHome::newTable(int rowCount, QString tag)
 	//m_tableCommon->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_tableCommon->verticalHeader()->hide();
 	m_content->layout()->addWidget(m_tableCommon);
+}
+
+void ViewHome::handler()
+{
+	if (m->alarmed())
+	{
+		bool result = false;
+		Notificator* noti = m->notificator();
+		if (noti->type() == Notificator::Login)
+		{
+			result = noti->result();
+			if (result) {
+				m_login->hide();
+				run();
+			}
+			else {
+				m_alarm->initSize(350, 120)->setMessage(m->notificator()->message());
+				m_alarm->show();
+			}				
+		}
+		else if (noti->type() == Notificator::Join)
+		{
+			//QString message = noti->result() ? kr("회원가입에 성공하였습니다.") : noti->message();
+			QString message = noti->message();
+			if (message.isEmpty()) 
+				message = kr("회원가입에 성공하였습니다.");
+			m_alarm->initSize(350, 120)->setMessage(message);
+			m_alarm->show();
+		}
+		else
+		{
+			result = m->notificator()->result();
+			if (!result) 
+			{
+				m_alarm->initSize(350, 120)->setMessage(m->notificator()->message());
+				m_alarm->show();
+			}
+		}
+		//if (m->notificator()->type() == Notificator::DVIBorrowedSearch) return;
+	//	if (m->notificator()->type() == Notificator::DVIReturnedSearch) return;
+	//	bool result = m->notificator()->result();
+	//	if (m->notificator()->dialog()) {
+	//		m_alarm->setMessage(result ?
+	//			"성공적으로 반영되었습니다." : m->notificator()->message());
+	//		m_alarm->show();
+	//	}
+
+	//	if (result)
+	//	{
+	//		if (m->notificator()->type() == Notificator::DVIList) listDVIces();
+	//		else if (m->notificator()->type() == Notificator::MNGList) listMNGements();
+	//		else if (m->notificator()->type() == Notificator::DVIModified) QTimer::singleShot(500, this, SLOT(listDVIces()));
+	//		else if (m->notificator()->type() == Notificator::MNGModified) QTimer::singleShot(500, this, SLOT(listMNGements()));
+	//		else if (m->notificator()->type() == Notificator::EMPList) listEMPloyees();
+	//	}
+	//	else
+	//	{
+	//		m_alarm->setMessage(m->notificator()->message());
+	//		m_alarm->show();
+	//	}
+		m->alarm(false);
+	}
 }

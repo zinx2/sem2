@@ -62,6 +62,10 @@ public:
     void progress(qint64, qint64);
     void done();
     /************* API CALL METHODS ****************/
+
+	NetWorker* join(QString id, QString pass, int noPart, int noUser);
+	NetWorker* login(QString id, QString pass);
+
     NetWorker* getUserList();
     NetWorker* getPartList();
     NetWorker* getDeviceList(int noPart = 1, int searchType = 0, int now = 1);
@@ -80,6 +84,7 @@ public:
     NetWorker* expire(int noUser);
     NetWorker* getDeviceInfo(int barcode);
     NetWorker* searchDeviceReturned(int barcode);
+	
     QMutex& mtx() { return m_mtx; }
 
 

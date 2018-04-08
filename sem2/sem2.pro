@@ -27,7 +27,8 @@ SOURCES += \
 src/main.cpp \
 src/view_home.cpp \
 src/cs_networker.cpp \
-src/cs_initializer.cpp
+src/cs_initializer.cpp \
+    src/cs_signature.cpp
 
 HEADERS += \
 src/view_home.h \
@@ -45,7 +46,9 @@ src/cs_metatable.h \
     src/cs_login.h \
     src/cs_join.h \
     src/cs_selector_employee.h \
-    src/cs_selector_part.h
+    src/cs_selector_part.h \
+    src/cs_barcoder.h \
+    src/cs_signature.h
 
 RESOURCES += \
     res.qrc

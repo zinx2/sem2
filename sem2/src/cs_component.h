@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include "cs_file.h"
 #include "cs_metatable.h"
+#include "cs_model.h"
 
 class CPTextEdit : public QTextEdit
 {
@@ -302,6 +303,7 @@ class   CPDialog : public QDialog
 public:
     explicit CPDialog(QString title, int w, int h, QWidget *parent=0) : QDialog(parent)
     {
+		m = Model::instance();
         Qt::WindowFlags flags = windowFlags();
         Qt::WindowFlags helpFlag = Qt::WindowContextHelpButtonHint;
         flags = flags & (~helpFlag);
@@ -309,7 +311,6 @@ public:
         setWindowTitle(title);
         setWindowFlags(flags);
         setFixedSize(w, h);
-//        setStyleSheet("background: orange");
         setLayout(new QVBoxLayout);
 
         m_wdContents = (new CPWidget(w, h-40, new QVBoxLayout))->initAlignment(Qt::AlignTop);
@@ -322,6 +323,7 @@ public:
 
     explicit CPDialog(int w, int h, QWidget *parent=0) : QDialog(parent)
     {
+		m = Model::instance();
         Qt::WindowFlags flags = windowFlags();
         Qt::WindowFlags helpFlag = Qt::WindowContextHelpButtonHint;
         flags = flags & (~helpFlag);
@@ -329,7 +331,7 @@ public:
         setFixedSize(w, h);
     }
 
-    virtual void notify(int index) {};
+    virtual void notify(int index, QString tag="") {};
 
 public slots:
     virtual void confirm() {};
@@ -342,4 +344,5 @@ signals:
 protected:
     CPWidget* m_wdContents = nullptr;
     CPWidget* m_wdTail = nullptr;
+	Model* m; 
 };

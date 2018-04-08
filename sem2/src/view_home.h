@@ -4,6 +4,9 @@
 #include "cs_component.h"
 #include "cs_command.h"
 #include "cs_metatable.h"
+#include "cs_model.h"
+#include "cs_alarm.h"
+#include "cs_login.h"
 
 #define TAG_DVC_LIST "device_list"
 #define TAG_MNG_LIST "management_list"
@@ -20,9 +23,11 @@ public:
     ViewHome(QWidget *parent = 0);
     ~ViewHome();
 
+	void run();
 	void initializeUI();
 	public slots:
 	void updateUI();
+	void handler();
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
@@ -30,6 +35,11 @@ protected:
 private:
 	bool initedUI = false;
 
+	Alarm* m_alarm;
+	//CPJoin* m_join;
+	CPLogin* m_login;
+
+	Model* m;
 	StyleMain* m_style;
 
 	StyleMainBody* m_styleBody;
@@ -98,4 +108,5 @@ private:
 	void newNavi();
 	void newMetaTable(QString tag);
 	bool isCurrentMetaTable(QString tag);
+	
 };

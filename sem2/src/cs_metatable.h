@@ -91,8 +91,7 @@ public:
 	MetaTableEMP()
 	{
 		QStringList metaHeader;
-		metaHeader << kr("번호") << kr("자산번호") << kr("장비명")
-			<< kr("취득금액") << kr("취득일자") << kr("대출여부") << kr("비고");
+		metaHeader << kr("번호") << kr("이름") << kr("관리자") << kr("관리");
 		header()->setMeta(metaHeader);
 		setHNavi(0);
 	}

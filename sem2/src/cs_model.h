@@ -170,6 +170,59 @@ private:
     bool m_system = false;
 };
 
+class User : public QObject
+{
+	Q_OBJECT
+		Q_PROPERTY(int noAdmin READ noAdmin WRITE setNoAdmin NOTIFY noAdminChanged)
+		Q_PROPERTY(int typeAdmin READ typeAdmin WRITE setTypeAdmin NOTIFY typeAdminChanged)
+		Q_PROPERTY(int noUser READ noUser WRITE setNoUser NOTIFY noUserChanged)
+		Q_PROPERTY(QString nameUser READ nameUser WRITE setNameUser NOTIFY nameUserChanged)
+		Q_PROPERTY(int noPart READ noPart WRITE setNoPart NOTIFY noPartChanged)
+		Q_PROPERTY(QString namePart READ namePart WRITE setNamePart NOTIFY namePartChanged)
+		Q_PROPERTY(int typeAlarm READ typeAlarm WRITE setTypeAlarm NOTIFY typeAlarmChanged)
+		Q_PROPERTY(QString textAlarm READ textAlarm WRITE setTextAlarm NOTIFY textAlarmChanged)
+
+public:
+	int noAdmin() { return m_noAdmin; }
+	int typeAdmin() { return m_typeAdmin; }
+	int noUser() { return m_noUser; }
+	QString nameUser() { return m_nameUser; }
+	int noPart() { return m_noPart; }
+	QString namePart() { return m_namePart; }
+	int typeAlarm() { return m_typeAlarm; }
+	QString textAlarm() { return m_textAlarm; }
+
+	public slots:
+	void setNoAdmin(int m) { m_noAdmin = m; }
+	void setTypeAdmin(int m) { m_typeAdmin = m; }
+	void setNoUser(int m) { m_noUser = m; }
+	void setNameUser(QString m) { m_nameUser = m; }
+	void setNoPart(int m) { m_noPart = m; }
+	void setNamePart(QString m) { m_namePart = m; }
+	void setTypeAlarm(int m) { m_typeAlarm = m; }
+	void setTextAlarm(QString m) { m_textAlarm = m; }
+
+signals:
+	void noAdminChanged();
+	void typeAdminChanged();
+	void noUserChanged();
+	void nameUserChanged();
+	void noPartChanged();
+	void namePartChanged();
+	void typeAlarmChanged();
+	void textAlarmChanged();
+
+private:
+	int m_noAdmin;
+	int m_typeAdmin;
+	int m_noUser;
+	QString m_nameUser;
+	int m_noPart;
+	QString m_namePart;
+	int m_typeAlarm;
+	QString m_textAlarm;
+};
+
 class Employee : public QObject {
     Q_OBJECT
         Q_PROPERTY(int noUser READ noUser WRITE setNoUser NOTIFY noUserChanged)
@@ -209,7 +262,7 @@ class Notificator : public QObject
 
 public:
     enum UpdateType{
-        None, File,
+        None, File, Login, Join,
         DVIList, DVIModified, DVIBorrowedSearch, DVIReturnedSearch,
         DVIBorrowed,
         MNGList, MNGModified,
@@ -290,6 +343,7 @@ class Model : public QObject {
 
         Q_PROPERTY(Device* searchedDevice READ searchedDevice WRITE setSearchedDevice NOTIFY searchedDeviceChanged)
         Q_PROPERTY(Rent* searchedRent READ searchedRent WRITE setSearchedRent NOTIFY searchedRentChanged)
+		Q_PROPERTY(User* user READ user WRITE setUser NOTIFY userChanged)
 
         Q_PROPERTY(QString fileUrl READ fileUrl WRITE setFileUrl NOTIFY fileUrlChanged)
 
@@ -348,6 +402,7 @@ public:
 
     Device* searchedDevice() { return m_searchedDevice;  }
     Rent* searchedRent() { return m_searchedRent; }
+	User* user() { return m_user; }
     QString fileUrl() { QString tmp = m_fileUrl; m_fileUrl = ""; return tmp; }
 
     int messageInt() {
@@ -389,6 +444,7 @@ public:
     void setSearchedRent(Rent* m) { m_searchedRent = m; emit searchedRentChanged(); }
     void setFileUrl(QString &m) { m_fileUrl = m; emit fileUrlChanged(); }
     void setMessageInt(int m) { m_messageInt = m; emit messageIntChanged(); }
+	void setUser(User* m) { m_user = m; emit; userChanged(); }
 signals:
     void messageChanged();
     void itemSelected();
@@ -427,6 +483,7 @@ signals:
 
     void fileUrlChanged();
     void messageIntChanged();
+	void userChanged();
 
 private:
     QList<Device*> m_devices;
@@ -463,5 +520,5 @@ private:
     QString m_fileUrl = "";
     int m_messageInt = -1;
 
-
+	User* m_user;
 };

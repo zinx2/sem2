@@ -104,6 +104,88 @@ void NetWorker::httpError(QNetworkReply::NetworkError msg)
 {
     qDebug() << "[**] THE ERROR WAS OCCURED. " << msg;
 }
+NetWorker* NetWorker::join(QString id, QString pass, int noPart, int noUser)
+{
+	/********** SET URL QUERIES **********/
+	QUrlQuery queries;
+	queries.addQueryItem("id", id);
+	queries.addQueryItem("password", pass);
+	queries.addQueryItem("part_no", QString("%1").arg(noPart));
+	queries.addQueryItem("sem_user_no", QString("%1").arg(noUser));
+
+	m_hosts.append(new NetHost("post", "/sem/joinManager", queries,
+		[&]()-> void {
+		QMutexLocker locker(&m_mtx);
+
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
+		QJsonObject jsonObj = jsonDoc.object();
+		bool isSuccess = jsonObj["is_success"].toBool();
+		m_netReply->deleteLater();
+
+		Notificator* noti = new Notificator();
+		int noAdmin = 0;
+		QString error = "";
+		if (isSuccess)
+			noAdmin = jsonObj["admin_no"].toInt();
+		else
+			error = jsonObj["error_message"].toString();
+
+		noti->setResult(isSuccess);
+		noti->setNo(noAdmin);
+		noti->setType(Notificator::Join);
+		noti->setMessage(error);		
+		m->setNotificator(noti);
+
+		m_netReply->deleteLater();
+		emit next();
+	}));
+	return this;
+}
+NetWorker* NetWorker::login(QString id, QString pass)
+{
+	/********** SET URL QUERIES **********/
+	QUrlQuery queries;
+	queries.addQueryItem("id", id);
+	queries.addQueryItem("password", pass);
+
+	m_hosts.append(new NetHost("post", "/sem/loginManager", queries,
+		[&]()-> void {
+		QMutexLocker locker(&m_mtx);
+
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
+		QJsonObject jsonObj = jsonDoc.object();
+		bool isSuccess = jsonObj["is_success"].toBool();
+		m_netReply->deleteLater();
+
+		Notificator* noti = new Notificator();
+		int noAdmin = 0;
+		QString error = "";
+		if (isSuccess)
+		{
+			User* u = new User();
+			u->setNoAdmin(jsonObj["admin_no"].toInt());
+			u->setTypeAdmin(jsonObj["admin_type"].toInt());
+			u->setNoUser(jsonObj["user_no"].toInt());
+			u->setNameUser(jsonObj["user_name"].toString());
+			u->setNoPart(jsonObj["part_no"].toInt());
+			u->setNamePart(jsonObj["part_name"].toString());
+			u->setTypeAlarm(jsonObj["alarm_type"].toInt());
+			u->setTextAlarm(jsonObj["alarm_text"].toString());
+		}
+		else
+			error = jsonObj["error_message"].toString();
+
+		noti->setResult(isSuccess);
+		noti->setNo(noAdmin);
+		noti->setType(Notificator::Login);
+		noti->setMessage(error);
+		m->setNotificator(noti);
+
+		m_netReply->deleteLater();
+		emit next();
+	}));
+	return this;
+}
 
 NetWorker* NetWorker::getUserList()
 {

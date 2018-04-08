@@ -39,6 +39,8 @@ public:
 	const QString btnHoveredStyleNavyNoRadius = "color: white; background-color: #1e5064";
 	const QString btnSelectedStyleNavyNoRadius = "color: white; background-color: #26708d";
 
+	const QString btnEnable = "color: white; background-color: #dedede";
+
 };
 
 class Font : public QObject
