@@ -50,6 +50,8 @@
 #include <QPrintDialog>
 #include <QPainter>
 #include <QScrollArea>
+#include <QSettings>
+
 static QString kr(const char *strKor)
 {
     static QTextCodec *codec = QTextCodec::codecForName("eucKR"); //"eucKR"

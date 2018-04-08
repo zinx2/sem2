@@ -6,14 +6,19 @@
 #include "cs_join.h"
 #include "cs_networker.h"
 #include "cs_model.h"
+#include "cs_settings.h"
+#include "cs_component.h"
 
 class ViewHome;
-class CPLogin : public QWidget
+class CPLogin : public CPDialog
 {
 	Q_OBJECT
 public:
-	CPLogin(QWidget* parent = 0) : QWidget(parent)
+	CPLogin(QWidget* parent = 0) : CPDialog(380, 280, parent)
 	{
+		setModal(true);
+		s = Settings::instance();
+		m = Model::instance();
 		setWindowTitle(kr("로그인"));
 		//setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		setFixedSize(380, 280);
@@ -37,7 +42,7 @@ public:
 				noti->setType(Notificator::None);
 				noti->setResult(false);
 				noti->setMessage(kr("아이디/비밀번호를 입력하세요."));
-				Model::instance()->setNotificator(noti);
+				m->setNotificator(noti);
 			}
 			else {
 				NetWorker::instance()->login(m_edID->text(), m_edPass->text())->request();
@@ -49,7 +54,7 @@ public:
 			noti->setType(Notificator::None);
 			noti->setResult(false);
 			noti->setMessage(kr("시스템 관리자(구본철)에게 문의하세요."));
-			Model::instance()->setNotificator(noti);
+			m->setNotificator(noti);
 		});
 		m_btnJoin = (new Command("join", kr("회원가입"), 100, 30))->initFontSize(13)->initStyleSheet(p->btnReleasedStyleNavy)
 			->initEffect(p->btnReleasedStyleNavy, p->btnSelectedStyleNavy, p->btnHoveredStyleNavy)
@@ -92,12 +97,13 @@ public:
 
 		m_checkBox = new QCheckBox(kr("로그인 유지"));
 		m_row5->layout()->addWidget(m_checkBox);
+		connect(m_checkBox, SIGNAL(stateChanged(int)), this, SLOT(checkChanged(int)));
 		layout()->addWidget(m_row5);
 
 		m_row6 = (new CPWidget(width(), 1, new QHBoxLayout))->initAlignment(Qt::AlignLeft | Qt::AlignCenter)
 			->initContentsMargins(40, 0, 0, 0)->append((new CPLabel(300, 1))->initStyleSheet("background: " + p->navy01));
 		layout()->addWidget(m_row6);
-		//layout()->setSpacing(0);
+
 		m_row7 = (new CPWidget(width(), 30, new QHBoxLayout))->initAlignment(Qt::AlignLeft | Qt::AlignCenter)
 			->initContentsMargins(40, 0, 0, 0)->initSpacing(10)->append(m_btnSearch)->append(m_btnJoin);
 		layout()->addWidget(m_row7);
@@ -105,6 +111,19 @@ public:
 	void setParent(ViewHome* m)
 	{
 		m_parent = m;
+	}
+
+	public slots:
+	void checkChanged(int state)
+	{		
+		s->loginAuto(state > 0 ? true : false);
+	}
+	void reject()
+	{		
+		hide();
+		Notificator* noti = new Notificator();
+		noti->setType(Notificator::Exit);
+		m->setNotificator(noti);
 	}
 
 private:
@@ -129,5 +148,7 @@ private:
 	QCheckBox* m_checkBox;
 
 	ViewHome* m_parent;
+	Model* m;
+	Settings* s;
 
 };

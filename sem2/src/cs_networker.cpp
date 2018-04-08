@@ -147,6 +147,8 @@ NetWorker* NetWorker::login(QString id, QString pass)
 	QUrlQuery queries;
 	queries.addQueryItem("id", id);
 	queries.addQueryItem("password", pass);
+	m->user()->setId(id);
+	m->user()->setPass(pass);
 
 	m_hosts.append(new NetHost("post", "/sem/loginManager", queries,
 		[&]()-> void {
@@ -162,15 +164,18 @@ NetWorker* NetWorker::login(QString id, QString pass)
 		QString error = "";
 		if (isSuccess)
 		{
-			User* u = new User();
-			u->setNoAdmin(jsonObj["admin_no"].toInt());
-			u->setTypeAdmin(jsonObj["admin_type"].toInt());
-			u->setNoUser(jsonObj["user_no"].toInt());
-			u->setNameUser(jsonObj["user_name"].toString());
-			u->setNoPart(jsonObj["part_no"].toInt());
-			u->setNamePart(jsonObj["part_name"].toString());
-			u->setTypeAlarm(jsonObj["alarm_type"].toInt());
-			u->setTextAlarm(jsonObj["alarm_text"].toString());
+			m->user()->setNoAdmin(jsonObj["admin_no"].toInt());
+			m->user()->setTypeAdmin(jsonObj["admin_type"].toInt());
+			m->user()->setNoUser(jsonObj["user_no"].toInt());
+			m->user()->setNameUser(jsonObj["user_name"].toString());
+			m->user()->setNoPart(jsonObj["part_no"].toInt());
+			m->user()->setNamePart(jsonObj["part_name"].toString());
+			m->user()->setTypeAlarm(jsonObj["alarm_type"].toInt());
+			m->user()->setTextAlarm(jsonObj["alarm_text"].toString());
+			qDebug() << jsonObj["user_name"].toString();
+			qDebug() << jsonObj["part_name"].toString();
+			qDebug() << jsonObj["part_no"].toInt();
+			qDebug() << jsonObj["admin_type"].toInt();
 		}
 		else
 			error = jsonObj["error_message"].toString();
@@ -187,6 +192,37 @@ NetWorker* NetWorker::login(QString id, QString pass)
 	return this;
 }
 
+NetWorker* NetWorker::logout()
+{
+	/********** SET URL QUERIES **********/
+	QUrlQuery queries;
+	queries.addQueryItem("sem_admin_no", QString("%1").arg(m->user()->noAdmin()));
+
+	m_hosts.append(new NetHost("post", "/sem/logout", queries,
+		[&]()-> void {
+		QMutexLocker locker(&m_mtx);
+
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
+		QJsonObject jsonObj = jsonDoc.object();
+		bool isSuccess = jsonObj["is_success"].toBool();
+		m_netReply->deleteLater();
+
+		Notificator* noti = new Notificator();
+		int noAdmin = 0;
+		QString error = "";
+		if (!isSuccess)
+			error = jsonObj["error_message"].toString();
+
+		noti->setResult(isSuccess);
+		noti->setType(Notificator::Logout);
+		noti->setMessage(error);
+		m->setNotificator(noti);
+
+		m_netReply->deleteLater();
+		emit next();
+	}));
+	return this;
+}
 NetWorker* NetWorker::getUserList()
 {
     m_hosts.append(new NetHost("post", "/sem/getUserList",
@@ -253,11 +289,11 @@ NetWorker* NetWorker::getPartList()
     }));
     return this;
 }
-NetWorker* NetWorker::getDeviceList(int noPart, int searchType, int now)
+NetWorker* NetWorker::getDeviceList(int searchType, int now)
 {
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
-    queries.addQueryItem("sem_part_no", QString("%1").arg(noPart));
+    //queries.addQueryItem("sem_part_no", QString("%1").arg(noPart));
     queries.addQueryItem("search_type", QString("%1").arg(searchType));
     queries.addQueryItem("now_page", QString("%1").arg(m->pageNumber()));
     qDebug() << m->pageNumber();
@@ -305,6 +341,63 @@ NetWorker* NetWorker::getDeviceList(int noPart, int searchType, int now)
         m_netReply->deleteLater(); emit next();
     }));
     return this;
+}
+NetWorker* NetWorker::getDeviceListForAdmin(int searchType)
+{
+	/********** SET URL QUERIES **********/
+	QUrlQuery queries;
+	queries.addQueryItem("sem_admin_no", QString("%1").arg(m->user()->noAdmin()));
+	queries.addQueryItem("sem_part_no", QString("%1").arg(m->user()->noPart()));
+	queries.addQueryItem("search_type", QString("%1").arg(searchType));
+	queries.addQueryItem("now_page", QString("%1").arg(m->pageNumber()));
+	qDebug() << m->pageNumber();
+
+	m_hosts.append(new NetHost("post", "/sem/getDeviceListForAdmin", queries,
+		[&]()-> void {
+		QMutexLocker locker(&m_mtx);
+
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
+		QJsonObject jsonObj = jsonDoc.object();
+		qDebug() << m_netReply->readAll();
+		bool isSuccess = jsonObj["is_success"].toBool();
+		if (!isSuccess) {
+			m_netReply->deleteLater();
+			emit next(); return;
+		}
+		int totalPage = jsonObj["total_page"].toInt();
+
+		QList<Device*> list;
+		QJsonArray jsonArr = jsonObj["data_list"].toArray();
+		int count = 0;
+		foreach(const QJsonValue &value, jsonArr)
+		{
+			QJsonObject obj = value.toObject();
+
+			Device *d = new Device();
+			d->setNoDevice(obj["sem_device_no"].toInt());
+			d->setNameDevice(obj["device_name"].toString());
+			d->setNoAsset(obj["asset_no"].toString());
+			d->setBarcode(obj["barcode"].toString());
+			d->setPrice(obj["get_money"].toInt());
+			d->setDateTaked(obj["get_date"].toString());
+			d->setMemo(obj["memo"].toString());
+			d->borrow(obj["is_rented"].toInt());
+			d->setNamePart(obj["part_name"].toString());
+			qDebug() << d->noDevice() << "/" << d->nameDevice() << d->noAsset() << "/" << d->barcode() 
+				<< "/" << d->price() << "/" << d->dateTaked() << "/" << d->memo() << "/" << d->borrowed()
+				<< "/" << d->namePart();
+			list.append(d);
+			count++;
+		}
+		m->setCountTotalDevice(totalPage);
+		m->setCountCurrentDevice((m->pageNumber() - 1)*COUNT_PAGE + count);
+		//m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVIList, false));
+		//m->setPageNumber((m->countCurrentDevice() / COUNT_PAGE) + 1);
+
+		m->setDevices(list);
+		m_netReply->deleteLater(); emit next();
+	}));
+	return this;
 }
 NetWorker* NetWorker::getRentList(int noPart, int now)
 {

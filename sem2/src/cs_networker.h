@@ -65,10 +65,12 @@ public:
 
 	NetWorker* join(QString id, QString pass, int noPart, int noUser);
 	NetWorker* login(QString id, QString pass);
+	NetWorker* logout();
 
     NetWorker* getUserList();
     NetWorker* getPartList();
-    NetWorker* getDeviceList(int noPart = 1, int searchType = 0, int now = 1);
+    NetWorker* getDeviceList(int searchType = 0, int now = 1);
+	NetWorker* getDeviceListForAdmin(int searchType=0);
     NetWorker* getRentList(int noPart = 1, int now = 1);
 
     NetWorker* borrowDevice(QString barcode, int noUser, QString purpose);

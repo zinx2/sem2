@@ -2,21 +2,37 @@
 #include "cs_qheader.h"
 #include "cs_checktable.h"
 
+
 ViewHome::ViewHome(QWidget *parent)
 	: QWidget(parent)
 {
+	setWindowTitle(kr("온라인평생교육원 자산 관리 시스템"));
+
 	m = Model::instance();
+	n = NetWorker::instance();
+	s = Settings::instance();
+
 	m_alarm = new Alarm(kr("알림"), "", 350, 200);
+	m_question = new Question(kr("알림"), "", 350, 200);
 	connect(m, SIGNAL(alarmedChanged()), this, SLOT(handler()));
-
-	m_login = new CPLogin();
-	m_login->setParent(this);
-	m_login->show();
-
-	setFixedSize(0, 0);
+	
+	init();
+	//if (s->isLoginAuto())
+	//{
+	//	NetWorker::instance()->login(s->id(), s->pass())->request();
+	//}
+	//else
+	//{
+		//m_login = new CPLogin();
+		//m_login->setParent(this);
+		//m_login->show();
+	//}
+	n->getDeviceList()->request();
+	connect(m, SIGNAL(devicesChanged()), this, SLOT(updateUI()()));
+	//setFixedSize(0, 0);
 	//run();
 }
-void ViewHome::run()
+void ViewHome::init()
 {
 	/*** GET STYLE INSTANCES. ***/
 	m_style = Style::instance()->main();
@@ -40,7 +56,6 @@ void ViewHome::run()
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(":/imgs/circle.png");
-
 	metaBtn = m_styleSlide->btnDVCList();
 	m_btnDVCList =
 		(new Command(TAG_DVC_LIST, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
@@ -97,8 +112,7 @@ void ViewHome::run()
 
 	//QLabel* lb = new QLabel(this);
 	//lb->setPixmap(QPixmap(":/imgs/plus_24dp.png"));
-
-	CPLabel* lbUserInfo = (new CPLabel(m_styleHeader->width() - m_styleHeader->wCol01 - m_btnLogout->width() - 10, m_styleHeader->height(), kr("시스템파트 김진환님 (관리자)")))
+	m_lbUserInfo = (new CPLabel(m_styleHeader->width() - m_styleHeader->wCol01 - m_btnLogout->width() - 10, m_styleHeader->height(), ""))
 		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
 		->initContentsMargins(0, 10, 0, 0)
 		->initFontSize(12)
@@ -166,7 +180,7 @@ void ViewHome::run()
 	layout()->addWidget(m_body);
 	layout()->addWidget(m_footer);
 
-	m_headerCol02->append(lbUserInfo)->append(m_btnLogout);
+	m_headerCol02->append(m_lbUserInfo)->append(m_btnLogout);
 	m_header->layout()->addWidget(m_headerCol01);
 	m_header->layout()->addWidget(m_headerCol02);
 
@@ -205,9 +219,14 @@ void ViewHome::run()
 		btnSlideExt->initName(m_styleSlide->extended() ? ">>" : "<<");
 		updateUI();
 	});
+
 	m_btnLogout->initFunc([=]()
 	{
-		print("CMD-LOGOUT", "logout...");
+		m_question->initSize(350, 120)->setMessage(kr("로그아웃 하시겠습니까?"));
+		m_question->func = [=]() {
+			n->logout()->request();
+		};
+		m_question->show();
 	});
 
 	m_btnDVCList->initFunc([=]()
@@ -286,13 +305,13 @@ void ViewHome::updateUI()
 	m_slideCol02->setFixedSize(wSlideCol02, hSlide);
 	m_emptyArea->setFixedSize(1, hSlide - m_cmdProvider->totalHeight() - 10 * (m_cmdProvider->count()+2));
 
-	print("HEADER", wHeader, hHeader);
+	/*print("HEADER", wHeader, hHeader);
 	print("FOOTER", wFooter, hFooter);
 	print("BODY", wBody, hBody);
 	print("CONTENT", wContent, hContent);
 	print("SLIDE", wSlide, hSlide);
 	print("SLIDE-COL01", wSlideCol01, hSlide);
-	print("SLIDE-COL02", wSlideCol02, hSlide);
+	print("SLIDE-COL02", wSlideCol02, hSlide);*/
 
 	Button* metaBtn;
 	metaBtn = m_styleSlide->btnDVCList();
@@ -329,6 +348,39 @@ void ViewHome::updateUI()
 			- metaTable->wCol2 - metaTable->wCol3 - metaTable->wCol4
 			- metaTable->wCol5 - metaTable->wCol6 - 2);
 		m_navi->setFixedWidth(m_content->width());
+
+		for (int row = 0; row < m->devices().size(); row++)
+		{
+			Device* dv = m->devices().at(row);
+
+			QTableWidgetItem* item0 = new QTableWidgetItem(QString("%1").arg((row + 1) + (m->pageNumber() - 1)*COUNT_PAGE));
+			item0->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 0, item0);
+
+			QTableWidgetItem* item1 = new QTableWidgetItem(QString("%1").arg(dv->noAsset()));
+			item1->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 1, item1);
+
+			QTableWidgetItem* item2 = new QTableWidgetItem(dv->nameDevice());
+			item2->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 2, item2);
+
+			QTableWidgetItem* item3 = new QTableWidgetItem(QString("%L1원  ").arg(dv->price()));
+			item3->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+			m_tableCommon->setItem(row, 3, item3);
+
+			QTableWidgetItem* item4 = new QTableWidgetItem(dv->dateTaked());
+			item4->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 4, item4);
+
+			QTableWidgetItem* item5 = new QTableWidgetItem(dv->borrowed() ? "O" : "X");
+			item5->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 5, item5);
+
+			QTableWidgetItem* item6 = new QTableWidgetItem(dv->memo());
+			item6->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 6, item6);
+		}
 	}
 	else if (!m_cmdProvider->selectedTag().compare(TAG_MNG_LIST))
 	{
@@ -617,6 +669,14 @@ void ViewHome::newTable(int rowCount, QString tag)
 	m_content->layout()->addWidget(m_tableCommon);
 }
 
+void ViewHome::newData(QString tag)
+{
+	if (!tag.compare(TAG_DVC_LIST))
+	{
+		
+	}
+
+}
 void ViewHome::handler()
 {
 	if (m->alarmed())
@@ -627,22 +687,77 @@ void ViewHome::handler()
 		{
 			result = noti->result();
 			if (result) {
-				m_login->hide();
-				run();
+
+				QString typeAdmin = "";
+				if (m->user()->typeAdmin() == 1) typeAdmin = kr("파트담당자");
+				else if (m->user()->typeAdmin() == 2) typeAdmin = kr("파트장");
+				else if (m->user()->typeAdmin() == 3) typeAdmin = kr("보직자");
+				else if (m->user()->typeAdmin() == 4) typeAdmin = kr("시스템관리자");
+				QString userType = m->user()->namePart() + " " + m->user()->nameUser() + kr("(") + typeAdmin + kr(")");
+				m_lbUserInfo->setText(userType);
+
+				n->getDeviceListForAdmin()->request();
+
+				bool isLogined = s->isLoginAuto();
+				if (isLogined)
+				{
+					s->setId(m->user()->id());
+					s->setPass(m->user()->pass());
+				}
+				else
+				{
+					s->setId("");
+					s->setPass("");
+				}
+
+				if (m_login != nullptr)
+					m_login->hide();
+
 			}
 			else {
 				m_alarm->initSize(350, 120)->setMessage(m->notificator()->message());
 				m_alarm->show();
 			}				
 		}
+		else if (noti->type() == Notificator::Logout)
+		{
+			result = noti->result();
+			if (result) {
+
+				//setFixedSize(0, 0);
+
+				m_login = new CPLogin();
+				m_login->setParent(this);
+				m_login->show();
+
+				s->loginAuto(false);
+				s->setId("");
+				s->setPass("");
+				m->user()->clear();
+			}
+			else {
+				m_alarm->initSize(350, 120)->setMessage(m->notificator()->message());
+				m_alarm->show();
+			}
+		}		
 		else if (noti->type() == Notificator::Join)
 		{
-			//QString message = noti->result() ? kr("회원가입에 성공하였습니다.") : noti->message();
 			QString message = noti->message();
-			if (message.isEmpty()) 
+			if (message.isEmpty())
+			{
 				message = kr("회원가입에 성공하였습니다.");
+			}
+
 			m_alarm->initSize(350, 120)->setMessage(message);
 			m_alarm->show();
+		}
+		else if (noti->type() == Notificator::Exit)
+		{
+			close();
+		}
+		if (noti->type() == Notificator::DVIList)
+		{
+			newData(TAG_DVC_LIST);
 		}
 		else
 		{

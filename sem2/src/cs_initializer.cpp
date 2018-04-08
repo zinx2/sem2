@@ -1,7 +1,9 @@
 ﻿#include "cs_style.h"
 #include "cs_model.h"
+#include "cs_settings.h"
 Style* Style::m_instance = nullptr;
 Model* Model::m_instance = nullptr;
+Settings* Settings::m_instance = nullptr;
 
 Style::Style() {
 	m_main = new StyleMain();

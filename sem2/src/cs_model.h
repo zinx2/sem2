@@ -173,6 +173,8 @@ private:
 class User : public QObject
 {
 	Q_OBJECT
+		Q_PROPERTY(QString id READ id WRITE setId NOTIFY idChanged)
+		Q_PROPERTY(QString pass READ pass WRITE setPass NOTIFY passChanged)
 		Q_PROPERTY(int noAdmin READ noAdmin WRITE setNoAdmin NOTIFY noAdminChanged)
 		Q_PROPERTY(int typeAdmin READ typeAdmin WRITE setTypeAdmin NOTIFY typeAdminChanged)
 		Q_PROPERTY(int noUser READ noUser WRITE setNoUser NOTIFY noUserChanged)
@@ -187,6 +189,8 @@ public:
 	int typeAdmin() { return m_typeAdmin; }
 	int noUser() { return m_noUser; }
 	QString nameUser() { return m_nameUser; }
+	QString id() { return m_id; }
+	QString pass() { return m_pass; }
 	int noPart() { return m_noPart; }
 	QString namePart() { return m_namePart; }
 	int typeAlarm() { return m_typeAlarm; }
@@ -201,6 +205,22 @@ public:
 	void setNamePart(QString m) { m_namePart = m; }
 	void setTypeAlarm(int m) { m_typeAlarm = m; }
 	void setTextAlarm(QString m) { m_textAlarm = m; }
+	void setId(QString m) { m_id = m; }
+	void setPass(QString m) { m_pass = m; }
+
+	void clear()
+	{
+		m_noAdmin = 0;
+		m_typeAdmin = 0;
+		m_noUser = 0;
+		m_nameUser = "";
+		m_noPart = 0;
+		m_namePart = "";
+		m_typeAlarm = 0;
+		m_textAlarm = "";
+		m_id = "";
+		m_pass = "";
+	}
 
 signals:
 	void noAdminChanged();
@@ -211,16 +231,20 @@ signals:
 	void namePartChanged();
 	void typeAlarmChanged();
 	void textAlarmChanged();
+	void idChanged();
+	void passChanged();
 
 private:
-	int m_noAdmin;
-	int m_typeAdmin;
-	int m_noUser;
-	QString m_nameUser;
-	int m_noPart;
-	QString m_namePart;
-	int m_typeAlarm;
-	QString m_textAlarm;
+	int m_noAdmin = 0;
+	int m_typeAdmin = 0;
+	int m_noUser = 0;
+	QString m_nameUser = "";
+	int m_noPart = 0;
+	QString m_namePart = "";
+	int m_typeAlarm = 0;
+	QString m_textAlarm = "";
+	QString m_id = "";
+	QString m_pass = "";
 };
 
 class Employee : public QObject {
@@ -262,7 +286,7 @@ class Notificator : public QObject
 
 public:
     enum UpdateType{
-        None, File, Login, Join,
+        None, File, Login, Join, Logout, Exit, LogoutRequest,
         DVIList, DVIModified, DVIBorrowedSearch, DVIReturnedSearch,
         DVIBorrowed,
         MNGList, MNGModified,
@@ -286,7 +310,7 @@ public:
     public slots :
     Notificator* setType(const int m) { m_type = m; emit typeChanged(); return this; }
     Notificator* setMessage(const QString &m) { m_message = m; emit messageChanged(); return this; }
-    void setResult(const bool m) { m_type = m; emit resultChanged(); }
+    void setResult(const bool m) { m_result = m; emit resultChanged(); }
     Notificator* showDialog(const bool m) { m_dialog = m; emit dialogChanged(); return this; }
     Notificator* setUrl(const QString &m) { m_url = m; emit urlChanged(); return this; }
     Notificator* setName(const QString &m) { m_name = m; emit nameChanged(); return this; }
@@ -353,6 +377,7 @@ private:
     Model()
     {
         m_notificator = new Notificator();
+		m_user = new User();
     }
     static Model* m_instance;
 public:
@@ -388,6 +413,7 @@ public:
     bool full() const { return m_full; }
     bool pressedCtrl() const { return m_pressedCtrl; }
     bool modal() const { return m_modal; }
+	bool checkedAuto() { return m_checkedAuto; }
 
     qreal scale() const { return m_scale; }
     int scaledItemWidth() const { return m_scaledItemWidth; }
@@ -444,7 +470,8 @@ public:
     void setSearchedRent(Rent* m) { m_searchedRent = m; emit searchedRentChanged(); }
     void setFileUrl(QString &m) { m_fileUrl = m; emit fileUrlChanged(); }
     void setMessageInt(int m) { m_messageInt = m; emit messageIntChanged(); }
-	void setUser(User* m) { m_user = m; emit; userChanged(); }
+	void setUser(User* m) { m_user = m; emit userChanged(); }
+	void checkAuto(bool m) { m_checkedAuto = m; }
 signals:
     void messageChanged();
     void itemSelected();
@@ -500,6 +527,7 @@ private:
     bool m_full = false;
     bool m_pressedCtrl = false;
     bool m_modal = false;
+	bool m_checkedAuto = false;
 
     qreal m_scale = 1;
     int m_scaledItemWidth = 720;

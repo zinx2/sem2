@@ -7,6 +7,9 @@
 #include "cs_model.h"
 #include "cs_alarm.h"
 #include "cs_login.h"
+#include "cs_settings.h"
+#include "cs_networker.h"
+#include "cs_question.h"
 
 #define TAG_DVC_LIST "device_list"
 #define TAG_MNG_LIST "management_list"
@@ -23,7 +26,7 @@ public:
     ViewHome(QWidget *parent = 0);
     ~ViewHome();
 
-	void run();
+	void init();
 	void initializeUI();
 	public slots:
 	void updateUI();
@@ -36,10 +39,13 @@ private:
 	bool initedUI = false;
 
 	Alarm* m_alarm;
+	Question* m_question;
 	//CPJoin* m_join;
-	CPLogin* m_login;
+	CPLogin* m_login = nullptr;
 
 	Model* m;
+	Settings* s;
+	NetWorker* n;
 	StyleMain* m_style;
 
 	StyleMainBody* m_styleBody;
@@ -91,6 +97,8 @@ private:
 
 	CPWidget* m_navi = nullptr;
 	CPLabel* m_lbNavi;
+	CPLabel* m_lbUserInfo;
+
 	Command* m_btnNaviLeft;
 	Command* m_btnNaviRight;
 
@@ -107,6 +115,7 @@ private:
 	void newTable(int rowCount, QString tag);
 	void newNavi();
 	void newMetaTable(QString tag);
+	void newData(QString tag);
 	bool isCurrentMetaTable(QString tag);
 	
 };
