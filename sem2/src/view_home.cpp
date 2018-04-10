@@ -19,18 +19,18 @@ ViewHome::ViewHome(QWidget *parent)
 	connect(m, SIGNAL(alarmedChanged()), this, SLOT(handler()));
 	
 	init();
-	//if (s->isLoginAuto())
-	//{
-	//	NetWorker::instance()->login(s->id(), s->pass())->request();
-	//}
-	//else
-	//{
-		//m_login = new CPLogin();
-		//m_login->setParent(this);
-		//m_login->show();
-	//}
-	n->getDeviceList()->request();
-	connect(m, SIGNAL(devicesChanged()), this, SLOT(updateUI()()));
+	if (s->isLoginAuto())
+	{
+		n->login(s->id(), s->pass())->request();
+	}
+	else
+	{
+		m_login = new CPLogin();
+		m_login->setParent(this);
+		m_login->show();
+	}
+	//n->getDeviceList()->request();
+	connect(m, SIGNAL(devicesChanged()), this, SLOT(updateUI()));
 	//setFixedSize(0, 0);
 	//run();
 }
@@ -171,7 +171,7 @@ void ViewHome::init()
 
 	/*** SET STYLE SHEETS. ***/
 	m_header->setStyleSheet("background: " + m_styleHeader->palette()->navy01);
-	m_body->setStyleSheet("background: orange");
+	//m_body->setStyleSheet("background: orange");
 	m_footer->setStyleSheet("background: " + m_styleFooter->palette()->navy01);
 	m_slide->setStyleSheet("background: " + m_styleHeader->palette()->navy02);
 	m_slideCol01->setStyleSheet("background: " + m_styleHeader->palette()->navy03);
@@ -327,25 +327,27 @@ void ViewHome::updateUI()
 	metaBtn = m_styleSlide->btnImExport();
 	m_btnImExport->initWidth(metaBtn->width())->initIcon(metaBtn->icon(), kr(metaBtn->name()));
 
+	QString mm = m_cmdProvider->selectedTag();
 	if (!m_cmdProvider->selectedTag().compare(TAG_DVC_LIST))
 	{
-		MetaTableDVC* metaTable = qobject_cast<MetaTableDVC*>(m_metaTable);
+		newTable(20, TAG_DVC_LIST);
+		MetaTableDVC* castedMetaTable = qobject_cast<MetaTableDVC*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
-		m_metaTable->setHeight(m_content->height() - m_contentRow1->height() - m_navi->height());
+		m_metaTable->setHeight(m_content->height() - m_contentRow1->height() - m_navi->height());		
 		m_tableCommon->setColumnCount(m_metaTable->header()->countCols());
 		m_tableCommon->setFixedSize(m_metaTable->width(), m_metaTable->height());
 		m_tableCommon->setHorizontalHeaderLabels(m_metaTable->header()->meta());
 		m_tableCommon->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
-		m_tableCommon->setColumnWidth(0, metaTable->wCol1);
-		m_tableCommon->setColumnWidth(1, metaTable->wCol2);
-		m_tableCommon->setColumnWidth(2, metaTable->wCol3);
-		m_tableCommon->setColumnWidth(3, metaTable->wCol4);
-		m_tableCommon->setColumnWidth(4, metaTable->wCol5);
-		m_tableCommon->setColumnWidth(5, metaTable->wCol6);
-		m_tableCommon->setColumnWidth(6, m_content->width() - metaTable->wCol1
-			- metaTable->wCol2 - metaTable->wCol3 - metaTable->wCol4
-			- metaTable->wCol5 - metaTable->wCol6 - 2);
-		m_navi->setFixedWidth(m_content->width());
+		m_tableCommon->setColumnWidth(0, castedMetaTable->wCol1);
+		m_tableCommon->setColumnWidth(1, castedMetaTable->wCol2);
+		m_tableCommon->setColumnWidth(2, castedMetaTable->wCol3);
+		m_tableCommon->setColumnWidth(3, castedMetaTable->wCol4);
+		m_tableCommon->setColumnWidth(4, castedMetaTable->wCol5);
+		m_tableCommon->setColumnWidth(5, castedMetaTable->wCol6);
+		m_tableCommon->setColumnWidth(6, m_content->width() - castedMetaTable->wCol1
+			- castedMetaTable->wCol2 - castedMetaTable->wCol3 - castedMetaTable->wCol4
+			- castedMetaTable->wCol5 - castedMetaTable->wCol6 - 20);
+		m_navi->setFixedWidth(m_content->width());		
 
 		for (int row = 0; row < m->devices().size(); row++)
 		{
@@ -363,7 +365,7 @@ void ViewHome::updateUI()
 			item2->setTextAlignment(Qt::AlignCenter);
 			m_tableCommon->setItem(row, 2, item2);
 
-			QTableWidgetItem* item3 = new QTableWidgetItem(QString("%L1원  ").arg(dv->price()));
+			QTableWidgetItem* item3 = new QTableWidgetItem(QString(kr("%L1원  ")).arg(dv->price()));
 			item3->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 			m_tableCommon->setItem(row, 3, item3);
 
@@ -382,23 +384,91 @@ void ViewHome::updateUI()
 	}
 	else if (!m_cmdProvider->selectedTag().compare(TAG_MNG_LIST))
 	{
-		MetaTableMNG* metaTable = qobject_cast<MetaTableMNG*>(m_metaTable);
+		newTable(20, TAG_MNG_LIST);
+		MetaTableMNG* castedMetaTable = qobject_cast<MetaTableMNG*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
 		m_metaTable->setHeight(m_content->height() - m_contentRow1->height() - m_navi->height());
 		m_tableCommon->setColumnCount(m_metaTable->header()->countCols());
 		m_tableCommon->setFixedSize(m_metaTable->width(), m_metaTable->height());
 		m_tableCommon->setHorizontalHeaderLabels(m_metaTable->header()->meta());
 		m_tableCommon->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
-		m_tableCommon->setColumnWidth(0, metaTable->wCol1);
-		m_tableCommon->setColumnWidth(1, metaTable->wCol2);
-		m_tableCommon->setColumnWidth(2, metaTable->wCol3);
-		m_tableCommon->setColumnWidth(3, metaTable->wCol4);
-		m_tableCommon->setColumnWidth(4, metaTable->wCol5);
-		m_tableCommon->setColumnWidth(5, metaTable->wCol6);
-		m_tableCommon->setColumnWidth(6, m_content->width() - metaTable->wCol1
-			- metaTable->wCol2 - metaTable->wCol3 - metaTable->wCol4
-			- metaTable->wCol5 - metaTable->wCol6 - 2);
+		m_tableCommon->setColumnWidth(0, castedMetaTable->width() * 0.03); //1. 번호
+		m_tableCommon->setColumnWidth(1, castedMetaTable->width() * 0.08); //2. 자산번호
+		m_tableCommon->setColumnWidth(2, castedMetaTable->width() * 0.10); //3. 장비명
+		m_tableCommon->setColumnWidth(3, castedMetaTable->width() * 0.12 - 7); //4. 대출날짜
+		m_tableCommon->setColumnWidth(4, castedMetaTable->width() * 0.09); //5. 대출자
+		m_tableCommon->setColumnWidth(5, castedMetaTable->width() * 0.10); //6. 서명
+		m_tableCommon->setColumnWidth(6, castedMetaTable->width() * 0.09); //. 용도
+		m_tableCommon->setColumnWidth(7, castedMetaTable->width() * 0.12 - 7); //7. 반납날짜
+		m_tableCommon->setColumnWidth(8, castedMetaTable->width() * 0.09); //8. 확인자
+		m_tableCommon->setColumnWidth(9, castedMetaTable->width() * 0.10); //9. 서명
+		m_tableCommon->setColumnWidth(10, castedMetaTable->width() * 0.05); //9. 보안점검
+		m_tableCommon->setColumnWidth(11, castedMetaTable->width() * 0.03); //10. 확인
 		m_navi->setFixedWidth(m_content->width());
+		for (int row = 0; row < m->rents().size(); row++)
+		{
+			m_tableCommon->setRowHeight(row, 50);
+			Rent* dv = m->rents().at(row);
+			QTableWidgetItem* item0 = new QTableWidgetItem(QString("%1").arg((row + 1) + (m->pageNumber() - 1)*COUNT_PAGE));
+			item0->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 0, item0);
+
+			QTableWidgetItem* item1 = new QTableWidgetItem(dv->noAsset());
+			item1->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 1, item1);
+
+			QTableWidgetItem* item2 = new QTableWidgetItem(dv->nameDevice());
+			item2->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 2, item2);
+
+			QTableWidgetItem* item3 = new QTableWidgetItem(dv->dateBorrowed());
+			item3->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 3, item3);
+
+			QTableWidgetItem* item4 = new QTableWidgetItem(dv->nameUser());
+			item4->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 4, item4);
+
+			CPLazyImage *lbSignBorrwed = new CPLazyImage(dv->signUser(), m_tableCommon->width() * 0.10);
+			lbSignBorrwed->setFixedSize(m_tableCommon->width() * 0.10, 50);
+			QHBoxLayout *lySignBorrwed = new QHBoxLayout();
+			lySignBorrwed->addWidget(lbSignBorrwed);
+			lySignBorrwed->setMargin(0);
+			QWidget *wdSignBorrwed = new QWidget();
+			wdSignBorrwed->setLayout(lySignBorrwed);
+			wdSignBorrwed->setStyleSheet("border: 0px;");
+			m_tableCommon->setCellWidget(row, 5, wdSignBorrwed);
+
+			QTableWidgetItem* itemPP = new QTableWidgetItem(dv->purpose());
+			itemPP->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 6, itemPP);
+
+			QTableWidgetItem* item7 = new QTableWidgetItem(dv->dateReturned());
+			item7->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 7, item7);
+
+			QTableWidgetItem* item8 = new QTableWidgetItem(dv->nameAdmin());
+			item8->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 8, item8);
+
+			CPLazyImage *lbSignReturned = new CPLazyImage(dv->signAdmin(), m_tableCommon->width() * 0.10);
+			lbSignReturned->setFixedSize(m_tableCommon->width() * 0.10, 50);
+			QHBoxLayout *lySignReturned = new QHBoxLayout();
+			lySignReturned->addWidget(lbSignReturned);
+			lySignReturned->setMargin(0);
+			QWidget *wdSignReturned = new QWidget();
+			wdSignReturned->setLayout(lySignReturned);
+			wdSignReturned->setStyleSheet("border: 0px;");
+			m_tableCommon->setCellWidget(row, 9, wdSignReturned);
+
+			QTableWidgetItem* itemSecu = new QTableWidgetItem(dv->initial() ? "O" : "X");
+			itemSecu->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 10, itemSecu);
+
+			QTableWidgetItem* item11 = new QTableWidgetItem(dv->completed() ? "O" : "X");
+			item11->setTextAlignment(Qt::AlignCenter);
+			m_tableCommon->setItem(row, 11, item11);
+		}
 	}
 	else if (!m_cmdProvider->selectedTag().compare(TAG_MNT_LIST))
 	{
@@ -513,23 +583,24 @@ void ViewHome::initDVCList()
 		f->show();		
 	});
 
-	newTable(20, TAG_DVC_LIST);
-	newNavi();
+	//newMetaTable(TAG_DVC_LIST);
+	//newTable(20, TAG_DVC_LIST);
+	//newNavi();
 	updateUI();
 }
 void ViewHome::initMNGList()
 {
 	if (!initPage(TAG_MNG_LIST, kr("관리대장"))) return;
-
-
-	newTable(20, TAG_MNG_LIST);
-	newNavi();
+	m_cmdProvider->select(TAG_MNG_LIST);
+	//newMetaTable(TAG_MNG_LIST);
+	//newTable(20, TAG_MNG_LIST);
+	//newNavi();
 	updateUI();
 }
 void ViewHome::initMNTList()
 {
 	if (!initPage(TAG_MNT_LIST, kr("월별대장"))) return;
-	newMetaTable(TAG_MNT_LIST);
+	//newMetaTable(TAG_MNT_LIST);
 
 	MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
 	m_btnCheckExt = (new Command("check_ext", metaTable->txt1, m_content->width(), metaTable->hExt))
@@ -580,6 +651,7 @@ void ViewHome::initMNTList()
 void ViewHome::initEMPList()
 {
 	if (!initPage(TAG_EMP_LIST, kr("직원관리"))) return;
+	//newMetaTable(TAG_EMP_LIST);
 	newTable(100, TAG_EMP_LIST);
 	updateUI();
 }
@@ -653,24 +725,55 @@ void ViewHome::newNavi()
 	m_btnNaviLeft =
 		(new Command("navi_left", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
-		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initFunc([=]() { prev(); });
 
 	metaBtn = m_styleContent->btnNaviRight();
 	m_btnNaviRight =
 		(new Command("navi_right", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
-		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
-	m_lbNavi = (new CPLabel(100, 30, "50/70"))->initAlignment(Qt::AlignCenter);
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initFunc([=]() { next(); });
+
+	m_lbNavi = (new CPLabel(100, 30, getCountDevice()))->initAlignment(Qt::AlignCenter);
 	m_navi = (new CPWidget(m_styleContent->width(), 0, new QHBoxLayout))
 		->initAlignment(Qt::AlignCenter)
 		->append(m_btnNaviLeft)->append(m_lbNavi)->append(m_btnNaviRight);
 	m_content->layout()->addWidget(m_navi);
 	m_navi->setFixedHeight(m_metaTable->hNavi());
+
+	m_lbNavi->setText(getCountDevice());
+
+	Palette* p = new Palette();
+	if (m->countCurrentDevice() > 20)
+	{
+		m_btnNaviLeft->initEnabled(true)->initStyleSheet(metaBtn->releasedStyle())
+			->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+	}
+	else
+	{
+		m_btnNaviLeft->initEnabled(false)->initStyleSheet(p->btnSelectedStyleDiabled)
+					 ->initEffect(p->btnSelectedStyleDiabled, 
+					 			  p->btnSelectedStyleDiabled, 
+					 			  p->btnSelectedStyleDiabled);
+	}
+
+	if (m->countCurrentDevice() < m->countTotalDevice())
+	{
+		m_btnNaviRight->initEnabled(true)->initStyleSheet(metaBtn->releasedStyle())
+			->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+	}
+	else
+	{
+		m_btnNaviRight->initEnabled(false)->initStyleSheet(p->btnSelectedStyleDiabled)
+					 ->initEffect(p->btnSelectedStyleDiabled,
+								  p->btnSelectedStyleDiabled,
+								  p->btnSelectedStyleDiabled);
+	}
 }
 void ViewHome::newTable(int rowCount, QString tag)
 {
 	newMetaTable(tag);
-
 	if (m_tableCommon != nullptr)
 	{
 		delete m_tableCommon;
@@ -679,22 +782,37 @@ void ViewHome::newTable(int rowCount, QString tag)
 	m_tableCommon = new QTableWidget(this);
 	m_tableCommon->setRowCount(rowCount);
 	m_tableCommon->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_tableCommon->setStyleSheet("border: 1px; background:orange;");
+	//m_tableCommon->setStyleSheet("border: 1px; background:orange;");
 	m_tableCommon->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_tableCommon->horizontalScrollBar()->setDisabled(true);
 	m_tableCommon->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_tableCommon->horizontalHeader()->setStyleSheet("QHeaderView::section { background-color:#eeeeee }");
 	//m_tableCommon->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_tableCommon->verticalHeader()->hide();
 	m_content->layout()->addWidget(m_tableCommon);
+
+	if (!tag.compare(TAG_DVC_LIST) || !tag.compare(TAG_MNG_LIST)) {
+		newNavi();
+	}
+
 }
 
 void ViewHome::newData(QString tag)
 {
+	initDVCList();
 	if (!tag.compare(TAG_DVC_LIST))
 	{
 		
 	}
 
+}
+void ViewHome::getDeviceList()
+{
+	n->getDeviceList()->request();
+}
+void ViewHome::getRentList()
+{
+	n->getRentList()->request();
 }
 void ViewHome::handler()
 {
@@ -715,7 +833,7 @@ void ViewHome::handler()
 				QString userType = m->user()->namePart() + " " + m->user()->nameUser() + kr("(") + typeAdmin + kr(")");
 				m_lbUserInfo->setText(userType);
 
-				n->getDeviceListForAdmin()->request();
+				QTimer::singleShot(500, this, SLOT(getDeviceList()));
 
 				bool isLogined = s->isLoginAuto();
 				if (isLogined)
@@ -776,7 +894,8 @@ void ViewHome::handler()
 		}
 		if (noti->type() == Notificator::DVIList)
 		{
-			newData(TAG_DVC_LIST);
+			//newData(TAG_DVC_LIST);
+			updateUI();
 		}
 		else
 		{
@@ -811,4 +930,23 @@ void ViewHome::handler()
 	//	}
 		m->alarm(false);
 	}
+}
+
+void ViewHome::prev()
+{
+	m->setPageNumber(m->pageNumber() - 1);
+	qDebug() << m->pageNumber();
+	n->getDeviceList()->request();
+}
+void ViewHome::next()
+{
+	m->setPageNumber(m->pageNumber() + 1);
+	qDebug() << m->pageNumber();
+	n->getDeviceList()->request();
+
+}
+
+QString ViewHome::getCountDevice()
+{
+	return QString("%1").arg(m->countCurrentDevice()) + "/" + QString("%1").arg(m->countTotalDevice());
 }

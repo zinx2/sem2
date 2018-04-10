@@ -44,6 +44,8 @@ public:
 	const QString btnReleasedStyleGrayNoRadius = "background: #dedede;";
 	const QString btnHoveredStyleGrayNoRadius = "background: #c4c4c4;";
 	const QString btnSelectedStyleGrayNoRadius = "background: #dedede;";
+
+	const QString btnSelectedStyleDiabled = "background: #a0a0a0; color: #dddddd; border-radius:5px;";
 };
 
 class Font : public QObject

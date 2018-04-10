@@ -32,6 +32,10 @@ public:
 	public slots:
 	void updateUI();
 	void handler();
+	void getDeviceList();
+	void getRentList();
+	void prev();
+	void next();
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
@@ -118,5 +122,7 @@ private:
 	void newMetaTable(QString tag);
 	void newData(QString tag);
 	bool isCurrentMetaTable(QString tag);
+
+	QString getCountDevice();
 	
 };

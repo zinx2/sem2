@@ -185,7 +185,6 @@ NetWorker* NetWorker::login(QString id, QString pass)
 		noti->setType(Notificator::Login);
 		noti->setMessage(error);
 		m->setNotificator(noti);
-
 		m_netReply->deleteLater();
 		emit next();
 	}));
@@ -293,7 +292,7 @@ NetWorker* NetWorker::getDeviceList(int searchType, int now)
 {
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
-    //queries.addQueryItem("sem_part_no", QString("%1").arg(noPart));
+    queries.addQueryItem("sem_part_no", QString("%1").arg(m->user()->noPart()));
     queries.addQueryItem("search_type", QString("%1").arg(searchType));
     queries.addQueryItem("now_page", QString("%1").arg(m->pageNumber()));
     qDebug() << m->pageNumber();
@@ -346,8 +345,8 @@ NetWorker* NetWorker::getDeviceListForAdmin(int searchType)
 {
 	/********** SET URL QUERIES **********/
 	QUrlQuery queries;
-	queries.addQueryItem("sem_admin_no", QString("%1").arg(m->user()->noAdmin()));
-	queries.addQueryItem("sem_part_no", QString("%1").arg(m->user()->noPart()));
+	//queries.addQueryItem("sem_admin_no", QString("%1").arg(m->user()->noAdmin()));
+	//queries.addQueryItem("sem_part_no", QString("%1").arg(m->user()->noPart()));
 	queries.addQueryItem("search_type", QString("%1").arg(searchType));
 	queries.addQueryItem("now_page", QString("%1").arg(m->pageNumber()));
 	qDebug() << m->pageNumber();

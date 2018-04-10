@@ -264,8 +264,9 @@ public:
 	MetaTableMNG()
 	{
 		QStringList metaHeader;
-		metaHeader << kr("222번호") << kr("자산번호") << kr("장비명")
-			<< kr("취득금액") << kr("취득일자") << kr("대출여부") << kr("비고");
+		metaHeader << kr("번호") << kr("자산번호") << kr("장비명")
+				   << kr("대출날짜") << kr("대출자") << kr("서명") << kr("용도")
+				   << kr("반납날짜") << kr("확인자") << kr("서명") << kr("보안점검") << kr("확인");
 		header()->setMeta(metaHeader);
 		setHNavi(50);
 	}
