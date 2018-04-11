@@ -17,11 +17,14 @@ ViewHome::ViewHome(QWidget *parent)
 	m_alarm = new Alarm(kr("알림"), "", 350, 200);
 	m_question = new Question(kr("알림"), "", 350, 200);
 	connect(m, SIGNAL(alarmedChanged()), this, SLOT(handler()));
-	
+
 	init();
+	//clearAutoLogin();
 	if (s->isLoginAuto())
 	{
-		n->login(s->id(), s->pass())->request();
+		m->user()->setId(s->id());
+		m->user()->setPass(s->pass());
+		m->request(true, Notificator::RequestLogin);
 	}
 	else
 	{
@@ -31,6 +34,7 @@ ViewHome::ViewHome(QWidget *parent)
 	}
 	//n->getDeviceList()->request();
 	connect(m, SIGNAL(devicesChanged()), this, SLOT(updateUI()));
+	connect(m, SIGNAL(rentsChanged()), this, SLOT(updateUI()));
 	//setFixedSize(0, 0);
 	//run();
 }
@@ -45,82 +49,134 @@ void ViewHome::init()
 	m_styleSlide = m_styleBody->slide();
 	/*** GET STYLE INSTANCES. END. ***/
 
-	connect(m_styleSlide, SIGNAL(extendedChanged()), this, SLOT(onSlided()));
+	setMinimumWidth(m_style->width()); setMinimumHeight(m_style->height());
+	setLayout(new QVBoxLayout);
+	layout()->setAlignment(Qt::AlignTop);
+	layout()->setMargin(0);
+	layout()->setSpacing(0);
 
-	/*** CREATE INSTANCES. ***/
-	Command* btnSlideExt = (new Command("slide_ext", "<<", m_styleSlide->wCol01, m_styleSlide->height()))
-		->initStyleSheet(m_styleSlide->btnExtReleasedSheet)
-		->initEffect(m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtHoverdSheet);
+	connect(m_styleSlide, SIGNAL(extendedChanged()), this, SLOT(onSlided()));
+	
+	#pragma region INITIALIZE BUTTONS IN SLIDE.
+	m_btnSlideExt = (new Command("slide_ext", kr("◀"), m_styleSlide->wCol01, m_styleSlide->height()))
+		->initStyleSheet(m_styleSlide->btnExtReleasedSheet)->initFontSize(8)
+		->initEffect(m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtHoverdSheet)
+		->initFunc([=]()
+	{
+		bool extended = m_styleSlide->extended();
+		m_styleSlide->extend(!extended);
+		QString arrow = m_styleSlide->extended() ? kr("▶") : kr("◀");
+		m_btnSlideExt->initName(arrow);
+		updateUI();
+	});
 
 	Button* metaBtn;
 	metaBtn = m_styleHeader->btnLogout();
 	m_btnLogout = (new Command("logout", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
-		->initIcon(":/imgs/circle.png");
+		->initIcon(":/imgs/circle.png")->initFunc([=]()
+		{
+			m_question->initSize(350, 120)->setMessage(kr("로그아웃 하시겠습니까?"));
+			m_question->func = [=]() {
+				n->logout()->request();
+			};
+			m_question->show();
+		});
+
 	metaBtn = m_styleSlide->btnDVCList();
 	m_btnDVCList =
 		(new Command(TAG_DVC_LIST, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
-		->initIcon(metaBtn->icon(), metaBtn->name());
+		->initIcon(metaBtn->icon(), metaBtn->name())
+		->initFunc([=]()
+		{
+			netGetDeviceList();
+			initDVCList();
+		});
 
 	metaBtn = m_styleSlide->btnMNGList();
 	m_btnMNGList =
 		(new Command(TAG_MNG_LIST, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
-		->initIcon(metaBtn->icon(), metaBtn->name());
+		->initIcon(metaBtn->icon(), metaBtn->name())->initFunc([=]()
+	{
+		netGetRentList();
+		initMNGList();
+	});
 
 	metaBtn = m_styleSlide->btnMNTList();
 	m_btnMNTList =
 		(new Command(TAG_MNT_LIST, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
-		->initIcon(metaBtn->icon(), metaBtn->name());
+		->initIcon(metaBtn->icon(), metaBtn->name())
+		->initFunc([=]()
+		{
+			initMNTList();
+		});
 
 	metaBtn = m_styleSlide->btnEMPList();
 	m_btnEMPList =
 		(new Command(TAG_EMP_LIST, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
-		->initIcon(metaBtn->icon(), metaBtn->name());
+		->initIcon(metaBtn->icon(), metaBtn->name())
+		->initFunc([=]()
+		{
+			initEMPList();
+		});
 
-	m_cmdProvider = new CommandProvider();
-	m_cmdProvider->append(m_btnDVCList)->append(m_btnMNGList)->append(m_btnMNTList)->append(m_btnEMPList);
+	metaBtn = m_styleSlide->btnImExport();
+	m_btnImExport = (new Command(TAG_IMEXPORT, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(metaBtn->icon(), metaBtn->name())
+		->initFunc([=]()
+	{
+		m_barcoder = new Barcoder(kr("대출/반납하기"), 520, 230);
+		m_barcoder->show();
+	});
 
+	m_cmdProviderList = new CommandProvider();
+	m_cmdProviderList->append(m_btnDVCList)->append(m_btnMNGList)->append(m_btnMNTList)->append(m_btnEMPList);
+	#pragma endregion
+	
+	#pragma region  INITIALIZE HEADER.
 	m_header = new QWidget(this);
+	m_header->setLayout(new QHBoxLayout);
+	m_header->layout()->setMargin(0);
+	m_header->layout()->setSpacing(0);
+	m_header->layout()->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 	m_headerCol01 = (new CPLabel(m_styleHeader->wCol01, m_styleHeader->height(), kr(m_styleHeader->txtTitle)))
 		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter)
 		->initContentsMargins(15, 0, 0, 0)
 		->initFontSize(20)
 		->initFontBold()
 		->initStyleSheet("color:white;");
+
 	m_headerCol02 = (new CPWidget(m_styleHeader->width() - m_styleHeader->wCol01, m_styleHeader->height(), new QHBoxLayout))
 		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
 		->initContentsMargins(0, 10, 0, 0);
 
-	m_contentRow1 = (new CPWidget(m_styleContent->width(), m_styleContent->hRow01, new QHBoxLayout))
-		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter)
-		->initContentsMargins(10, 0, 0, 0);
-
-	m_contentRow2 = (new CPWidget(m_styleContent->width(), m_styleContent->height() - m_styleContent->hRow01, new QHBoxLayout))
-		->initAlignment(Qt::AlignLeft | Qt::AlignTop)
-		->initStyleSheet("background: blue;");
-
-	m_lbCurrentContent = (new CPLabel(m_styleContent->wGrid1_1 - 40, m_styleContent->hRow01, kr("장비목록")))
-		->initFontSize(20)
-		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-
-	//QLabel* lb = new QLabel(this);
-	//lb->setPixmap(QPixmap(":/imgs/plus_24dp.png"));
 	m_lbUserInfo = (new CPLabel(m_styleHeader->width() - m_styleHeader->wCol01 - m_btnLogout->width() - 10, m_styleHeader->height(), ""))
 		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
 		->initContentsMargins(0, 10, 0, 0)
 		->initFontSize(12)
 		->initStyleSheet("color:white;");
 
+	m_headerCol02->append(m_lbUserInfo)->append(m_btnLogout);
+	m_header->layout()->addWidget(m_headerCol01);
+	m_header->layout()->addWidget(m_headerCol02);
+#pragma endregion
+	
 	m_body = new QWidget(this);
+	m_body->setLayout(new QHBoxLayout);
+	m_body->layout()->setMargin(0);
+	m_body->layout()->setSpacing(0);
+
 	m_footer = new QWidget(this);
 
 	m_content = new QWidget(this);
@@ -130,43 +186,18 @@ void ViewHome::init()
 	m_content->layout()->setSpacing(0);
 
 	m_slide = new QWidget(this);
+	m_slide->setLayout(new QHBoxLayout);
 	m_slideCol01 = new QWidget(m_slide);
+	m_slideCol01->setLayout(new QVBoxLayout);
 	m_slideCol02 = (new CPWidget(m_styleSlide->wCol01, m_styleSlide->height(), new QVBoxLayout))
 		->initAlignment(Qt::AlignRight | Qt::AlignTop)
 		->initSpacing(10)->initContentsMargins(0, 10, 10, 0);
-	/*** CREATE INSTANCES. END. ***/
-
-	/*** INITIALIZE PARENT. ***/
-	setMinimumWidth(m_style->width()); setMinimumHeight(m_style->height());
-	setLayout(new QVBoxLayout);
-	layout()->setAlignment(Qt::AlignTop);
-	layout()->setMargin(0);
-	layout()->setSpacing(0);
-	/*** INITIALIZE PARENT. END. ***/
-
-	/*** SET LAYOUT. ***/
-	m_header->setLayout(new QHBoxLayout);
-	m_header->layout()->setMargin(0);
-	m_header->layout()->setSpacing(0);
-	m_header->layout()->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-
-	m_body->setLayout(new QHBoxLayout);
-	m_body->layout()->setMargin(0);
-	m_body->layout()->setSpacing(0);
-
-	m_content->setLayout(new QVBoxLayout);
-	m_content->layout()->setMargin(0);
-	m_content->layout()->setSpacing(0);
-
-	m_slide->setLayout(new QHBoxLayout);
-	m_slideCol01->setLayout(new QVBoxLayout);
-	m_slideCol02->setLayout(new QVBoxLayout);
 
 	m_slide->layout()->setMargin(0);
 	m_slide->layout()->setSpacing(0);
 	m_slideCol01->layout()->setAlignment(Qt::AlignCenter);
 	m_slideCol01->layout()->setMargin(0);
-	m_slideCol01->layout()->addWidget(btnSlideExt);
+	m_slideCol01->layout()->addWidget(m_btnSlideExt);
 	/*** SET LAYOUT. END. ***/
 
 	/*** SET STYLE SHEETS. ***/
@@ -181,85 +212,32 @@ void ViewHome::init()
 	layout()->addWidget(m_header);
 	layout()->addWidget(m_body);
 	layout()->addWidget(m_footer);
-
-	m_headerCol02->append(m_lbUserInfo)->append(m_btnLogout);
-	m_header->layout()->addWidget(m_headerCol01);
-	m_header->layout()->addWidget(m_headerCol02);
-
+	
 	m_body->layout()->addWidget(m_content);
 	m_body->layout()->addWidget(m_slide);
 
-	m_contentRow1->append((new CPLabel(20, 20))->initImage(":/imgs/circle.png"))
-		->initSpacing(10)
-		->append(m_lbCurrentContent);
-	m_content->layout()->addWidget(m_contentRow1);
 	m_slide->layout()->addWidget(m_slideCol01);
 	m_slide->layout()->addWidget(m_slideCol02);
 	m_slideCol02->append(m_btnDVCList)->append(m_btnMNGList)->append(m_btnMNTList)->append(m_btnEMPList);
 
 	m_emptyArea = (new CPLabel(0, 0, ""));
 
-	metaBtn = m_styleSlide->btnImExport();
-	m_btnImExport = (new Command(TAG_IMEXPORT, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
-		->initStyleSheet(metaBtn->releasedStyle())
-		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
-		->initIcon(metaBtn->icon(), metaBtn->name());
+
 	m_slideCol02->append(m_emptyArea);
 	m_slideCol02->append(m_btnImExport);
-	m_cmdProvider->append(m_btnImExport);
+	m_cmdProviderList->append(m_btnImExport);
 
 	/*** ADD WIDGETS. END. ***/
 
 	initDVCList();
 	m_btnDVCList->select(true);
 
-	/* CONNECT COMMANDS. */
-	btnSlideExt->initFunc([=]()
-	{
-		bool extended = m_styleSlide->extended();
-		m_styleSlide->extend(!extended);
-		btnSlideExt->initName(m_styleSlide->extended() ? ">>" : "<<");
-		updateUI();
-	});
-
-	m_btnLogout->initFunc([=]()
-	{
-		m_question->initSize(350, 120)->setMessage(kr("로그아웃 하시겠습니까?"));
-		m_question->func = [=]() {
-			n->logout()->request();
-		};
-		m_question->show();
-	});
-
-	m_btnDVCList->initFunc([=]()
-	{
-		initDVCList();
-	});
-	m_btnMNGList->initFunc([=]()
-	{
-		initMNGList();
-	});
-	m_btnMNTList->initFunc([=]()
-	{		
-		initMNTList();
-	});
-	m_btnEMPList->initFunc([=]()
-	{		
-		initEMPList();
-	});
-	m_btnImExport->initFunc([=]()
-	{
-		m_barcoder = new Barcoder(kr("대출/반납하기"), 520, 230);
-		m_barcoder->show();
-	});
-	/* CONNECT COMMANDS. END. */
-
 	updateUI();
 }
 void ViewHome::resizeEvent(QResizeEvent *e)
 {
-	if (!initedUI) {
-		initializeUI();
+	if (!m_initedUI) {
+		m_initedUI = true;
 		return;
 	}
 
@@ -269,10 +247,6 @@ void ViewHome::resizeEvent(QResizeEvent *e)
 	m_style->setHeight(newSize.height());
 	print("MAIN", newSize.width(), newSize.height());
 	updateUI();
-}
-void ViewHome::initializeUI()
-{
-	initedUI = true;
 }
 void ViewHome::updateUI()
 {
@@ -296,20 +270,24 @@ void ViewHome::updateUI()
 	m_footer->setFixedSize(wFooter, hFooter);
 	m_content->setFixedSize(wContent, hContent);
 	m_contentRow1->initWidth(wContent);
-	if (m_contentGrid1_2 != nullptr)
-		m_contentGrid1_2->initWidth(wContent - m_styleContent->wGrid1_1);
+	
+	int wGrid1_1 = m_contentRow1->width() / 2;
+	int wGrid1_2 = 0;
+	int wGrid1_3 = m_contentRow1->width() / 2;
+	if (!m_cmdProviderList->selectedTag().compare(TAG_MNG_LIST) || 
+		!m_cmdProviderList->selectedTag().compare(TAG_MNT_LIST)) {
+		wGrid1_1 = m_contentRow1->width() / 3;
+		wGrid1_2 = m_contentRow1->width() / 3;
+		wGrid1_3 = m_contentRow1->width() / 3;
+	}
+	m_contentGrid1_1->setFixedWidth(wGrid1_1);
+	m_contentGrid1_2->setFixedWidth(wGrid1_2);
+	m_contentGrid1_3->setFixedWidth(wGrid1_3);
+
 	m_slide->setFixedSize(wSlide, hSlide);
 	m_slideCol01->setFixedSize(wSlideCol01, hSlide);
 	m_slideCol02->setFixedSize(wSlideCol02, hSlide);
-	m_emptyArea->setFixedSize(1, hSlide - m_cmdProvider->totalHeight() - 10 * (m_cmdProvider->count()+2));
-
-	/*print("HEADER", wHeader, hHeader);
-	print("FOOTER", wFooter, hFooter);
-	print("BODY", wBody, hBody);
-	print("CONTENT", wContent, hContent);
-	print("SLIDE", wSlide, hSlide);
-	print("SLIDE-COL01", wSlideCol01, hSlide);
-	print("SLIDE-COL02", wSlideCol02, hSlide);*/
+	m_emptyArea->setFixedSize(1, hSlide - m_cmdProviderList->totalHeight() - 10 * (m_cmdProviderList->count() + 2));
 
 	Button* metaBtn;
 	metaBtn = m_styleSlide->btnDVCList();
@@ -327,13 +305,14 @@ void ViewHome::updateUI()
 	metaBtn = m_styleSlide->btnImExport();
 	m_btnImExport->initWidth(metaBtn->width())->initIcon(metaBtn->icon(), kr(metaBtn->name()));
 
-	QString mm = m_cmdProvider->selectedTag();
-	if (!m_cmdProvider->selectedTag().compare(TAG_DVC_LIST))
+	QString mm = m_cmdProviderList->selectedTag();
+	if (!m_cmdProviderList->selectedTag().compare(TAG_DVC_LIST))
 	{
 		newTable(20, TAG_DVC_LIST);
+		newNavi();
 		MetaTableDVC* castedMetaTable = qobject_cast<MetaTableDVC*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
-		m_metaTable->setHeight(m_content->height() - m_contentRow1->height() - m_navi->height());		
+		m_metaTable->setHeight(m_content->height() - m_contentRow1->height() - m_navi->height());
 		m_tableCommon->setColumnCount(m_metaTable->header()->countCols());
 		m_tableCommon->setFixedSize(m_metaTable->width(), m_metaTable->height());
 		m_tableCommon->setHorizontalHeaderLabels(m_metaTable->header()->meta());
@@ -347,7 +326,7 @@ void ViewHome::updateUI()
 		m_tableCommon->setColumnWidth(6, m_content->width() - castedMetaTable->wCol1
 			- castedMetaTable->wCol2 - castedMetaTable->wCol3 - castedMetaTable->wCol4
 			- castedMetaTable->wCol5 - castedMetaTable->wCol6 - 20);
-		m_navi->setFixedWidth(m_content->width());		
+		m_navi->setFixedWidth(m_content->width());
 
 		for (int row = 0; row < m->devices().size(); row++)
 		{
@@ -382,12 +361,12 @@ void ViewHome::updateUI()
 			m_tableCommon->setItem(row, 6, item6);
 		}
 	}
-	else if (!m_cmdProvider->selectedTag().compare(TAG_MNG_LIST))
-	{
-		newTable(20, TAG_MNG_LIST);
+	else if (!m_cmdProviderList->selectedTag().compare(TAG_MNG_LIST))
+	{		
+		newTable(100, TAG_MNG_LIST);
 		MetaTableMNG* castedMetaTable = qobject_cast<MetaTableMNG*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
-		m_metaTable->setHeight(m_content->height() - m_contentRow1->height() - m_navi->height());
+		m_metaTable->setHeight(m_content->height() - m_contentRow1->height());
 		m_tableCommon->setColumnCount(m_metaTable->header()->countCols());
 		m_tableCommon->setFixedSize(m_metaTable->width(), m_metaTable->height());
 		m_tableCommon->setHorizontalHeaderLabels(m_metaTable->header()->meta());
@@ -404,7 +383,6 @@ void ViewHome::updateUI()
 		m_tableCommon->setColumnWidth(9, castedMetaTable->width() * 0.10); //9. 서명
 		m_tableCommon->setColumnWidth(10, castedMetaTable->width() * 0.05); //9. 보안점검
 		m_tableCommon->setColumnWidth(11, castedMetaTable->width() * 0.03); //10. 확인
-		m_navi->setFixedWidth(m_content->width());
 		for (int row = 0; row < m->rents().size(); row++)
 		{
 			m_tableCommon->setRowHeight(row, 50);
@@ -469,13 +447,32 @@ void ViewHome::updateUI()
 			item11->setTextAlignment(Qt::AlignCenter);
 			m_tableCommon->setItem(row, 11, item11);
 		}
+
+		QString selectedTime = m_currentYear + m_currentMonth;
+		QString tYear = QDateTime::currentDateTime().addMonths(0).toString("yyyy");
+		QString tMonth = QDateTime::currentDateTime().addMonths(0).toString("MM");
+		QString tTime = tYear + tMonth;
+		metaBtn = m_styleContent->btnCalendarNext();
+		if (selectedTime.toInt() < tTime.toInt())
+		{
+			m_btnCalendarNext->initEnabled(true)->initStyleSheet(metaBtn->releasedStyle())
+				->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+		}
+		else
+		{
+			Palette* p = new Palette();
+			m_btnCalendarNext->initEnabled(false)->initStyleSheet(p->btnSelectedStyleDiabled)
+				->initEffect(p->btnSelectedStyleDiabled,
+					p->btnSelectedStyleDiabled,
+					p->btnSelectedStyleDiabled);
+		}
 	}
-	else if (!m_cmdProvider->selectedTag().compare(TAG_MNT_LIST))
+	else if (!m_cmdProviderList->selectedTag().compare(TAG_MNT_LIST))
 	{
 		MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
 		m_metaTable->setHeight(m_content->height() - m_contentRow1->height());
-		m_checkTable->initSize(m_content->width()-20);
+		m_checkTable->initSize(m_content->width() - 20);
 		m_btnCheckExt->setFixedWidth(m_content->width() - 20);
 
 		int hMntStack = m_checkTable->height() + metaTable->hExt * (m_checkTable->meta()->parts().size() + 1);
@@ -491,9 +488,27 @@ void ViewHome::updateUI()
 		m_mntStack->setFixedSize(m_content->width() - 20, hMntStack);
 		m_mntScrArea->setFixedSize(m_mntStack->width() + 20, m_content->height() - m_contentRow1->height());
 		m_mntScrArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-		
+
+		QString selectedTime = m_currentYear + m_currentMonth;
+		QString tYear = QDateTime::currentDateTime().addMonths(0).toString("yyyy");
+		QString tMonth = QDateTime::currentDateTime().addMonths(0).toString("MM");
+		QString tTime = tYear + tMonth;
+		metaBtn = m_styleContent->btnCalendarNext();
+		if (selectedTime.toInt() < tTime.toInt())
+		{
+			m_btnCalendarNext->initEnabled(true)->initStyleSheet(metaBtn->releasedStyle())
+				->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
+		}
+		else
+		{
+			Palette* p = new Palette();
+			m_btnCalendarNext->initEnabled(false)->initStyleSheet(p->btnSelectedStyleDiabled)
+				->initEffect(p->btnSelectedStyleDiabled,
+					p->btnSelectedStyleDiabled,
+					p->btnSelectedStyleDiabled);
+		}
 	}
-	else if (!m_cmdProvider->selectedTag().compare(TAG_EMP_LIST))
+	else if (!m_cmdProviderList->selectedTag().compare(TAG_EMP_LIST))
 	{
 		MetaTableEMP* metaTable = qobject_cast<MetaTableEMP*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
@@ -512,12 +527,11 @@ void ViewHome::updateUI()
 			- metaTable->wCol2 - metaTable->wCol3 - metaTable->wCol4
 			- metaTable->wCol5 - metaTable->wCol6 - 2);
 	}
-
 }
 void ViewHome::initDVCList()
 {
 	if (!initPage(TAG_DVC_LIST, kr("장비목록"))) return;
-
+	#pragma region INITIALIZE BUTTONS.
 	Button* metaBtn;
 	metaBtn = m_styleContent->btnPrint();
 	m_btnPrint = (new Command("print", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
@@ -543,7 +557,7 @@ void ViewHome::initDVCList()
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(m_styleContent->btnNew()->icon());
 
-	m_contentGrid1_2->append(m_btnNew)->append(m_btnEdit)->append(m_btnRemove)->append(m_btnPrint);
+	m_contentGrid1_3->append(m_btnNew)->append(m_btnEdit)->append(m_btnRemove)->append(m_btnPrint);
 
 	m_btnPrint->initFunc([=]()
 	{
@@ -568,7 +582,7 @@ void ViewHome::initDVCList()
 		QString strNoAsset = m->devices().at(m_tableCommon->currentRow())->noAsset();
 		m_question->initSize(350, 120)->setMessage(kr("선택한 장비를 삭제 하시겠습니까?\n\n장비명: ") + strNameDevice + kr("\n자산번호: ") + strNoAsset);
 		m_question->func = [=]() {
-			
+
 		};
 		m_question->show();
 	});
@@ -580,21 +594,77 @@ void ViewHome::initDVCList()
 	m_btnNew->initFunc([=]()
 	{
 		FormAdd* f = new FormAdd(410, 340);
-		f->show();		
+		f->show();
 	});
-
-	//newMetaTable(TAG_DVC_LIST);
-	//newTable(20, TAG_DVC_LIST);
-	//newNavi();
+#pragma endregion
 	updateUI();
 }
 void ViewHome::initMNGList()
 {
 	if (!initPage(TAG_MNG_LIST, kr("관리대장"))) return;
-	m_cmdProvider->select(TAG_MNG_LIST);
-	//newMetaTable(TAG_MNG_LIST);
-	//newTable(20, TAG_MNG_LIST);
-	//newNavi();
+	
+	#pragma region INITIALIZE BUTTONS.
+	Button* metaBtn;
+	metaBtn = m_styleContent->btnViewAll();
+	m_btnViewAll = (new Command(TAG_VIEW_ALL, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(m_styleContent->btnViewAll()->icon())
+		->initFunc([=]() {
+			m_cmdProviderView->select(TAG_VIEW_ALL);
+			m_btnCalendarPrev->setVisible(false);
+			m_lbCalendar->setVisible(false);
+			m_btnCalendarNext->setVisible(false);
+			updateUI();
+		});
+
+	metaBtn = m_styleContent->btnViewDate();
+	m_btnViewDate = (new Command(TAG_VIEW_DATE, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initIcon(m_styleContent->btnViewDate()->icon())
+		->initFunc([=]() {
+			m_lbCalendar->initText(getCurrentDate(0));
+			m_cmdProviderView->select(TAG_VIEW_DATE);
+			m_btnCalendarPrev->setVisible(true);
+			m_lbCalendar->setVisible(true);
+			m_btnCalendarNext->setVisible(true);
+			updateUI();
+		});
+
+	metaBtn = m_styleContent->btnCalendarPrev();
+	m_btnCalendarPrev =
+		(new Command("cal_prev", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())->initVisible(false)
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initFunc([=]() { 
+			m_lbCalendar->initText(getCurrentDate(--m_countMonth));
+			updateUI();
+		});
+
+	metaBtn = m_styleContent->btnCalendarNext();
+	m_btnCalendarNext =
+		(new Command("cal_next", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())->initVisible(false)
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initFunc([=]() {
+			m_lbCalendar->initText(getCurrentDate(++m_countMonth));
+			updateUI();
+		});
+
+	#pragma endregion
+
+	if (m_cmdProviderView != nullptr) m_cmdProviderView->clear();
+	else m_cmdProviderView = new CommandProvider();
+	m_cmdProviderView->append(m_btnViewAll)->append(m_btnViewDate);
+	m_cmdProviderView->select(TAG_VIEW_ALL);
+
+	m_lbCalendar = (new CPLabel(100, 30, getCurrentDate(0)))->initVisible(false)
+					->initAlignment(Qt::AlignCenter)->initFontSize(15);
+	m_contentGrid1_2->append(m_btnCalendarPrev)->append(m_lbCalendar)->append(m_btnCalendarNext);
+	m_contentGrid1_3->append(m_btnViewAll)->append(m_btnViewDate);
+	#pragma endregion
+
 	updateUI();
 }
 void ViewHome::initMNTList()
@@ -602,21 +672,48 @@ void ViewHome::initMNTList()
 	if (!initPage(TAG_MNT_LIST, kr("월별대장"))) return;
 	//newMetaTable(TAG_MNT_LIST);
 
-	MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
-	m_btnCheckExt = (new Command("check_ext", metaTable->txt1, m_content->width(), metaTable->hExt))
-		->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", metaTable->txt2)
-		->initEffect(metaTable->btnExtReleasedSheet, metaTable->btnExtHoverdSheet, metaTable->btnExtHoverdSheet)
-		->initFunc([=]() {	
-
-		bool folded = m_btnCheckExt->selected();
-		int h = folded ? (12 * 30 + 24) : 0;
-		m_checkTable->initHeight(h);
-		m_btnCheckExt->initName(folded ? metaTable->txt1 : metaTable->txt2);
-		m_btnCheckExt->select(!folded);
+	#pragma region INITIALIZE BUTTONS.
+	Button* metaBtn;
+	metaBtn = m_styleContent->btnCalendarPrev();
+	m_btnCalendarPrev =
+		(new Command("cal_prev", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initFunc([=]() {
+		m_lbCalendar->initText(getCurrentDate(--m_countMonth));
 		updateUI();
 	});
-	m_cmdProviderExt = new CommandProvider();
-	m_cmdProviderExt->append(m_btnCheckExt);
+
+	metaBtn = m_styleContent->btnCalendarNext();
+	m_btnCalendarNext =
+		(new Command("cal_next", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
+		->initStyleSheet(metaBtn->releasedStyle())
+		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+		->initFunc([=]() {
+		m_lbCalendar->initText(getCurrentDate(++m_countMonth));
+		updateUI();
+	});
+	#pragma endregion
+
+	m_lbCalendar = (new CPLabel(100, 30, getCurrentDate(0)))
+		->initAlignment(Qt::AlignCenter)->initFontSize(15);
+	m_contentGrid1_2->append(m_btnCalendarPrev)->append(m_lbCalendar)->append(m_btnCalendarNext);
+#pragma endregion
+
+	MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
+	m_btnCheckExt = (new Command("check_ext", metaTable->txt2, m_content->width(), metaTable->hExt))
+		->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", metaTable->txt2)
+		->initEffect(metaTable->btnExtReleasedSheet, metaTable->btnExtHoverdSheet, metaTable->btnExtHoverdSheet)
+		->initFunc([=]() {
+
+		bool folded = !m_btnCheckExt->selected();
+		int h = folded ? (12 * 30 + 24) : 0;
+		m_checkTable->initHeight(h);
+		m_btnCheckExt->initName(folded ? metaTable->txt2 : metaTable->txt1);
+		m_btnCheckExt->select(folded);
+		updateUI();
+	});
+	m_btnCheckExt->select(true);
 
 	m_mntStack = (new CPWidget(m_content->width(), m_content->height(), new QVBoxLayout))
 		->initAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -628,6 +725,7 @@ void ViewHome::initMNTList()
 	m_mntStack->append(m_btnCheckExt)->append(m_checkTable);
 
 	m_mntTables.clear();
+	m_cmdProviderExt = new CommandProvider();
 	for (int i = 0; i < 8; i++)
 	{
 		Command* m_btnExt = (new Command("ext_" + QString("%1").arg(i), metaTable->txt1, m_content->width(), metaTable->hExt))
@@ -636,6 +734,7 @@ void ViewHome::initMNTList()
 			->initFunc([=]() {
 			Command* cmd = m_cmdProviderExt->command(i);
 			bool folded = cmd->selected();
+			cmd->initName(folded ? metaTable->txt1 : metaTable->txt2);
 			cmd->select(!folded);
 			updateUI();
 		});
@@ -657,11 +756,38 @@ void ViewHome::initEMPList()
 }
 bool ViewHome::initPage(QString tag, QString titleTxt)
 {
-	if (isCurrentMetaTable(tag)) return false;
+	/* DON'T INITIALIZE. */
+	if (!m_cmdProviderList->selectedTag().compare(tag)) return false;
+
+	m->setPageNumber(1);		/* INITIALIZE PAGE NUMBER */
+	m_cmdProviderList->select(tag); /* SELECT BUTTON & UPDATE TAG */
+
+	#pragma region INITIALIZE MetaTable.
+	if (!tag.compare(TAG_DVC_LIST)) m_metaTable = new MetaTableDVC();
+	else if (!tag.compare(TAG_MNG_LIST)) m_metaTable = new MetaTableMNG();
+	else if (!tag.compare(TAG_MNT_LIST)) m_metaTable = new MetaTableMNT();
+	else if (!tag.compare(TAG_EMP_LIST)) m_metaTable = new MetaTableEMP();
+#pragma endregion
+	#pragma region INITIALIZE Widgets.
+	if (m_contentGrid1_1 != nullptr)
+	{
+		delete m_contentGrid1_1;
+		m_contentGrid1_1 = nullptr;
+	}
 	if (m_contentGrid1_2 != nullptr)
 	{
 		delete m_contentGrid1_2;
 		m_contentGrid1_2 = nullptr;
+	}
+	if (m_contentGrid1_3 != nullptr)
+	{
+		delete m_contentGrid1_3;
+		m_contentGrid1_3 = nullptr;
+	}
+	if (m_contentRow1 != nullptr)
+	{
+		delete m_contentRow1;
+		m_contentRow1 = nullptr;
 	}
 	if (m_tableCommon != nullptr)
 	{
@@ -675,7 +801,7 @@ bool ViewHome::initPage(QString tag, QString titleTxt)
 	}
 	if (m_checkTable != nullptr)
 	{
-        delete m_checkTable;
+		delete m_checkTable;
 		m_checkTable = nullptr;
 	}
 	if (m_mntStack != nullptr)
@@ -686,33 +812,67 @@ bool ViewHome::initPage(QString tag, QString titleTxt)
 	if (m_mntScrArea != nullptr)
 	{
 		delete m_mntScrArea;
-		m_mntScrArea	 = nullptr;
+		m_mntScrArea = nullptr;
 	}
-	m_lbCurrentContent->setText(titleTxt);
-	m_contentGrid1_2 = (new CPWidget(m_styleContent->width() - m_styleContent->wGrid1_1, m_styleContent->hRow01, new QHBoxLayout))
+	#pragma endregion
+	#pragma region INITIALIZE Row1
+	m_contentRow1 = (new CPWidget(m_styleContent->width(), m_styleContent->hRow01, new QHBoxLayout))
+		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	m_content->layout()->addWidget(m_contentRow1);
+
+	int wGrid1_1 = m_contentRow1->width() / 2;
+	int wGrid1_2 = 0;
+	int wGrid1_3 = m_contentRow1->width() / 2;
+	if (!tag.compare(TAG_MNG_LIST) || !tag.compare(TAG_MNT_LIST)) {
+		wGrid1_1 = m_contentRow1->width() / 3;
+		wGrid1_2 = m_contentRow1->width() / 3;
+		wGrid1_3 = m_contentRow1->width() / 3;
+	} 		
+
+	m_contentGrid1_1 = (new CPWidget(wGrid1_1, m_styleContent->hRow01, new QHBoxLayout))
+		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter)->initContentsMargins(10, 0, 0, 0)->initSpacing(10)
+		->append((new CPLabel(20, 20))->initImage(":/imgs/circle.png"))
+		->append((new CPLabel(m_styleContent->wGrid1_1 - 40, m_styleContent->hRow01, titleTxt))->initFontSize(20)
+					->initAlignment(Qt::AlignLeft | Qt::AlignVCenter));
+	m_contentRow1->append(m_contentGrid1_1);
+	
+	m_contentGrid1_2 = (new CPWidget(wGrid1_2, m_styleContent->hRow01, new QHBoxLayout))
+		->initSpacing(10)
+		->initAlignment(Qt::AlignCenter);
+		//->initContentsMargins(0, 20, 0, 0);
+	m_contentRow1->append(m_contentGrid1_2);
+	
+	m_contentGrid1_3 = (new CPWidget(wGrid1_3, m_styleContent->hRow01, new QHBoxLayout))
 		->initSpacing(10)
 		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
-		->initContentsMargins(0, 20, 0, 0);
-	m_contentRow1->layout()->addWidget(m_contentGrid1_2);
+		->initContentsMargins(0, 10, 0, 0);
+	m_contentRow1->append(m_contentGrid1_3);
+	#pragma endregion
 
 	return true;
 }
-ViewHome::~ViewHome()
+void ViewHome::newTable(int rowCount, QString tag)
 {
+	if (m_tableCommon != nullptr)
+	{
+		delete m_tableCommon;
+		m_tableCommon = nullptr;
+	}
+	m_tableCommon = new QTableWidget(this);
+	m_tableCommon->setRowCount(rowCount);
+	m_tableCommon->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_tableCommon->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_tableCommon->horizontalScrollBar()->setDisabled(true);
+	m_tableCommon->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_tableCommon->horizontalHeader()->setStyleSheet("QHeaderView::section { background-color:#eeeeee }");
+	m_tableCommon->verticalHeader()->hide();
+	m_content->layout()->addWidget(m_tableCommon);
 
+#pragma region INITIALIZE NAVIGATION BUTTON.
+
+#pragma endregion
 }
-bool ViewHome::isCurrentMetaTable(QString tag)
-{
-	return !m_cmdProvider->selectedTag().compare(tag);
-}
-void ViewHome::newMetaTable(QString tag)
-{
-	m_cmdProvider->select(tag);
-	if (!tag.compare(TAG_DVC_LIST)) m_metaTable = new MetaTableDVC();
-	else if (!tag.compare(TAG_MNG_LIST)) m_metaTable = new MetaTableMNG();
-	else if (!tag.compare(TAG_MNT_LIST)) m_metaTable = new MetaTableMNT();
-	else if (!tag.compare(TAG_EMP_LIST)) m_metaTable = new MetaTableEMP();
-}
+
 void ViewHome::newNavi()
 {
 	if (m_navi != nullptr)
@@ -722,105 +882,74 @@ void ViewHome::newNavi()
 	}
 	Button* metaBtn;
 	metaBtn = m_styleContent->btnNaviLeft();
-	m_btnNaviLeft =
+	m_btnNaviPrev =
 		(new Command("navi_left", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initFunc([=]() { prev(); });
 
 	metaBtn = m_styleContent->btnNaviRight();
-	m_btnNaviRight =
+	m_btnNaviNext =
 		(new Command("navi_right", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initFunc([=]() { next(); });
 
+	Palette* p = new Palette();
 	m_lbNavi = (new CPLabel(100, 30, getCountDevice()))->initAlignment(Qt::AlignCenter);
-	m_navi = (new CPWidget(m_styleContent->width(), 0, new QHBoxLayout))
-		->initAlignment(Qt::AlignCenter)
-		->append(m_btnNaviLeft)->append(m_lbNavi)->append(m_btnNaviRight);
+	m_navi = new QWidget();
+	m_navi->setFixedSize(m_styleContent->width(), m_metaTable->hNavi());
+	m_navi->setLayout(new QHBoxLayout);
+	m_navi->layout()->setMargin(0);
+	m_navi->layout()->setSpacing(0);
+	m_navi->layout()->setAlignment(Qt::AlignCenter);
+	//m_navi->setStyleSheet("background: " + p->navy04);
+	m_navi->layout()->addWidget(m_btnNaviPrev);
+	m_navi->layout()->addWidget(m_lbNavi);
+	m_navi->layout()->addWidget(m_btnNaviNext);
 	m_content->layout()->addWidget(m_navi);
-	m_navi->setFixedHeight(m_metaTable->hNavi());
-
 	m_lbNavi->setText(getCountDevice());
 
-	Palette* p = new Palette();
+
 	if (m->countCurrentDevice() > 20)
 	{
-		m_btnNaviLeft->initEnabled(true)->initStyleSheet(metaBtn->releasedStyle())
+		m_btnNaviPrev->initEnabled(true)->initStyleSheet(metaBtn->releasedStyle())
 			->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
 	}
 	else
 	{
-		m_btnNaviLeft->initEnabled(false)->initStyleSheet(p->btnSelectedStyleDiabled)
-					 ->initEffect(p->btnSelectedStyleDiabled, 
-					 			  p->btnSelectedStyleDiabled, 
-					 			  p->btnSelectedStyleDiabled);
+		m_btnNaviPrev->initEnabled(false)->initStyleSheet(p->btnSelectedStyleDiabled)
+			->initEffect(p->btnSelectedStyleDiabled,
+				p->btnSelectedStyleDiabled,
+				p->btnSelectedStyleDiabled);
 	}
 
 	if (m->countCurrentDevice() < m->countTotalDevice())
 	{
-		m_btnNaviRight->initEnabled(true)->initStyleSheet(metaBtn->releasedStyle())
+		m_btnNaviNext->initEnabled(true)->initStyleSheet(metaBtn->releasedStyle())
 			->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle());
 	}
 	else
 	{
-		m_btnNaviRight->initEnabled(false)->initStyleSheet(p->btnSelectedStyleDiabled)
-					 ->initEffect(p->btnSelectedStyleDiabled,
-								  p->btnSelectedStyleDiabled,
-								  p->btnSelectedStyleDiabled);
-	}
-}
-void ViewHome::newTable(int rowCount, QString tag)
-{
-	newMetaTable(tag);
-	if (m_tableCommon != nullptr)
-	{
-		delete m_tableCommon;
-		m_tableCommon = nullptr;
-	}
-	m_tableCommon = new QTableWidget(this);
-	m_tableCommon->setRowCount(rowCount);
-	m_tableCommon->setSelectionBehavior(QAbstractItemView::SelectRows);
-	//m_tableCommon->setStyleSheet("border: 1px; background:orange;");
-	m_tableCommon->setSelectionMode(QAbstractItemView::SingleSelection);
-	m_tableCommon->horizontalScrollBar()->setDisabled(true);
-	m_tableCommon->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	m_tableCommon->horizontalHeader()->setStyleSheet("QHeaderView::section { background-color:#eeeeee }");
-	//m_tableCommon->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	m_tableCommon->verticalHeader()->hide();
-	m_content->layout()->addWidget(m_tableCommon);
-
-	if (!tag.compare(TAG_DVC_LIST) || !tag.compare(TAG_MNG_LIST)) {
-		newNavi();
+		m_btnNaviNext->initEnabled(false)->initStyleSheet(p->btnSelectedStyleDiabled)
+			->initEffect(p->btnSelectedStyleDiabled,
+				p->btnSelectedStyleDiabled,
+				p->btnSelectedStyleDiabled);
 	}
 
 }
 
-void ViewHome::newData(QString tag)
-{
-	initDVCList();
-	if (!tag.compare(TAG_DVC_LIST))
-	{
-		
-	}
-
-}
-void ViewHome::getDeviceList()
-{
-	n->getDeviceList()->request();
-}
-void ViewHome::getRentList()
-{
-	n->getRentList()->request();
-}
 void ViewHome::handler()
 {
 	if (m->alarmed())
 	{
 		bool result = false;
 		Notificator* noti = m->notificator();
-		if (noti->type() == Notificator::Login)
+		if (noti->type() == Notificator::RequestLogin)
+		{
+			QTimer::singleShot(500, this, SLOT(netLogin()));
+		}
+		else if (noti->type() == Notificator::Login)
 		{
 			result = noti->result();
 			if (result) {
@@ -833,7 +962,7 @@ void ViewHome::handler()
 				QString userType = m->user()->namePart() + " " + m->user()->nameUser() + kr("(") + typeAdmin + kr(")");
 				m_lbUserInfo->setText(userType);
 
-				QTimer::singleShot(500, this, SLOT(getDeviceList()));
+				QTimer::singleShot(500, this, SLOT(netGetDeviceList()));
 
 				bool isLogined = s->isLoginAuto();
 				if (isLogined)
@@ -854,7 +983,7 @@ void ViewHome::handler()
 			else {
 				m_alarm->initSize(350, 120)->setMessage(m->notificator()->message());
 				m_alarm->show();
-			}				
+			}
 		}
 		else if (noti->type() == Notificator::Logout)
 		{
@@ -876,7 +1005,7 @@ void ViewHome::handler()
 				m_alarm->initSize(350, 120)->setMessage(m->notificator()->message());
 				m_alarm->show();
 			}
-		}		
+		}
 		else if (noti->type() == Notificator::Join)
 		{
 			QString message = noti->message();
@@ -890,9 +1019,9 @@ void ViewHome::handler()
 		}
 		else if (noti->type() == Notificator::Exit)
 		{
-			close();
+			//close();
 		}
-		if (noti->type() == Notificator::DVIList)
+		else if (noti->type() == Notificator::DVIList)
 		{
 			//newData(TAG_DVC_LIST);
 			updateUI();
@@ -900,7 +1029,7 @@ void ViewHome::handler()
 		else
 		{
 			result = m->notificator()->result();
-			if (!result) 
+			if (!result)
 			{
 				m_alarm->initSize(350, 120)->setMessage(m->notificator()->message());
 				m_alarm->show();
@@ -936,17 +1065,50 @@ void ViewHome::prev()
 {
 	m->setPageNumber(m->pageNumber() - 1);
 	qDebug() << m->pageNumber();
-	n->getDeviceList()->request();
+	netGetDeviceList();
 }
 void ViewHome::next()
 {
 	m->setPageNumber(m->pageNumber() + 1);
 	qDebug() << m->pageNumber();
-	n->getDeviceList()->request();
+	netGetDeviceList();
 
 }
 
+#pragma region UTILITY FUNCTION.
 QString ViewHome::getCountDevice()
 {
 	return QString("%1").arg(m->countCurrentDevice()) + "/" + QString("%1").arg(m->countTotalDevice());
+}
+QString ViewHome::getCurrentDate(int month)
+{
+	m_currentYear = QDateTime::currentDateTime().addMonths(month).toString("yyyy");
+	m_currentMonth = QDateTime::currentDateTime().addMonths(month).toString("MM");
+	return m_currentYear + "." + m_currentMonth;
+}
+void ViewHome::netGetDeviceList()
+{
+	n->getDeviceList()->request();
+}
+void ViewHome::netGetRentList()
+{
+	n->getRentList(0)->request();
+}
+void ViewHome::netLogin()
+{
+	n->login(m->user()->id(), m->user()->pass())->request();
+}
+#pragma endregion
+
+
+
+void ViewHome::clearAutoLogin()
+{
+	s->setId("");
+	s->setPass("");
+	s->loginAuto(false);
+}
+ViewHome::~ViewHome()
+{
+
 }

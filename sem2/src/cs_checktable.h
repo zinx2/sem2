@@ -78,7 +78,7 @@ public:
 
 			if (!currentMonth.compare(QString("%1").arg(i + 1)))
 			{
-				table->setStyleSheet("QTableView {border-right:0px solid white; background-color:blue}");
+				table->setStyleSheet("QTableView {border-right:0px solid white; background-color: #0083B0}");
 			}
 			else
 			{

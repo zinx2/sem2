@@ -103,6 +103,16 @@ public:
 		setPixmap(QPixmap(path));
 		return this;
 	}
+	CPLabel* initText(QString txt)
+	{
+		setText(txt);
+		return this;
+	}
+	CPLabel* initVisible(bool visible)
+	{
+		setVisible(visible);
+		return this;
+	}
 };
 
 class CPWidget : public QWidget

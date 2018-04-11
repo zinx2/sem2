@@ -398,12 +398,14 @@ NetWorker* NetWorker::getDeviceListForAdmin(int searchType)
 	}));
 	return this;
 }
-NetWorker* NetWorker::getRentList(int noPart, int now)
+NetWorker* NetWorker::getRentList(int noAdmin, int type, int year, int month)
 {
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
-    queries.addQueryItem("sem_part_no", QString("%1").arg(noPart));
-    queries.addQueryItem("now_page", QString("%1").arg(m->pageNumber()));
+    queries.addQueryItem("sem_admin_no", QString("%1").arg(m->user()->noAdmin()));
+	queries.addQueryItem("search_type", QString("%1").arg(type));
+    queries.addQueryItem("search_year", QString("%1").arg(year));
+	queries.addQueryItem("search_month", QString("%1").arg(month));
 
     m_hosts.append(new NetHost("post", "/sem/getRentList", queries,
         [&]()-> void {
@@ -414,6 +416,7 @@ NetWorker* NetWorker::getRentList(int noPart, int now)
         bool isSuccess = jsonObj["is_success"].toBool();
         if (!isSuccess) {
             m_netReply->deleteLater();
+			qDebug() << jsonObj["error_message"].toString();
             emit next(); return;
         }
         int totalPage = jsonObj["total_page"].toInt();
@@ -439,6 +442,8 @@ NetWorker* NetWorker::getRentList(int noPart, int now)
             d->complete(obj["is_complete"].toInt());
             d->setSignAdmin(obj["confirm_signature"].toString());
             d->setPurpose(obj["purpose"].toString());
+			d->setNoPart(obj["sem_part_no"].toInt());
+			d->setNamePart(obj["sem_part_name"].toString());
             d->isInitial(obj["is_initial"].toInt());
             qDebug() << d->noRent() << "##/" << d->nameUser() << "/" << d->dateReturned();
             list.append(d);

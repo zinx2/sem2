@@ -9,6 +9,8 @@ public:
 	const QString navy01 = "#143246";
 	const QString navy02 = "#0a283c";
 	const QString navy03 = "#001e32";
+	const QString navy04 = "#26708d";
+
 
 	const QString grary01 = "#eeeeee";
 	const QString blue01 = "#2b78e4";
@@ -24,7 +26,7 @@ public:
 
 	const QString btnSelectedStyle = "color: white; background-color: #1caf9a; font-weight: bold;";
 	const QString btnReleasedStyle01 = "color: black; background-color: #eeeeee;  border-radius:5px;";
-	const QString btnReleasedStyle02 = "color: white; background-color: "+ navy01+";  border-radius:5px;";
+	const QString btnReleasedStyle02 = "color: white; background-color: " + navy01 + ";  border-radius:5px;";
 	const QString btnHoveredStyle = "color: white; background-color: blue; font-weight: bold;";
 
 	const QString btnReleasedStyleGray = "color: black; background-color: #eeeeee;  border-radius:5px;";
@@ -95,7 +97,7 @@ public:
 	/* VIEW SIZE */
 	int width() { return m_width; }
 	int height() { return m_height; }
-    QSize size() { return QSize(m_width, m_height); }
+	QSize size() { return QSize(m_width, m_height); }
 
 	/* COLOR */
 	Palette* palette() { return m_palette; }
@@ -164,7 +166,7 @@ public:
 
 		m_btnDVCList = new Button();
 		m_btnDVCList->setHeight(50);
-		m_btnDVCList->setIcon(":/imgs/devices_36dp.png");		
+		m_btnDVCList->setIcon(":/imgs/devices_36dp.png");
 		m_btnDVCList->setReleasedStyle(palette()->btnReleasedStyle01);
 		m_btnDVCList->setHoveredStyle(palette()->btnHoveredStyleGray);
 		m_btnDVCList->setSelectedStyle(palette()->btnSelectedStyleGray);
@@ -277,7 +279,7 @@ public:
 
 		m_btnLogout = new Button();
 		m_btnLogout->setName("로그아웃");
-		m_btnLogout->setWidth(100); 
+		m_btnLogout->setWidth(100);
 		m_btnLogout->setHeight(40);
 		m_btnLogout->setIcon(":/imgs/circle.png");
 		m_btnLogout->setReleasedStyle(palette()->btnReleasedStyleGray);
@@ -358,6 +360,41 @@ public:
 		m_btnNaviRight->setReleasedStyle(palette()->btnReleasedStyleNavy);
 		m_btnNaviRight->setHoveredStyle(palette()->btnHoveredStyleNavy);
 		m_btnNaviRight->setSelectedStyle(palette()->btnSelectedStyleNavy);
+
+		m_btnViewAll = new Button();
+		m_btnViewAll->setName("전체보기");
+		m_btnViewAll->setWidth(110);
+		m_btnViewAll->setHeight(40);
+		m_btnViewAll->setIcon(":/imgs/all_24dp.png");
+		m_btnViewAll->setReleasedStyle(palette()->btnReleasedStyleNavy);
+		m_btnViewAll->setHoveredStyle(palette()->btnHoveredStyleNavy);
+		m_btnViewAll->setSelectedStyle(palette()->btnSelectedStyleNavy);
+
+		m_btnViewDate = new Button();
+		m_btnViewDate->setName("월별보기");
+		m_btnViewDate->setWidth(110);
+		m_btnViewDate->setHeight(40);
+		m_btnViewDate->setIcon(":/imgs/calendar2_24dp.png");
+		m_btnViewDate->setReleasedStyle(palette()->btnReleasedStyleNavy);
+		m_btnViewDate->setHoveredStyle(palette()->btnHoveredStyleNavy);
+		m_btnViewDate->setSelectedStyle(palette()->btnSelectedStyleNavy);
+
+		m_btnCalendarPrev = new Button();
+		m_btnCalendarPrev->setName("◀");
+		m_btnCalendarPrev->setWidth(30);
+		m_btnCalendarPrev->setHeight(30);
+		m_btnCalendarPrev->setReleasedStyle(palette()->btnReleasedStyleNavy);
+		m_btnCalendarPrev->setHoveredStyle(palette()->btnHoveredStyleNavy);
+		m_btnCalendarPrev->setSelectedStyle(palette()->btnSelectedStyleNavy);
+
+		m_btnCalendarNext = new Button();
+		m_btnCalendarNext->setName("▶");
+		m_btnCalendarNext->setWidth(30);
+		m_btnCalendarNext->setHeight(30);
+		m_btnCalendarNext->setReleasedStyle(palette()->btnReleasedStyleNavy);
+		m_btnCalendarNext->setHoveredStyle(palette()->btnHoveredStyleNavy);
+		m_btnCalendarNext->setSelectedStyle(palette()->btnSelectedStyleNavy);
+
 	}
 	const int wGrid1_1 = 350;
 	const int hRow01 = 60;
@@ -368,6 +405,10 @@ public:
 	Button* btnEdit() { return m_btnEdit; }
 	Button* btnNaviLeft() { return m_btnNaviLeft; }
 	Button* btnNaviRight() { return m_btnNaviRight; }
+	Button* btnViewAll() { return m_btnViewAll; }
+	Button* btnViewDate() { return m_btnViewDate; }
+	Button* btnCalendarPrev() { return m_btnCalendarPrev; }
+	Button* btnCalendarNext() { return m_btnCalendarNext; }
 
 private:
 	Button* m_btnPrint;
@@ -376,6 +417,10 @@ private:
 	Button* m_btnEdit;
 	Button* m_btnNaviLeft;
 	Button* m_btnNaviRight;
+	Button* m_btnViewAll;
+	Button* m_btnViewDate;
+	Button* m_btnCalendarPrev;
+	Button* m_btnCalendarNext;
 };
 
 class StyleMainBody : public StyleBasic {
@@ -400,8 +445,8 @@ public:
 
 	public slots:
 	void initWidthBody()
-	{ 
-		m_content->setWidth(m_width - m_slide->width()); 
+	{
+		m_content->setWidth(m_width - m_slide->width());
 	}
 	void initHeightBody()
 	{
@@ -420,12 +465,12 @@ public:
 	StyleMain()
 	{
 		m_width = 1200; m_height = 840;
-		m_header = new StyleMainHeader(); 
-		m_body   = new StyleMainBody();
-		m_footer = new StyleMainFooter(); 
+		m_header = new StyleMainHeader();
+		m_body = new StyleMainBody();
+		m_footer = new StyleMainFooter();
 
 		m_header->setWidth(m_width);
-		m_body->setWidth(m_width); 
+		m_body->setWidth(m_width);
 		m_body->setHeight(m_height - m_header->height() - m_footer->height());
 		m_footer->setWidth(m_width);
 
@@ -438,14 +483,14 @@ public:
 	public slots:
 	void initWidthHeader() { m_header->setWidth(m_width); }
 	void initWidthFooter() { m_footer->setWidth(m_width); }
-	void initSizeBody() 
-	{ 
-		m_body->setWidth(m_width); 
-		m_body->setHeight(m_height - m_header->height() - m_footer->height()); 
+	void initSizeBody()
+	{
+		m_body->setWidth(m_width);
+		m_body->setHeight(m_height - m_header->height() - m_footer->height());
 	}
 
 	StyleMainHeader* header() { return m_header; }
-	StyleMainBody*   body()	  { return m_body;   }
+	StyleMainBody*   body() { return m_body; }
 	StyleMainFooter* footer() { return m_footer; }
 
 private:

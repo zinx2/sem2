@@ -47,7 +47,7 @@ public:
 		this->setFont(QFont(name, oldFont.pointSize(), oldFont.weight()));
 		return this;
 	}
-	Command* initName(QString name) { setText(name); return this; }
+	Command* initName(QString name) { this->setText(name); return this; }
 	Command* initIcon(QString iconPath) {
 		QPixmap pixmap(iconPath);
 		QIcon icon(pixmap);
@@ -65,6 +65,10 @@ public:
         setEnabled(enabled);
         return this;
     };
+	Command* initVisible(bool visible) {
+		setVisible(visible);
+		return this;
+	}
 	QPixmap m_pixmap;
 	QString m_txt;
 	int m_margin;
@@ -188,6 +192,7 @@ public:
 
 	}
 	int count() { return m_commands.size(); }
+	void clear() { m_commands.clear(); }
 	QList<Command*> commands() { return m_commands; }
 private:
 	QList<Command*> m_commands;

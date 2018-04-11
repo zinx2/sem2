@@ -45,7 +45,10 @@ public:
 				m->setNotificator(noti);
 			}
 			else {
-				NetWorker::instance()->login(m_edID->text(), m_edPass->text())->request();
+				m->user()->setId(m_edID->text());
+				m->user()->setPass(m_edPass->text());
+				m->request(true, Notificator::RequestLogin);
+				//NetWorker::instance()->login(m_edID->text(), m_edPass->text())->request();
 			}
 		});
 		m_btnSearch = (new Command("search", kr("아이디/비밀번호 찾기"), 190, 30))->initFontSize(13)->initStyleSheet(p->btnReleasedStyleNavy)

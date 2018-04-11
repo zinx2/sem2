@@ -71,7 +71,9 @@ class Rent : public QObject {
     Q_OBJECT
         Q_PROPERTY(int noRent READ noRent WRITE setNoRent NOTIFY noRentChanged)
         Q_PROPERTY(int noDevice READ noDevice WRITE setNoDevice NOTIFY noDeviceChanged)
+		Q_PROPERTY(int noPart READ noPart WRITE setNoPart NOTIFY noPartChanged)
         Q_PROPERTY(QString noAsset READ noAsset WRITE setNoAsset NOTIFY noAssetChanged)
+		Q_PROPERTY(QString namePart READ namePart WRITE setNamePart NOTIFY namePartChanged)
         Q_PROPERTY(QString nameDevice READ nameDevice WRITE setNameDevice NOTIFY nameDeviceChanged)
         Q_PROPERTY(QString nameUser READ nameUser WRITE setNameUser NOTIFY nameUserChanged)
         Q_PROPERTY(QString nameAdmin READ nameAdmin WRITE setNameAdmin NOTIFY nameAdminChanged)
@@ -86,7 +88,9 @@ class Rent : public QObject {
 public:
     int noRent() const { return m_noRent; }
     int noDevice() const { return m_noDevice; }
+	int noPart() const { return m_noPart; }
     QString noAsset() const { return m_noAsset; }
+	QString namePart() const { return m_namePart; }
     QString nameDevice() const { return m_nameDevice; }
     QString nameUser() const { return m_nameUser; }
     QString nameAdmin() const { return m_nameAdmin; }
@@ -99,9 +103,11 @@ public:
     bool initial() const { return m_initial; }
 
     public slots:
+	void setNoPart(const int m) { m_noPart = m; emit noPartChanged(); }
     void setNoRent(const int m) { m_noRent = m; emit noRentChanged(); }
     void setNoDevice(const int m) { m_noDevice = m; emit noAssetChanged(); }
     void setNoAsset(const QString &m) { m_noAsset = m; emit noDeviceChanged(); }
+	void setNamePart(const QString &m) { m_namePart = m; emit namePartChanged(); }
     void setNameDevice(const QString &m) { m_nameDevice = m; emit nameDeviceChanged(); }
     void setNameUser(const QString &m) { m_nameUser = m; emit nameUserChanged(); }
     void setNameAdmin(const QString &m) { m_nameAdmin = m; emit nameAdminChanged(); }
@@ -114,9 +120,11 @@ public:
     void isInitial(bool m) { m_initial = m; emit initialChanged(); }
 
 signals:
+	void noPartChanged();
     void noRentChanged();
     void noAssetChanged();
     void noDeviceChanged();
+	void namePartChanged();
     void nameDeviceChanged();
     void nameUserChanged();
     void nameAdminChanged();
@@ -129,9 +137,11 @@ signals:
     void initialChanged();
 
 private:
+	int m_noPart = -1;
     int m_noRent = -1;
     int m_noDevice = -1;
     QString m_noAsset;
+	QString m_namePart;
     QString m_nameDevice;
     QString m_nameUser;
     QString m_nameAdmin;
@@ -286,7 +296,7 @@ class Notificator : public QObject
 
 public:
     enum UpdateType{
-        None, File, Login, Join, Logout, Exit, LogoutRequest,
+        None, File, Login, RequestLogin, Join, Logout, Exit, LogoutRequest,
         DVIList, DVIModified, DVIBorrowedSearch, DVIReturnedSearch,
         DVIBorrowed,
         MNGList, MNGModified,
@@ -298,6 +308,8 @@ public:
         : m_result(result), m_message(message), m_type(type), m_dialog(dialog) { }
     Notificator(bool result, QString message, QString url, QString name, int type = UpdateType::None)
         : m_result(result), m_message(message), m_type(type), m_url(url), m_name(name) { }
+	Notificator(bool result, int type = UpdateType::None)
+		: m_result(result), m_type(type) {  }
 
     int type() const { return m_type; }
     int no() const { return m_no; }
@@ -472,6 +484,11 @@ public:
     void setMessageInt(int m) { m_messageInt = m; emit messageIntChanged(); }
 	void setUser(User* m) { m_user = m; emit userChanged(); }
 	void checkAuto(bool m) { m_checkedAuto = m; }
+
+	void request(bool result, Notificator::UpdateType type)
+	{
+		setNotificator(new Notificator(result, type));
+	}
 signals:
     void messageChanged();
     void itemSelected();

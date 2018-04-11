@@ -28,7 +28,10 @@ src/main.cpp \
 src/view_home.cpp \
 src/cs_networker.cpp \
 src/cs_initializer.cpp \
-    src/cs_signature.cpp
+src/cs_signature.cpp \
+src/cs_form_add.cpp \
+src/cs_form_edit.cpp
+
 
 HEADERS += \
 src/view_home.h \
@@ -41,14 +44,20 @@ src/cs_networker.h \
 src/cs_checktable.h \
 src/cs_command.h \
 src/cs_metatable.h \
-    src/cs_dialog.h \
-    src/cs_login.h \
-    src/cs_login.h \
-    src/cs_join.h \
-    src/cs_selector_employee.h \
-    src/cs_selector_part.h \
-    src/cs_barcoder.h \
-    src/cs_signature.h
+src/cs_dialog.h \
+src/cs_login.h \
+src/cs_login.h \
+src/cs_join.h \
+src/cs_selector_employee.h \
+src/cs_selector_part.h \
+src/cs_barcoder.h \
+src/cs_signature.h \
+src/cs_alarm.h \
+src/cs_form_add.h \
+src/cs_form_borrow.h \
+src/cs_form_edit.h \
+src/cs_question.h \
+src/cs_settings.h
 
 RESOURCES += \
     res.qrc

@@ -18,6 +18,9 @@
 #define TAG_EMP_LIST "employee_list"
 #define TAG_IMEXPORT "im_export" 
 
+#define TAG_VIEW_ALL "view_all"
+#define TAG_VIEW_DATE "view_date"
+
 class CheckTable;
 class ViewHome : public QWidget
 {
@@ -28,12 +31,12 @@ public:
     ~ViewHome();
 
 	void init();
-	void initializeUI();
 	public slots:
 	void updateUI();
 	void handler();
-	void getDeviceList();
-	void getRentList();
+	void netGetDeviceList();
+	void netGetRentList();
+	void netLogin();
 	void prev();
 	void next();
 
@@ -41,7 +44,10 @@ protected:
 	void resizeEvent(QResizeEvent *event) override;
 
 private:
-	bool initedUI = false;
+	int m_countMonth = 0;
+	bool m_initedUI = false;
+	QString m_currentYear;
+	QString m_currentMonth;
 
 	Alarm* m_alarm;
 	Question* m_question;
@@ -60,13 +66,14 @@ private:
 	QWidget* m_header;
 	CPLabel* m_headerCol01;
 	CPWidget* m_headerCol02;
+	//CPWidget* m_headerCol03;
 
 	StyleMainContent* m_styleContent;
 	QWidget* m_content;
-	CPWidget* m_contentRow1;
+	CPWidget* m_contentRow1 = nullptr;
+	CPWidget* m_contentGrid1_1 = nullptr;
 	CPWidget* m_contentGrid1_2 = nullptr;
-	CPLabel* m_lbCurrentContent;
-	CPWidget* m_contentRow2;
+	CPWidget* m_contentGrid1_3 = nullptr;
 
 	StyleMainSlide* m_styleSlide;
 	QWidget* m_slide;	
@@ -87,25 +94,36 @@ private:
 
 	QList<CPTable*> m_mntTables;
 
+	Command* m_btnSlideExt;
+
 	Command* m_btnLogout;
 	Command* m_btnPrint;
 	Command* m_btnEdit;
 	Command* m_btnRemove;
 	Command* m_btnNew;
 
+	Command* m_btnViewAll;
+	Command* m_btnViewDate;
+	CommandProvider* m_cmdProviderView = nullptr;
+
 	Command* m_btnDVCList;
 	Command* m_btnMNGList;
 	Command* m_btnMNTList;
 	Command* m_btnEMPList;
 	Command* m_btnImExport;
-	CommandProvider* m_cmdProvider;
+	CommandProvider* m_cmdProviderList;
 
-	CPWidget* m_navi = nullptr;
+	//CPWidget* m_navi = nullptr;
+	QWidget* m_navi = nullptr;
 	CPLabel* m_lbNavi;
 	CPLabel* m_lbUserInfo;
 
-	Command* m_btnNaviLeft;
-	Command* m_btnNaviRight;
+	Command* m_btnNaviPrev;
+	Command* m_btnNaviNext;
+
+	Command* m_btnCalendarPrev;
+	Command* m_btnCalendarNext;
+	CPLabel* m_lbCalendar;
 
 	CheckTable* m_checkTable = nullptr;
 	CPWidget* m_mntStack = nullptr;
@@ -119,10 +137,10 @@ private:
 
 	void newTable(int rowCount, QString tag);
 	void newNavi();
-	void newMetaTable(QString tag);
-	void newData(QString tag);
-	bool isCurrentMetaTable(QString tag);
+	//bool isCurrentMetaTable(QString tag);
 
 	QString getCountDevice();
+	QString getCurrentDate(int month=0);
+	void clearAutoLogin();
 	
 };

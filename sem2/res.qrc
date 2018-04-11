@@ -12,5 +12,7 @@
         <file>imgs/printer_24dp.png</file>
         <file>imgs/remove_24dp.png</file>
         <file>imgs/logo.png</file>
+        <file>imgs/all_24dp.png</file>
+        <file>imgs/calendar2_24dp.png</file>
     </qresource>
 </RCC>
