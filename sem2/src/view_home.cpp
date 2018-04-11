@@ -18,23 +18,26 @@ ViewHome::ViewHome(QWidget *parent)
 	m_question = new Question(kr("알림"), "", 350, 200);
 	connect(m, SIGNAL(alarmedChanged()), this, SLOT(handler()));
 
+	m->request(true, Notificator::RequestPartsList);
+
 	init();
 	//clearAutoLogin();
-	if (s->isLoginAuto())
-	{
-		m->user()->setId(s->id());
-		m->user()->setPass(s->pass());
-		m->request(true, Notificator::RequestLogin);
-	}
-	else
-	{
-		m_login = new CPLogin();
-		m_login->setParent(this);
-		m_login->show();
-	}
-	//n->getDeviceList()->request();
+	/* POSTPHONE AUTO LOGIN. */
+	//if (s->isLoginAuto())
+	//{
+	//	m->user()->setId(s->id());
+	//	m->user()->setPass(s->pass());
+	//	m->request(true, Notificator::RequestLogin);
+	//}
+	//else
+	//{
+	m_login = new CPLogin();
+	m_login->setParent(this);
+	m_login->show();
+	//}
 	connect(m, SIGNAL(devicesChanged()), this, SLOT(updateUI()));
 	connect(m, SIGNAL(rentsChanged()), this, SLOT(updateUI()));
+	connect(m, SIGNAL(singsChanged()), this, SLOT(updateUI()));
 	//setFixedSize(0, 0);
 	//run();
 }
@@ -56,8 +59,8 @@ void ViewHome::init()
 	layout()->setSpacing(0);
 
 	connect(m_styleSlide, SIGNAL(extendedChanged()), this, SLOT(onSlided()));
-	
-	#pragma region INITIALIZE BUTTONS IN SLIDE.
+
+#pragma region INITIALIZE BUTTONS IN SLIDE.
 	m_btnSlideExt = (new Command("slide_ext", kr("◀"), m_styleSlide->wCol01, m_styleSlide->height()))
 		->initStyleSheet(m_styleSlide->btnExtReleasedSheet)->initFontSize(8)
 		->initEffect(m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtHoverdSheet)
@@ -76,13 +79,13 @@ void ViewHome::init()
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(":/imgs/circle.png")->initFunc([=]()
-		{
-			m_question->initSize(350, 120)->setMessage(kr("로그아웃 하시겠습니까?"));
-			m_question->func = [=]() {
-				n->logout()->request();
-			};
-			m_question->show();
-		});
+	{
+		m_question->initSize(350, 120)->setMessage(kr("로그아웃 하시겠습니까?"));
+		m_question->func = [=]() {
+			n->logout()->request();
+		};
+		m_question->show();
+	});
 
 	metaBtn = m_styleSlide->btnDVCList();
 	m_btnDVCList =
@@ -91,10 +94,10 @@ void ViewHome::init()
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(metaBtn->icon(), metaBtn->name())
 		->initFunc([=]()
-		{
-			netGetDeviceList();
-			initDVCList();
-		});
+	{
+		netGetDeviceList();
+		initDVCList();
+	});
 
 	metaBtn = m_styleSlide->btnMNGList();
 	m_btnMNGList =
@@ -103,7 +106,7 @@ void ViewHome::init()
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(metaBtn->icon(), metaBtn->name())->initFunc([=]()
 	{
-		netGetRentList();
+		netGetRentList(0);
 		initMNGList();
 	});
 
@@ -114,9 +117,9 @@ void ViewHome::init()
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(metaBtn->icon(), metaBtn->name())
 		->initFunc([=]()
-		{
-			initMNTList();
-		});
+	{
+		initMNTList();
+	});
 
 	metaBtn = m_styleSlide->btnEMPList();
 	m_btnEMPList =
@@ -125,9 +128,9 @@ void ViewHome::init()
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(metaBtn->icon(), metaBtn->name())
 		->initFunc([=]()
-		{
-			initEMPList();
-		});
+	{
+		initEMPList();
+	});
 
 	metaBtn = m_styleSlide->btnImExport();
 	m_btnImExport = (new Command(TAG_IMEXPORT, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
@@ -142,9 +145,9 @@ void ViewHome::init()
 
 	m_cmdProviderList = new CommandProvider();
 	m_cmdProviderList->append(m_btnDVCList)->append(m_btnMNGList)->append(m_btnMNTList)->append(m_btnEMPList);
-	#pragma endregion
-	
-	#pragma region  INITIALIZE HEADER.
+#pragma endregion
+
+#pragma region  INITIALIZE HEADER.
 	m_header = new QWidget(this);
 	m_header->setLayout(new QHBoxLayout);
 	m_header->layout()->setMargin(0);
@@ -171,7 +174,7 @@ void ViewHome::init()
 	m_header->layout()->addWidget(m_headerCol01);
 	m_header->layout()->addWidget(m_headerCol02);
 #pragma endregion
-	
+
 	m_body = new QWidget(this);
 	m_body->setLayout(new QHBoxLayout);
 	m_body->layout()->setMargin(0);
@@ -212,7 +215,7 @@ void ViewHome::init()
 	layout()->addWidget(m_header);
 	layout()->addWidget(m_body);
 	layout()->addWidget(m_footer);
-	
+
 	m_body->layout()->addWidget(m_content);
 	m_body->layout()->addWidget(m_slide);
 
@@ -270,11 +273,11 @@ void ViewHome::updateUI()
 	m_footer->setFixedSize(wFooter, hFooter);
 	m_content->setFixedSize(wContent, hContent);
 	m_contentRow1->initWidth(wContent);
-	
+
 	int wGrid1_1 = m_contentRow1->width() / 2;
 	int wGrid1_2 = 0;
 	int wGrid1_3 = m_contentRow1->width() / 2;
-	if (!m_cmdProviderList->selectedTag().compare(TAG_MNG_LIST) || 
+	if (!m_cmdProviderList->selectedTag().compare(TAG_MNG_LIST) ||
 		!m_cmdProviderList->selectedTag().compare(TAG_MNT_LIST)) {
 		wGrid1_1 = m_contentRow1->width() / 3;
 		wGrid1_2 = m_contentRow1->width() / 3;
@@ -362,7 +365,7 @@ void ViewHome::updateUI()
 		}
 	}
 	else if (!m_cmdProviderList->selectedTag().compare(TAG_MNG_LIST))
-	{		
+	{
 		newTable(100, TAG_MNG_LIST);
 		MetaTableMNG* castedMetaTable = qobject_cast<MetaTableMNG*>(m_metaTable);
 		m_metaTable->setWidth(m_content->width());
@@ -531,7 +534,7 @@ void ViewHome::updateUI()
 void ViewHome::initDVCList()
 {
 	if (!initPage(TAG_DVC_LIST, kr("장비목록"))) return;
-	#pragma region INITIALIZE BUTTONS.
+#pragma region INITIALIZE BUTTONS.
 	Button* metaBtn;
 	metaBtn = m_styleContent->btnPrint();
 	m_btnPrint = (new Command("print", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
@@ -602,21 +605,24 @@ void ViewHome::initDVCList()
 void ViewHome::initMNGList()
 {
 	if (!initPage(TAG_MNG_LIST, kr("관리대장"))) return;
-	
-	#pragma region INITIALIZE BUTTONS.
+
+#pragma region INITIALIZE BUTTONS.
 	Button* metaBtn;
 	metaBtn = m_styleContent->btnViewAll();
 	m_btnViewAll = (new Command(TAG_VIEW_ALL, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(m_styleContent->btnViewAll()->icon())
-		->initFunc([=]() {
+		->initFunc([=]() {		
+		if (m_cmdProviderView->selectedTag().compare(TAG_VIEW_ALL))
+		{			
+			netGetRentList(0);
 			m_cmdProviderView->select(TAG_VIEW_ALL);
 			m_btnCalendarPrev->setVisible(false);
 			m_lbCalendar->setVisible(false);
 			m_btnCalendarNext->setVisible(false);
-			updateUI();
-		});
+		}		
+	});
 
 	metaBtn = m_styleContent->btnViewDate();
 	m_btnViewDate = (new Command(TAG_VIEW_DATE, kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
@@ -624,23 +630,26 @@ void ViewHome::initMNGList()
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initIcon(m_styleContent->btnViewDate()->icon())
 		->initFunc([=]() {
+		if (m_cmdProviderView->selectedTag().compare(TAG_VIEW_DATE))
+		{
+			netGetRentList(1);
 			m_lbCalendar->initText(getCurrentDate(0));
 			m_cmdProviderView->select(TAG_VIEW_DATE);
 			m_btnCalendarPrev->setVisible(true);
 			m_lbCalendar->setVisible(true);
 			m_btnCalendarNext->setVisible(true);
-			updateUI();
-		});
+		}
+	});
 
 	metaBtn = m_styleContent->btnCalendarPrev();
 	m_btnCalendarPrev =
 		(new Command("cal_prev", kr(metaBtn->name()), metaBtn->width(), metaBtn->height()))
 		->initStyleSheet(metaBtn->releasedStyle())->initVisible(false)
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
-		->initFunc([=]() { 
-			m_lbCalendar->initText(getCurrentDate(--m_countMonth));
-			updateUI();
-		});
+		->initFunc([=]() {
+		m_lbCalendar->initText(getCurrentDate(--m_countMonth));
+		updateUI();
+	});
 
 	metaBtn = m_styleContent->btnCalendarNext();
 	m_btnCalendarNext =
@@ -648,11 +657,11 @@ void ViewHome::initMNGList()
 		->initStyleSheet(metaBtn->releasedStyle())->initVisible(false)
 		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
 		->initFunc([=]() {
-			m_lbCalendar->initText(getCurrentDate(++m_countMonth));
-			updateUI();
-		});
+		m_lbCalendar->initText(getCurrentDate(++m_countMonth));
+		updateUI();
+	});
 
-	#pragma endregion
+#pragma endregion
 
 	if (m_cmdProviderView != nullptr) m_cmdProviderView->clear();
 	else m_cmdProviderView = new CommandProvider();
@@ -660,10 +669,10 @@ void ViewHome::initMNGList()
 	m_cmdProviderView->select(TAG_VIEW_ALL);
 
 	m_lbCalendar = (new CPLabel(100, 30, getCurrentDate(0)))->initVisible(false)
-					->initAlignment(Qt::AlignCenter)->initFontSize(15);
+		->initAlignment(Qt::AlignCenter)->initFontSize(15);
 	m_contentGrid1_2->append(m_btnCalendarPrev)->append(m_lbCalendar)->append(m_btnCalendarNext);
 	m_contentGrid1_3->append(m_btnViewAll)->append(m_btnViewDate);
-	#pragma endregion
+#pragma endregion
 
 	updateUI();
 }
@@ -672,7 +681,7 @@ void ViewHome::initMNTList()
 	if (!initPage(TAG_MNT_LIST, kr("월별대장"))) return;
 	//newMetaTable(TAG_MNT_LIST);
 
-	#pragma region INITIALIZE BUTTONS.
+#pragma region INITIALIZE BUTTONS.
 	Button* metaBtn;
 	metaBtn = m_styleContent->btnCalendarPrev();
 	m_btnCalendarPrev =
@@ -693,7 +702,7 @@ void ViewHome::initMNTList()
 		m_lbCalendar->initText(getCurrentDate(++m_countMonth));
 		updateUI();
 	});
-	#pragma endregion
+#pragma endregion
 
 	m_lbCalendar = (new CPLabel(100, 30, getCurrentDate(0)))
 		->initAlignment(Qt::AlignCenter)->initFontSize(15);
@@ -762,13 +771,13 @@ bool ViewHome::initPage(QString tag, QString titleTxt)
 	m->setPageNumber(1);		/* INITIALIZE PAGE NUMBER */
 	m_cmdProviderList->select(tag); /* SELECT BUTTON & UPDATE TAG */
 
-	#pragma region INITIALIZE MetaTable.
+#pragma region INITIALIZE MetaTable.
 	if (!tag.compare(TAG_DVC_LIST)) m_metaTable = new MetaTableDVC();
 	else if (!tag.compare(TAG_MNG_LIST)) m_metaTable = new MetaTableMNG();
 	else if (!tag.compare(TAG_MNT_LIST)) m_metaTable = new MetaTableMNT();
 	else if (!tag.compare(TAG_EMP_LIST)) m_metaTable = new MetaTableEMP();
 #pragma endregion
-	#pragma region INITIALIZE Widgets.
+#pragma region INITIALIZE Widgets.
 	if (m_contentGrid1_1 != nullptr)
 	{
 		delete m_contentGrid1_1;
@@ -814,8 +823,8 @@ bool ViewHome::initPage(QString tag, QString titleTxt)
 		delete m_mntScrArea;
 		m_mntScrArea = nullptr;
 	}
-	#pragma endregion
-	#pragma region INITIALIZE Row1
+#pragma endregion
+#pragma region INITIALIZE Row1
 	m_contentRow1 = (new CPWidget(m_styleContent->width(), m_styleContent->hRow01, new QHBoxLayout))
 		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 	m_content->layout()->addWidget(m_contentRow1);
@@ -827,27 +836,27 @@ bool ViewHome::initPage(QString tag, QString titleTxt)
 		wGrid1_1 = m_contentRow1->width() / 3;
 		wGrid1_2 = m_contentRow1->width() / 3;
 		wGrid1_3 = m_contentRow1->width() / 3;
-	} 		
+	}
 
 	m_contentGrid1_1 = (new CPWidget(wGrid1_1, m_styleContent->hRow01, new QHBoxLayout))
 		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter)->initContentsMargins(10, 0, 0, 0)->initSpacing(10)
 		->append((new CPLabel(20, 20))->initImage(":/imgs/circle.png"))
 		->append((new CPLabel(m_styleContent->wGrid1_1 - 40, m_styleContent->hRow01, titleTxt))->initFontSize(20)
-					->initAlignment(Qt::AlignLeft | Qt::AlignVCenter));
+			->initAlignment(Qt::AlignLeft | Qt::AlignVCenter));
 	m_contentRow1->append(m_contentGrid1_1);
-	
+
 	m_contentGrid1_2 = (new CPWidget(wGrid1_2, m_styleContent->hRow01, new QHBoxLayout))
 		->initSpacing(10)
 		->initAlignment(Qt::AlignCenter);
-		//->initContentsMargins(0, 20, 0, 0);
+	//->initContentsMargins(0, 20, 0, 0);
 	m_contentRow1->append(m_contentGrid1_2);
-	
+
 	m_contentGrid1_3 = (new CPWidget(wGrid1_3, m_styleContent->hRow01, new QHBoxLayout))
 		->initSpacing(10)
 		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
 		->initContentsMargins(0, 10, 0, 0);
 	m_contentRow1->append(m_contentGrid1_3);
-	#pragma endregion
+#pragma endregion
 
 	return true;
 }
@@ -979,6 +988,11 @@ void ViewHome::handler()
 				if (m_login != nullptr)
 					m_login->hide();
 
+				if (m->user()->typeAlarm() == 1)
+				{
+					m_alarm->initSize(350, 120)->setMessage(m->user()->textAlarm());
+					m_alarm->show();
+				}
 			}
 			else {
 				m_alarm->initSize(350, 120)->setMessage(m->notificator()->message());
@@ -1026,6 +1040,10 @@ void ViewHome::handler()
 			//newData(TAG_DVC_LIST);
 			updateUI();
 		}
+		else if (noti->type() == Notificator::RequestPartsList)
+		{
+			n->getPartList()->request();
+		}
 		else
 		{
 			result = m->notificator()->result();
@@ -1035,28 +1053,6 @@ void ViewHome::handler()
 				m_alarm->show();
 			}
 		}
-		//if (m->notificator()->type() == Notificator::DVIBorrowedSearch) return;
-	//	if (m->notificator()->type() == Notificator::DVIReturnedSearch) return;
-	//	bool result = m->notificator()->result();
-	//	if (m->notificator()->dialog()) {
-	//		m_alarm->setMessage(result ?
-	//			"성공적으로 반영되었습니다." : m->notificator()->message());
-	//		m_alarm->show();
-	//	}
-
-	//	if (result)
-	//	{
-	//		if (m->notificator()->type() == Notificator::DVIList) listDVIces();
-	//		else if (m->notificator()->type() == Notificator::MNGList) listMNGements();
-	//		else if (m->notificator()->type() == Notificator::DVIModified) QTimer::singleShot(500, this, SLOT(listDVIces()));
-	//		else if (m->notificator()->type() == Notificator::MNGModified) QTimer::singleShot(500, this, SLOT(listMNGements()));
-	//		else if (m->notificator()->type() == Notificator::EMPList) listEMPloyees();
-	//	}
-	//	else
-	//	{
-	//		m_alarm->setMessage(m->notificator()->message());
-	//		m_alarm->show();
-	//	}
 		m->alarm(false);
 	}
 }
@@ -1086,13 +1082,41 @@ QString ViewHome::getCurrentDate(int month)
 	m_currentMonth = QDateTime::currentDateTime().addMonths(month).toString("MM");
 	return m_currentYear + "." + m_currentMonth;
 }
-void ViewHome::netGetDeviceList()
+void ViewHome::netGetDeviceList(int searchType)
 {
-	n->getDeviceList()->request();
+	switch (m->user()->typeAdmin())
+	{
+	case 1:
+	case 2:
+	{
+		n->getDeviceList(searchType)->request();
+		break;
+	}
+	case 3:
+	case 4:
+	{
+		n->getDeviceListForAdmin(0, searchType)->request();
+		break;
+	}
+	}
 }
-void ViewHome::netGetRentList()
+void ViewHome::netGetRentList(int type, int noPart)
 {
-	n->getRentList(0)->request();
+	switch (m->user()->typeAdmin())
+	{
+	case 1:
+	case 2:
+	{
+		n->getRentList(type, m_currentYear.toInt(), m_currentMonth.toInt())->request();
+		break;
+	}
+	case 3:
+	case 4:
+	{
+		n->getRentListForAdmin(type, m_currentYear.toInt(), m_currentMonth.toInt(), noPart)->request();
+		break;
+	}
+	}
 }
 void ViewHome::netLogin()
 {

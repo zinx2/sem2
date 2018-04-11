@@ -22,50 +22,50 @@ NetWorker::~NetWorker()
 
 void NetWorker::request()
 {
-    if (m_hosts.isEmpty())
-        return;
+    //if (m_hosts.isEmpty())
+    //    return;
 
-    NetHost* host = m_hosts.front();
-    QNetworkRequest req;
+    //NetHost* host = m_hosts.front();
+    //QNetworkRequest req;
 
-    if (!host->type().compare("post"))
-    {
-        req = createRequest(host->addr(), host->queries());
-        m_netReply = m_netManager.post(req, req.url().query().toUtf8());
-    }
-    else if (!host->type().compare("get"))
-    {
-        req = createRequest(host->addr(), host->queries());
-        m_netReply = m_netManager.get(req);
-    }
-    else if (!host->type().compare("file"))
-    {
-        QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
-        QHttpPart imagePart;
-        imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/jpeg")); /*jpeg*/
-        imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"" + host->file() + "\""));
+    //if (!host->type().compare("post"))
+    //{
+    //    req = createRequest(host->addr(), host->queries());
+    //    m_netReply = m_netManager.post(req, req.url().query().toUtf8());
+    //}
+    //else if (!host->type().compare("get"))
+    //{
+    //    req = createRequest(host->addr(), host->queries());
+    //    m_netReply = m_netManager.get(req);
+    //}
+    //else if (!host->type().compare("file"))
+    //{
+    //    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    //    QHttpPart imagePart;
+    //    imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/jpeg")); /*jpeg*/
+    //    imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"" + host->file() + "\""));
 
-        QFile *file = new QFile(host->file());
-        file->open(QIODevice::ReadOnly);
-        imagePart.setBodyDevice(file);
-        file->setParent(multiPart);
-        multiPart->append(imagePart);
+    //    QFile *file = new QFile(host->file());
+    //    file->open(QIODevice::ReadOnly);
+    //    imagePart.setBodyDevice(file);
+    //    file->setParent(multiPart);
+    //    multiPart->append(imagePart);
 
-        QUrl url(DOMAIN_NAME + host->addr());
-        if (!host->queries().isEmpty())
-            url.setQuery(host->queries());
+    //    QUrl url(DOMAIN_NAME + host->addr());
+    //    if (!host->queries().isEmpty())
+    //        url.setQuery(host->queries());
 
-        req.setUrl(url);
-        m_netReply = m_netManager.post(req, multiPart);
-        multiPart->setParent(m_netReply);
-    }
-    else return;
+    //    req.setUrl(url);
+    //    m_netReply = m_netManager.post(req, multiPart);
+    //    multiPart->setParent(m_netReply);
+    //}
+    //else return;
 
-    qDebug() << "[" << host->type() << "] Called Function: " + req.url().toString();
-    connect(m_netReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, QOverload<QNetworkReply::NetworkError>::of(&NetWorker::httpError));
-    connect(m_netReply, &QNetworkReply::finished, host->func());
-    connect(m_netReply, SIGNAL(uploadProgress(qint64, qint64)), this, SLOT(progress(qint64, qint64)));
-    m_hosts.pop_front();
+    //qDebug() << "[" << host->type() << "] Called Function: " + req.url().toString();
+    //connect(m_netReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, QOverload<QNetworkReply::NetworkError>::of(&NetWorker::httpError));
+    //connect(m_netReply, &QNetworkReply::finished, host->func());
+    //connect(m_netReply, SIGNAL(uploadProgress(qint64, qint64)), this, SLOT(progress(qint64, qint64)));
+    //m_hosts.pop_front();
 }
 
 void NetWorker::done()
@@ -341,15 +341,14 @@ NetWorker* NetWorker::getDeviceList(int searchType, int now)
     }));
     return this;
 }
-NetWorker* NetWorker::getDeviceListForAdmin(int searchType)
+NetWorker* NetWorker::getDeviceListForAdmin(int noPart, int searchType, int now)
 {
 	/********** SET URL QUERIES **********/
 	QUrlQuery queries;
-	//queries.addQueryItem("sem_admin_no", QString("%1").arg(m->user()->noAdmin()));
-	//queries.addQueryItem("sem_part_no", QString("%1").arg(m->user()->noPart()));
+	queries.addQueryItem("sem_admin_no", QString("%1").arg(m->user()->noAdmin()));
+	queries.addQueryItem("sem_part_no", QString("%1").arg(noPart));
 	queries.addQueryItem("search_type", QString("%1").arg(searchType));
 	queries.addQueryItem("now_page", QString("%1").arg(m->pageNumber()));
-	qDebug() << m->pageNumber();
 
 	m_hosts.append(new NetHost("post", "/sem/getDeviceListForAdmin", queries,
 		[&]()-> void {
@@ -398,7 +397,7 @@ NetWorker* NetWorker::getDeviceListForAdmin(int searchType)
 	}));
 	return this;
 }
-NetWorker* NetWorker::getRentList(int noAdmin, int type, int year, int month)
+NetWorker* NetWorker::getRentList(int type, int year, int month)
 {
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
@@ -457,6 +456,138 @@ NetWorker* NetWorker::getRentList(int noAdmin, int type, int year, int month)
     }));
     return this;
 }
+NetWorker* NetWorker::getRentListForAdmin(int type, int year, int month, int noPart)
+{
+	/********** SET URL QUERIES **********/
+	QUrlQuery queries;
+	queries.addQueryItem("sem_admin_no", QString("%1").arg(m->user()->noAdmin()));
+	queries.addQueryItem("search_type", QString("%1").arg(type));
+	queries.addQueryItem("search_year", QString("%1").arg(year));
+	queries.addQueryItem("search_month", QString("%1").arg(month));
+	queries.addQueryItem("sem_part_no", QString("%1").arg(noPart));
+
+	m_hosts.append(new NetHost("post", "/sem/getRentListForAdmin", queries,
+		[&]()-> void {
+		QMutexLocker locker(&m_mtx);
+
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
+		QJsonObject jsonObj = jsonDoc.object();
+		bool isSuccess = jsonObj["is_success"].toBool();
+		if (!isSuccess) {
+			m_netReply->deleteLater();
+			qDebug() << jsonObj["error_message"].toString();
+			emit next(); return;
+		}
+		int totalPage = jsonObj["total_count"].toInt();
+
+		QList<Rent*> list;
+		QJsonArray jsonArr = jsonObj["data_list"].toArray();
+		int count = 0;
+		foreach(const QJsonValue &value, jsonArr)
+		{
+			QJsonObject obj = value.toObject();
+			Rent *d = new Rent();
+			d->setNoRent(obj["rent_no"].toInt());
+			d->setNameUser(obj["sem_user_name"].toString());
+			d->setNoDevice(obj["sem_device_no"].toInt());
+			d->setNameDevice(obj["device_name"].toString());
+			d->setNoAsset(obj["asset_no"].toString());
+			d->setDateBorrowed(obj["rent_date"].toString());
+			QString confirmer = obj["confirm_user_name"].toString();
+			QString dateReturned = confirmer.isEmpty() ? "" : obj["return_date"].toString();
+			d->setNameAdmin(confirmer);
+			d->setDateReturned(dateReturned);
+			d->setSignUser(obj["signature"].toString());
+			d->complete(obj["is_complete"].toInt());
+			d->setSignAdmin(obj["confirm_signature"].toString());
+			d->setPurpose(obj["purpose"].toString());
+			d->setNoPart(obj["sem_part_no"].toInt());
+			d->setNamePart(obj["origin_part_name"].toString());
+			d->isInitial(obj["is_initial"].toInt());
+			qDebug() << d->noRent() << "##/" << d->nameUser() << "/" << d->dateReturned();
+			list.append(d);
+			count++;
+		}
+		m->setCountTotalDevice(totalPage);
+		m->setCountCurrentDevice((m->pageNumber() - 1)*COUNT_PAGE + count);
+		m->setRents(list);
+		m_netReply->deleteLater();
+		emit next();
+	}));
+	return this;
+}
+NetWorker* NetWorker::getTotalRentListMonth(int year, int month)
+{
+	/********** SET URL QUERIES **********/
+	QUrlQuery queries;
+	queries.addQueryItem("sem_admin_no", QString("%1").arg(m->user()->noAdmin()));
+	queries.addQueryItem("year", QString("%1").arg(year));
+	queries.addQueryItem("month", QString("%1").arg(month));
+
+	m_hosts.append(new NetHost("post", "/sem/getTotalRentListMonth", queries,
+		[&]()-> void {
+		QMutexLocker locker(&m_mtx);
+
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
+		QJsonObject jsonObj = jsonDoc.object();
+		bool isSuccess = jsonObj["is_success"].toBool();
+		if (!isSuccess) {
+			m_netReply->deleteLater();
+			qDebug() << jsonObj["error_message"].toString();
+			emit next(); return;
+		}
+		int totalPage = jsonObj["total_count"].toInt();
+
+		QList<Rent*> list;
+		QJsonArray jsonArr = jsonObj["data_list1"].toArray();
+		foreach(const QJsonValue &value, jsonArr)
+		{
+			QJsonObject obj = value.toObject();
+			Rent *d = new Rent();
+			d->setNoRent(obj["rent_no"].toInt());
+			d->setNameUser(obj["sem_user_name"].toString());
+			d->setNoDevice(obj["sem_device_no"].toInt());
+			d->setNameDevice(obj["device_name"].toString());
+			d->setNoAsset(obj["asset_no"].toString());
+			d->setDateBorrowed(obj["rent_date"].toString());
+			QString confirmer = obj["confirm_user_name"].toString();
+			QString dateReturned = confirmer.isEmpty() ? "" : obj["return_date"].toString();
+			d->setNameAdmin(confirmer);
+			d->setDateReturned(dateReturned);
+			d->setSignUser(obj["signature"].toString());
+			d->complete(obj["is_complete"].toInt());
+			d->setSignAdmin(obj["confirm_signature"].toString());
+			d->setPurpose(obj["purpose"].toString());
+			//d->setNoPart(obj["sem_part_no"].toInt());
+			d->setNamePart(obj["origin_part_name"].toString());
+			d->isInitial(obj["is_initial"].toInt());
+			qDebug() << d->noRent() << "##/" << d->nameUser() << "/" << d->dateReturned();
+			list.append(d);
+		}
+		m->setRents(list);
+
+		QList<Sign*> list2;
+		jsonArr = jsonObj["data_list2"].toArray();
+		foreach(const QJsonValue &value, jsonArr)
+		{
+			QJsonObject obj = value.toObject();
+			Sign *s = new Sign();
+			s->setNoSign(obj["superior_sign_no"].toInt());
+			s->setNamePart(obj["sem_part_name"].toString());
+			s->setYear(obj["year"].toInt());
+			s->setMonth(obj["month"].toInt());
+			s->complete(obj["is_complete"].toInt() > 0 ? true : false);
+			qDebug() << s->noSign() << "##/" << s->namePart() << "/" << s->year();
+			list2.append(s);
+		}
+		m->setSignatures(list2);
+
+		m_netReply->deleteLater();
+		emit next();
+	}));
+	return this;
+}
+
 NetWorker* NetWorker::borrowDevice(QString barcode, int noUser, QString purpose)
 {
     /********** SET URL QUERIES **********/

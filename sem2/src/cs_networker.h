@@ -70,8 +70,10 @@ public:
     NetWorker* getUserList();
     NetWorker* getPartList();
     NetWorker* getDeviceList(int searchType = 0, int now = 1);
-	NetWorker* getDeviceListForAdmin(int searchType=0);
-    NetWorker* getRentList(int noAdmin, int type=0, int year=0, int month=0); /* type=0:전체, type=1:년,월 */
+	NetWorker* getDeviceListForAdmin(int noPart, int searchType=0, int now = 1);
+    NetWorker* getRentList(int type=0, int year=0, int month=0); /* type=0:전체, type=1:년,월 */
+	NetWorker* getRentListForAdmin(int type = 0, int year = 0, int month = 0, int noPart = 0); /* type=0:전체, type=1:년,월 */	
+	NetWorker* getTotalRentListMonth(int year, int month);
 
     NetWorker* borrowDevice(QString barcode, int noUser, QString purpose);
     NetWorker* returnDevice(QString barcode, int noAdmin, int noDevice, bool isInitial=false);

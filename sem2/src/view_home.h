@@ -34,8 +34,8 @@ public:
 	public slots:
 	void updateUI();
 	void handler();
-	void netGetDeviceList();
-	void netGetRentList();
+	void netGetDeviceList(int searchType=0);
+	void netGetRentList(int type, int noPart = 0);
 	void netLogin();
 	void prev();
 	void next();
@@ -70,6 +70,7 @@ private:
 
 	StyleMainContent* m_styleContent;
 	QWidget* m_content;
+	CPWidget* m_wdSign = nullptr;
 	CPWidget* m_contentRow1 = nullptr;
 	CPWidget* m_contentGrid1_1 = nullptr;
 	CPWidget* m_contentGrid1_2 = nullptr;

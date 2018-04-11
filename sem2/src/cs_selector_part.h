@@ -17,8 +17,8 @@ public:
         m_width = width; m_height = height;
         setModal(true);
 
-        NetWorker* n = NetWorker::instance();
-        n->getPartList()->request();
+        /*NetWorker* n = NetWorker::instance();
+        n->getPartList()->request();*/
 
         Palette* p = new Palette();
         m_btnConfirm = (new Command("btn_confirm", kr("확인"), 80, 40))->initFontSize(12)->initStyleSheet(p->btnReleasedStyleNavy)

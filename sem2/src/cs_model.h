@@ -283,6 +283,44 @@ private:
     bool m_manager = false;
 };
 
+class Sign : public QObject
+{
+	Q_OBJECT
+		Q_PROPERTY(int noSign READ noSign WRITE setNoSign NOTIFY noSignChanged)
+		Q_PROPERTY(QString namePart READ namePart WRITE setNamePart NOTIFY namePartChanged)
+		Q_PROPERTY(int year READ year WRITE setYear NOTIFY yearChanged)
+		Q_PROPERTY(int month READ month WRITE setMonth NOTIFY monthChanged)
+		Q_PROPERTY(bool completed READ completed WRITE complete NOTIFY completedChanged)
+
+public:
+	int noSign() const { return m_noSign; }
+	QString namePart() const { return m_namePart; }
+	int year() const { return m_year; }
+	int month() const { return m_month; }
+	bool completed() const { return m_completed; }
+
+	public slots :
+	void setNoSign(const int m) { m_noSign = m; emit noSignChanged(); }
+	void setNamePart(const QString m) { m_namePart = m; emit namePartChanged(); }
+	void setYear(const int m) { m_year = m; emit yearChanged(); }
+	void setMonth(const int m) { m_month = m; emit monthChanged(); }
+	void complete(const bool m) { m_completed = m; emit completedChanged(); }
+
+signals:
+	void noSignChanged();
+	void namePartChanged();
+	void yearChanged();
+	void monthChanged();
+	void completedChanged();
+
+private:
+	int m_noSign = -1;
+	QString m_namePart = "";
+	int m_year = -1;
+	int m_month = -1;
+	bool m_completed = false;
+};
+
 class Notificator : public QObject
 {
     Q_OBJECT
@@ -300,7 +338,7 @@ public:
         DVIList, DVIModified, DVIBorrowedSearch, DVIReturnedSearch,
         DVIBorrowed,
         MNGList, MNGModified,
-        EMPList
+        EMPList, RequestPartsList
     };
 
     Notificator() { }
@@ -370,6 +408,7 @@ class Model : public QObject {
         Q_PROPERTY(QList<Part*> parts READ parts WRITE setParts NOTIFY partsChanged)
         Q_PROPERTY(QList<Employee*> employees READ employees WRITE setEmployees NOTIFY employeesChanged)
         Q_PROPERTY(QList<Rent*> rents READ rents WRITE setRents NOTIFY rentsChanged)
+		Q_PROPERTY(QList<Sign*> signatures READ signatures WRITE setSignatures NOTIFY signaturesChanged)
 
         Q_PROPERTY(bool alarmed READ alarmed WRITE alarm NOTIFY alarmedChanged)
 
@@ -416,6 +455,9 @@ public:
     QList<Rent*> rents() { return m_rents; }
     int countRent() { return m_rents.size(); }
 
+	QList<Sign*> signatures() { return m_signatures; }
+	int countSignatures() { return m_signatures.size(); }
+
     QString message() const { return m_message; }
     int selectedItem() const { return m_selectedItem; }
     QString path() const { return m_path; }
@@ -454,6 +496,7 @@ public:
     void setParts(QList<Part*> m) { m_parts.clear();  m_parts = m; emit partsChanged(); }
     void setEmployees(QList<Employee*> m) { m_employees.clear();  m_employees = m; emit employeesChanged(); }
     void setRents(QList<Rent*> m) { m_rents.clear();  m_rents = m; emit rentsChanged(); }
+	void setSignatures(QList<Sign*> m) { m_signatures.clear();  m_signatures = m; emit signaturesChanged(); }
     void setMessage(QString m) { m_message = m; emit messageChanged(); }
     void selectItem(int m) { m_selectedItem = m; emit itemSelected(); }
     void setPath(QString m) { m_path = m; emit pathChanged(); }
@@ -528,12 +571,14 @@ signals:
     void fileUrlChanged();
     void messageIntChanged();
 	void userChanged();
+	void signaturesChanged();
 
 private:
     QList<Device*> m_devices;
     QList<Part*> m_parts;
     QList<Employee*> m_employees;
     QList<Rent*> m_rents;
+	QList<Sign*> m_signatures;
     QString m_message;
     int m_selectedItem;
     QString m_path;
