@@ -44,7 +44,6 @@ src/cs_networker.h \
 src/cs_checktable.h \
 src/cs_command.h \
 src/cs_metatable.h \
-src/cs_dialog.h \
 src/cs_login.h \
 src/cs_login.h \
 src/cs_join.h \

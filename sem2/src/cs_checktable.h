@@ -2,12 +2,15 @@
 #include "cs_qheader.h"
 #include "cs_metatable.h"
 #include "cs_component.h"
+#include "cs_model.h"
 class CheckTable : public QWidget
 {
 	Q_OBJECT
 public:
 	CheckTable()
 	{
+		m = Model::instance();
+
 		m_meta = new MetaTableCheck();
 		connect(m_meta, &MetaTableCheck::wViewChanged, [=]() { 		
 			setFixedSize(m_meta->wView(), m_meta->hView());			
@@ -23,7 +26,7 @@ public:
 		layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
 		m_wdPart = 
-			(new CPWidget(m_meta->wPart, (m_meta->parts().size() + 2) * m_meta->hCell, new QVBoxLayout))
+			(new CPWidget(m_meta->wPart, m_meta->hView(), new QVBoxLayout))
 			->initAlignment(Qt::AlignLeft | Qt::AlignTop);
 
 		m_wdPart->layout()->addWidget(
@@ -34,19 +37,21 @@ public:
 			(new CPLabel(m_meta->wPart, m_meta->hCell, kr("서명인")))
 			->initAlignment(Qt::AlignCenter)->initStyleSheet("border-bottom:1px solid gray; background:#eeeeee"));
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < m->parts().size(); i++)
 		{
 			m_wdPart->layout()->addWidget(
 				(new CPLabel(m_meta->wPart, m_meta->hCell, m_meta->parts().at(i)))
 				->initAlignment(Qt::AlignCenter)->initStyleSheet("border-bottom:1px solid gray; background:#eeeeee"));
 		}
 
-		m_main = (new CPWidget(m_meta->wTable() - m_meta->wPart, m_meta->hTable, new QVBoxLayout))
+		m_main = (new CPWidget(m_meta->wTable() - m_meta->wPart, m_meta->hView(), new QVBoxLayout))
 			->initAlignment(Qt::AlignLeft | Qt::AlignTop);
 
 		scrollArea = new QScrollArea(this);
+		scrollArea->verticalScrollBar()->setDisabled(false);
+		scrollArea->verticalScrollBar()->setVisible(false);
 		scrollArea->setWidget(
-			(new CPWidget(m_meta->wTable(), m_meta->hTable, new QHBoxLayout))
+			(new CPWidget(m_meta->wTable(), m_meta->hView(), new QHBoxLayout))
 			->initAlignment(Qt::AlignLeft | Qt::AlignTop)
 			->append(m_wdPart)
 			->append(m_main));
@@ -57,10 +62,11 @@ public:
 		m_main->layout()->addWidget(m_wdMnt);
 
 		QLabel* lbMth;
-		for (int i = 0; i < 12; i++)
+		int s = m_meta->metaMonths.size();
+		for (int i = 0; i < s; i++)
 		{
 			m_wdMnt->layout()->addWidget(
-				(new CPLabel(m_meta->wCell() * 3, m_meta->hCell, QString("%1").arg(i + 1) + kr("월")))
+				(new CPLabel(m_meta->wCell() * 3, m_meta->hCell, m_meta->metaMonths.at(i)))
 				->initAlignment(Qt::AlignCenter)->initStyleSheet("border-right:1px solid gray; border-left:1px solid gray; background:#eeeeee"));
 		}
 
@@ -68,7 +74,7 @@ public:
 			->initAlignment(Qt::AlignLeft | Qt::AlignTop);
 		m_main->append(m_wdTdCollection);
 
-		for (int i = 0; i < 12; i++)
+		for (int i = 0; i < m_meta->metaMonths.size(); i++)
 		{
 			QTableWidget* table = new QTableWidget(this);
 			table->setRowCount(m_meta->parts().size());
@@ -84,7 +90,6 @@ public:
 			{
 				table->setStyleSheet("QTableView {border-right:0px solid white;}");
 			}
-
 			
 			table->setSelectionMode(QAbstractItemView::NoSelection);
 			table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -123,4 +128,5 @@ private:
 	CPWidget* m_main = nullptr;
 	CPWidget* m_wdMnt = nullptr;
 	CPWidget* m_wdTdCollection = nullptr;
+	Model* m;
 };

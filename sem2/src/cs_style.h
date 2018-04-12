@@ -4,6 +4,15 @@
 #include <QDebug>
 #include <QGuiApplication>
 
+#define TAG_DVC_LIST "device_list"
+#define TAG_MNG_LIST "management_list"
+#define TAG_MNT_LIST "month_list"
+#define TAG_EMP_LIST "employee_list"
+#define TAG_IMEXPORT "im_export" 
+
+#define TAG_VIEW_ALL "view_all"
+#define TAG_VIEW_DATE "view_date"
+
 class Palette {
 public:
 	const QString navy01 = "#143246";
@@ -128,17 +137,25 @@ class Button : public StyleBasic
 public:
 	const char* name() { return m_name; }
 	QString icon() { return m_icon; }
+	QString tag() { return m_tag; }
 	QString releasedStyle() { return m_releasedStyle; }
 	QString hoveredStyle() { return m_hoveredStyle; }
 	QString selectedStyle() { return m_selectedStyle; }
+	QString disabledReleasedStyle() { return m_disabledReleasedStyle; }
+	QString disabledHoveredStyle() { return  m_disabledHoveredStyle; }
+	QString disabledSelectedStyle() { return m_disabledSelectedStyle; }
 	bool visible() { return m_visible; }
 
 	public slots :
 	void setName(const char* m) { m_name = m; emit nameChanged(); }
 	void setIcon(QString m) { m_icon = m; emit iconChanged(); }
+	void setTag(QString m) { m_tag = m; }
 	void setReleasedStyle(QString m) { m_releasedStyle = m; }
 	void setHoveredStyle(QString m) { m_hoveredStyle = m; }
 	void setSelectedStyle(QString m) { m_selectedStyle = m; }
+	void setDisabledReleasedStyle(QString m) { m_disabledReleasedStyle = m; }
+	void setDisabledHoveredStyle(QString m) { m_disabledHoveredStyle = m; }
+	void setDisabledSelectedStyle(QString m) { m_disabledSelectedStyle = m; }
 	void setVisible(bool m) { m_visible = m; }
 
 signals:
@@ -148,11 +165,29 @@ signals:
 
 protected:
 	const char* m_name;
-	QString m_icon;
-	QString m_releasedStyle;
-	QString m_hoveredStyle;
-	QString m_selectedStyle;
+	QString m_icon = "";
+	QString m_tag = "";
+	QString m_releasedStyle = "";
+	QString m_hoveredStyle = "";
+	QString m_selectedStyle = "";
+	QString m_disabledReleasedStyle = "";
+	QString m_disabledHoveredStyle = "";
+	QString m_disabledSelectedStyle = "";
 	bool m_visible;
+};
+
+class NavyButton : public Button
+{
+public:
+	NavyButton()
+	{
+		setReleasedStyle(palette()->btnReleasedStyleNavy);
+		setHoveredStyle(palette()->btnHoveredStyleNavy);
+		setSelectedStyle(palette()->btnSelectedStyleNavy);
+		setDisabledReleasedStyle(palette()->btnReleasedStyleNavy);
+		setDisabledHoveredStyle(palette()->btnHoveredStyleNavy);
+		setDisabledSelectedStyle(palette()->btnSelectedStyleNavy);
+	}
 };
 
 class StyleMainSlide : public StyleBasic
@@ -164,7 +199,18 @@ public:
 	{
 		m_width = widthFold;
 
+		m_btnExt = new Button();
+		m_btnExt->setTag("");
+		m_btnExt->setWidth(20);
+		m_btnExt->setHeight(height());
+		m_btnExt->setIcon("");
+		m_btnExt->setName("◀");
+		m_btnExt->setReleasedStyle(btnExtReleasedSheet);
+		m_btnExt->setHoveredStyle(btnExtHoverdSheet);
+		m_btnExt->setSelectedStyle(btnExtReleasedSheet);
+
 		m_btnDVCList = new Button();
+		m_btnDVCList->setTag(TAG_DVC_LIST);
 		m_btnDVCList->setHeight(50);
 		m_btnDVCList->setIcon(":/imgs/devices_36dp.png");
 		m_btnDVCList->setReleasedStyle(palette()->btnReleasedStyle01);
@@ -172,6 +218,7 @@ public:
 		m_btnDVCList->setSelectedStyle(palette()->btnSelectedStyleGray);
 
 		m_btnMNGList = new Button();
+		m_btnMNGList->setTag(TAG_MNG_LIST);
 		m_btnMNGList->setHeight(50);
 		m_btnMNGList->setIcon(":/imgs/management_36dp.png");
 		m_btnMNGList->setReleasedStyle(palette()->btnReleasedStyleGray);
@@ -179,6 +226,7 @@ public:
 		m_btnMNGList->setSelectedStyle(palette()->btnSelectedStyleGray);
 
 		m_btnMNTList = new Button();
+		m_btnMNTList->setTag(TAG_MNT_LIST);
 		m_btnMNTList->setHeight(50);
 		m_btnMNTList->setIcon(":/imgs/calendar_36dp.png");
 		m_btnMNTList->setReleasedStyle(palette()->btnReleasedStyleGray);
@@ -186,6 +234,7 @@ public:
 		m_btnMNTList->setSelectedStyle(palette()->btnSelectedStyleGray);
 
 		m_btnEMPList = new Button();
+		m_btnEMPList->setTag(TAG_EMP_LIST);
 		m_btnEMPList->setHeight(50);
 		m_btnEMPList->setIcon(":/imgs/employee_36dp.png");
 		m_btnEMPList->setReleasedStyle(palette()->btnReleasedStyleGray);
@@ -214,6 +263,7 @@ public:
 	const QString btnExtReleasedSheet = "border:0px; background: transparent; color:white;";
 	const QString btnExtHoverdSheet = "border:0px; background: #1e5064; color:white;";
 
+	Button* btnExt() { return m_btnExt; }
 	Button* btnDVCList() { return m_btnDVCList; }
 	Button* btnMNGList() { return m_btnMNGList; }
 	Button* btnMNTList() { return m_btnMNTList; }
@@ -262,6 +312,7 @@ signals:
 private:
 	bool m_extended = false;
 
+	Button* m_btnExt;
 	Button* m_btnDVCList;
 	Button* m_btnMNGList;
 	Button* m_btnMNTList;
@@ -278,6 +329,7 @@ public:
 		font()->setSmall(14);
 
 		m_btnLogout = new Button();
+		m_btnLogout->setTag("logout");
 		m_btnLogout->setName("로그아웃");
 		m_btnLogout->setWidth(100);
 		m_btnLogout->setHeight(40);
@@ -309,91 +361,72 @@ class StyleMainContent : public StyleBasic {
 public:
 	StyleMainContent()
 	{
-		m_btnPrint = new Button();
+		m_btnPrint = new NavyButton();
+		m_btnPrint->setTag("print");
 		m_btnPrint->setName("인쇄하기");
 		m_btnPrint->setWidth(110);
 		m_btnPrint->setHeight(40);
 		m_btnPrint->setIcon(":/imgs/printer_24dp.png");
-		m_btnPrint->setReleasedStyle(palette()->btnReleasedStyleNavy);
-		m_btnPrint->setHoveredStyle(palette()->btnHoveredStyleNavy);
-		m_btnPrint->setSelectedStyle(palette()->btnSelectedStyleNavy);
 
-		m_btnNew = new Button();
+		m_btnNew = new NavyButton();
 		m_btnNew->setName("추가하기");
 		m_btnNew->setWidth(110);
 		m_btnNew->setHeight(40);
 		m_btnNew->setIcon(":/imgs/plus_24dp.png");
-		m_btnNew->setReleasedStyle(palette()->btnReleasedStyleNavy);
-		m_btnNew->setHoveredStyle(palette()->btnHoveredStyleNavy);
-		m_btnNew->setSelectedStyle(palette()->btnSelectedStyleNavy);
 
-		m_btnRemove = new Button();
+		m_btnRemove = new NavyButton();
 		m_btnRemove->setName("삭제하기");
 		m_btnRemove->setWidth(110);
 		m_btnRemove->setHeight(40);
 		m_btnRemove->setIcon(":/imgs/remove_24dp.png");
-		m_btnRemove->setReleasedStyle(palette()->btnReleasedStyleNavy);
-		m_btnRemove->setHoveredStyle(palette()->btnHoveredStyleNavy);
-		m_btnRemove->setSelectedStyle(palette()->btnSelectedStyleNavy);
 
-		m_btnEdit = new Button();
+		m_btnEdit = new NavyButton();
 		m_btnEdit->setName("수정하기");
+		m_btnEdit->setTag("edit");
 		m_btnEdit->setWidth(110);
 		m_btnEdit->setHeight(40);
 		m_btnEdit->setIcon(":/imgs/edit_24dp.png");
-		m_btnEdit->setReleasedStyle(palette()->btnReleasedStyleNavy);
-		m_btnEdit->setHoveredStyle(palette()->btnHoveredStyleNavy);
-		m_btnEdit->setSelectedStyle(palette()->btnSelectedStyleNavy);
 
-		m_btnNaviLeft = new Button();
+		m_btnNaviLeft = new NavyButton();
 		m_btnNaviLeft->setName("◀");
 		m_btnNaviLeft->setWidth(30);
 		m_btnNaviLeft->setHeight(30);
-		m_btnNaviLeft->setReleasedStyle(palette()->btnReleasedStyleNavy);
-		m_btnNaviLeft->setHoveredStyle(palette()->btnHoveredStyleNavy);
-		m_btnNaviLeft->setSelectedStyle(palette()->btnSelectedStyleNavy);
 
-		m_btnNaviRight = new Button();
+		m_btnNaviRight = new NavyButton();
 		m_btnNaviRight->setName("▶");
 		m_btnNaviRight->setWidth(30);
 		m_btnNaviRight->setHeight(30);
-		m_btnNaviRight->setReleasedStyle(palette()->btnReleasedStyleNavy);
-		m_btnNaviRight->setHoveredStyle(palette()->btnHoveredStyleNavy);
-		m_btnNaviRight->setSelectedStyle(palette()->btnSelectedStyleNavy);
 
-		m_btnViewAll = new Button();
+		m_btnViewAll = new NavyButton();
+		m_btnViewAll->setTag(TAG_VIEW_ALL);
 		m_btnViewAll->setName("전체보기");
 		m_btnViewAll->setWidth(110);
 		m_btnViewAll->setHeight(40);
 		m_btnViewAll->setIcon(":/imgs/all_24dp.png");
-		m_btnViewAll->setReleasedStyle(palette()->btnReleasedStyleNavy);
-		m_btnViewAll->setHoveredStyle(palette()->btnHoveredStyleNavy);
-		m_btnViewAll->setSelectedStyle(palette()->btnSelectedStyleNavy);
 
-		m_btnViewDate = new Button();
+		m_btnViewDate = new NavyButton();
+		m_btnViewDate->setTag(TAG_VIEW_DATE);
 		m_btnViewDate->setName("월별보기");
 		m_btnViewDate->setWidth(110);
 		m_btnViewDate->setHeight(40);
 		m_btnViewDate->setIcon(":/imgs/calendar2_24dp.png");
-		m_btnViewDate->setReleasedStyle(palette()->btnReleasedStyleNavy);
-		m_btnViewDate->setHoveredStyle(palette()->btnHoveredStyleNavy);
-		m_btnViewDate->setSelectedStyle(palette()->btnSelectedStyleNavy);
 
-		m_btnCalendarPrev = new Button();
+		m_btnCalendarPrev = new NavyButton();
+		m_btnCalendarPrev->setTag("cal_prev");
 		m_btnCalendarPrev->setName("◀");
 		m_btnCalendarPrev->setWidth(30);
 		m_btnCalendarPrev->setHeight(30);
-		m_btnCalendarPrev->setReleasedStyle(palette()->btnReleasedStyleNavy);
-		m_btnCalendarPrev->setHoveredStyle(palette()->btnHoveredStyleNavy);
-		m_btnCalendarPrev->setSelectedStyle(palette()->btnSelectedStyleNavy);
 
-		m_btnCalendarNext = new Button();
+		m_btnCalendarNext = new NavyButton();
+		m_btnCalendarPrev->setTag("cal_next");
 		m_btnCalendarNext->setName("▶");
 		m_btnCalendarNext->setWidth(30);
 		m_btnCalendarNext->setHeight(30);
-		m_btnCalendarNext->setReleasedStyle(palette()->btnReleasedStyleNavy);
-		m_btnCalendarNext->setHoveredStyle(palette()->btnHoveredStyleNavy);
-		m_btnCalendarNext->setSelectedStyle(palette()->btnSelectedStyleNavy);
+
+		m_btnSign = new NavyButton();
+		m_btnSign->setWidth(40);
+		m_btnSign->setHeight(40);
+		m_btnSign->setIcon(":/imgs/sign_24dp.png");
 
 	}
 	const int wGrid1_1 = 350;
@@ -409,6 +442,10 @@ public:
 	Button* btnViewDate() { return m_btnViewDate; }
 	Button* btnCalendarPrev() { return m_btnCalendarPrev; }
 	Button* btnCalendarNext() { return m_btnCalendarNext; }
+	Button* btnSign() { return m_btnSign; }
+
+	int hRow02() { return m_hRow02; }
+	void setHRow02(int m) { m_hRow02 = m; }
 
 private:
 	Button* m_btnPrint;
@@ -421,6 +458,9 @@ private:
 	Button* m_btnViewDate;
 	Button* m_btnCalendarPrev;
 	Button* m_btnCalendarNext;
+	Button* m_btnSign;
+
+	int m_hRow02 = 0;
 };
 
 class StyleMainBody : public StyleBasic {

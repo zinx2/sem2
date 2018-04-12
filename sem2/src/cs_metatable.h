@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "cs_qheader.h"
-
+#include "cs_model.h"
 class Meta : public QObject
 {
 	Q_OBJECT
@@ -11,7 +11,7 @@ public:
 	int height() { return m_height; }
 
 	public slots :
-	void setWidth(int m) { m_width= m; }
+		void setWidth(int m) { m_width = m; }
 	void setHeight(int m) { m_height = m; }
 
 signals:
@@ -30,7 +30,7 @@ public:
 	QStringList meta() { return m_metaHeader; }
 
 	public slots :
-	void setMeta(QStringList m) { m_metaHeader = m; }
+		void setMeta(QStringList m) { m_metaHeader = m; }
 	int countCols() { return m_metaHeader.size(); }
 
 private:
@@ -69,7 +69,7 @@ class MetaTableDVC : public MetaTable
 public:
 	MetaTableDVC()
 	{
-		QStringList metaHeader; 
+		QStringList metaHeader;
 		metaHeader << kr("번호") << kr("자산번호") << kr("장비명")
 			<< kr("취득금액") << kr("취득일자") << kr("대출여부") << kr("비고");
 		header()->setMeta(metaHeader);
@@ -152,7 +152,7 @@ public:
 		setHRow(30);
 	}
 	//const int hExt = 25;
-	
+
 	//bool extended() { return m_extended; }
 	//int wView() { return m_wView; }
 	//int hView() { return m_hView; }
@@ -198,16 +198,27 @@ class MetaTableCheck : public QObject
 public:
 	MetaTableCheck()
 	{
-		for (int i = 0; i < 12; i++)
-		{
-			QString mthTxt = QString("%1").arg(i + 1) + kr("월");
-			metaMonths << mthTxt;
-		}
+		Model* m = Model::instance();
+		//for (int i = 0; i < 12; i++)
+		//{
+		//	QString mthTxt = QString("%1").arg(i + 1) + kr("월");
+		//	metaMonths << mthTxt;
+		//}
 		metaSignatory << kr("담당자") << kr("관리자") << kr("보직자");
-		m_parts.append(kr("A파트")); m_parts.append(kr("B파트")); m_parts.append(kr("C파트"));
-		m_parts.append(kr("D파트")); m_parts.append(kr("E파트")); m_parts.append(kr("F파트"));
-		m_parts.append(kr("G파트")); m_parts.append(kr("H파트")); m_parts.append(kr("I파트"));
-		m_parts.append(kr("J파트"));
+
+		foreach(Part* p, m->parts())
+			m_parts.append(p->namePart());
+
+		QString partName = m_parts.at(0);
+		foreach(Sign* s, m->signatures())
+		{
+			if (!partName.compare(s->namePart()))
+				metaMonths << QString("%1").arg(s->month()) + kr("월");
+		}
+
+		m_hView = (m_parts.size() + 2) * hCell + 24;
+
+
 	}
 
 	//const int wTable = 1180;
@@ -222,7 +233,7 @@ public:
 	QList<QString> metaMonths;
 	QList<QString> metaSignatory;
 	QList<QString> parts() { return m_parts; }
-	void setParts(QList<QString> m) 
+	void setParts(QList<QString> m)
 	{
 		m_parts.clear();
 		m_parts = m;
@@ -253,7 +264,7 @@ private:
 	int m_wView = 980;
 	int m_hView = 12 * 30 + 24;
 	int m_wCell = 50;
-	int m_wMonth = m_wCell*3;
+	int m_wMonth = m_wCell * 3;
 	int m_wTable = wPart + 12 * 3 * m_wCell;
 };
 
@@ -265,9 +276,12 @@ public:
 	{
 		QStringList metaHeader;
 		metaHeader << kr("번호") << kr("자산번호") << kr("장비명")
-				   << kr("대출날짜") << kr("대출자") << kr("서명") << kr("용도")
-				   << kr("반납날짜") << kr("확인자") << kr("서명") << kr("보안점검") << kr("확인");
+			<< kr("대출날짜") << kr("대출자") << kr("서명") << kr("용도")
+			<< kr("반납날짜") << kr("확인자") << kr("서명") << kr("보안점검") << kr("확인");
 		header()->setMeta(metaHeader);
+
+		headerSign << kr("담당자") << kr("파트장") << kr("보직자");
+
 		setHNavi(50);
 	}
 	const int hRow = 30;
@@ -277,4 +291,6 @@ public:
 	const int wCol4 = 150;
 	const int wCol5 = 150;
 	const int wCol6 = 55;
+	QStringList headerSign;
+
 };

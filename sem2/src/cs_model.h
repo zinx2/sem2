@@ -195,6 +195,8 @@ class User : public QObject
 		Q_PROPERTY(QString textAlarm READ textAlarm WRITE setTextAlarm NOTIFY textAlarmChanged)
 
 public:
+	enum UserType { None, PartManager, PartChair, SpecialList, SystemAdmin};
+
 	int noAdmin() { return m_noAdmin; }
 	int typeAdmin() { return m_typeAdmin; }
 	int noUser() { return m_noUser; }
@@ -290,35 +292,35 @@ class Sign : public QObject
 		Q_PROPERTY(QString namePart READ namePart WRITE setNamePart NOTIFY namePartChanged)
 		Q_PROPERTY(int year READ year WRITE setYear NOTIFY yearChanged)
 		Q_PROPERTY(int month READ month WRITE setMonth NOTIFY monthChanged)
-		Q_PROPERTY(bool completed READ completed WRITE complete NOTIFY completedChanged)
+		Q_PROPERTY(int typeComplete READ typeComplete WRITE setTypeComplete NOTIFY typeCompleteChanged)
 
 public:
 	int noSign() const { return m_noSign; }
 	QString namePart() const { return m_namePart; }
 	int year() const { return m_year; }
 	int month() const { return m_month; }
-	bool completed() const { return m_completed; }
+	int typeComplete() const { return m_typeComplete; }
 
 	public slots :
 	void setNoSign(const int m) { m_noSign = m; emit noSignChanged(); }
 	void setNamePart(const QString m) { m_namePart = m; emit namePartChanged(); }
 	void setYear(const int m) { m_year = m; emit yearChanged(); }
 	void setMonth(const int m) { m_month = m; emit monthChanged(); }
-	void complete(const bool m) { m_completed = m; emit completedChanged(); }
+	void setTypeComplete(const bool m) { m_typeComplete = m; emit typeCompleteChanged(); }
 
 signals:
 	void noSignChanged();
 	void namePartChanged();
 	void yearChanged();
 	void monthChanged();
-	void completedChanged();
+	void typeCompleteChanged();
 
 private:
 	int m_noSign = -1;
 	QString m_namePart = "";
 	int m_year = -1;
 	int m_month = -1;
-	bool m_completed = false;
+	int m_typeComplete = -1;
 };
 
 class Notificator : public QObject

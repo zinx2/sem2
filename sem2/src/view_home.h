@@ -12,15 +12,6 @@
 #include "cs_question.h"
 #include "cs_barcoder.h"
 
-#define TAG_DVC_LIST "device_list"
-#define TAG_MNG_LIST "management_list"
-#define TAG_MNT_LIST "month_list"
-#define TAG_EMP_LIST "employee_list"
-#define TAG_IMEXPORT "im_export" 
-
-#define TAG_VIEW_ALL "view_all"
-#define TAG_VIEW_DATE "view_date"
-
 class CheckTable;
 class ViewHome : public QWidget
 {
@@ -30,15 +21,16 @@ public:
     ViewHome(QWidget *parent = 0);
     ~ViewHome();
 
-	void init();
+
 	public slots:
 	void updateUI();
-	void handler();
+	void netHandler();
 	void netGetDeviceList(int searchType=0);
-	void netGetRentList(int type, int noPart = 0);
+	void netGetRentList(int type);
 	void netLogin();
 	void prev();
 	void next();
+	void updateMNGSign();
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
@@ -76,6 +68,8 @@ private:
 	CPWidget* m_contentGrid1_2 = nullptr;
 	CPWidget* m_contentGrid1_3 = nullptr;
 
+	CPWidget* m_contentRow2 = nullptr;
+
 	StyleMainSlide* m_styleSlide;
 	QWidget* m_slide;	
 	QWidget* m_slideCol01;
@@ -88,6 +82,7 @@ private:
 	MetaTable* m_metaTable = nullptr;
 	QTableWidget* m_tableCommon = nullptr;
 	QTableWidget* m_tableEMP = nullptr;
+	QTableWidget* m_tableSign = nullptr;
 
 	Command* m_btnCheckExt;
 	QList<Command*> m_btnsPartExt;
@@ -103,8 +98,9 @@ private:
 	Command* m_btnRemove;
 	Command* m_btnNew;
 
-	Command* m_btnViewAll;
+	Command* m_btnViewAll; /* 전체보기 */
 	Command* m_btnViewDate;
+	Command* m_btnSign;
 	CommandProvider* m_cmdProviderView = nullptr;
 
 	Command* m_btnDVCList;
@@ -130,10 +126,15 @@ private:
 	CPWidget* m_mntStack = nullptr;
 	QScrollArea* m_mntScrArea = nullptr;
 
-	void initDVCList();
-	void initMNGList();
-	void initMNTList();
-	void initEMPList();
+	CPWidget* m_zoneSign = nullptr;
+	CPLabel* m_lbSign1 = nullptr;
+	CPLabel* m_lbSign2 = nullptr;
+	CPLabel* m_lbSign3 = nullptr;
+
+	void initListDVC();
+	void initListMNG();
+	void initListMNT();
+	void initListEMP();
 	bool initPage(QString tag, QString titleTxt);
 
 	void newTable(int rowCount, QString tag);
@@ -144,4 +145,39 @@ private:
 	QString getCurrentDate(int month=0);
 	void clearAutoLogin();
 	
+	void initWidgets();
+	void initContentRow1();
+	void initContentRow2();
+
+	void initParent();
+	void initStyles();
+	void initParentLayout();
+	void initBody();
+	void initContent();
+	void initHeader();
+	void initFooter();
+	void initSlide();
+	void initSlideButton();
+	void initMNGNaviCalendar();
+
+	void initButtonsDVC();
+	void initButtonsMNG();
+	void initButtonsMNT();
+	void initButtonsEMP();
+
+	void initTableDVC();
+	void initTableMNG();
+	void initTableMNT();
+	void initTableEMP();
+
+	void updateHeader();
+	void updateFooter();
+	void updateBody();
+	void updateContent();
+	void updateSlideButtons();
+	void updateSlide();
+	void updateContentRow1();
+	void updateContentRow2();
+
+	QString m_titleTxt;
 };

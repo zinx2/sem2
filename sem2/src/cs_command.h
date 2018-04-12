@@ -1,4 +1,4 @@
-﻿#pragma once
+﻿#pragma once	
 #include "cs_qheader.h"
 #include "cs_style.h"
 #include <QStyle>
@@ -16,12 +16,37 @@ public:
 		this->setText(name);
 		initFontType("NanumBarunGothic");
 	}
+	Command(Button* metaBtn, FUNC func = [=]() {}, bool enabled = true)
+	{
+		this->setFixedSize(metaBtn->width(), metaBtn->height());
+		QFont font = this->font();
+		font.setPointSize(12);
+		this->setFont(font);
+		this->setText(kr(metaBtn->name()));
+		initFontType("NanumBarunGothic");
+		
+		m_releasedSheet = metaBtn->releasedStyle();	m_hoveredSheet = metaBtn->hoveredStyle(); m_selectedSheet = metaBtn->selectedStyle();
+		m_disabledReleasedSheet = metaBtn->disabledReleasedStyle();	m_disabledHoveredSheet = metaBtn->disabledHoveredStyle(); m_disabledSelectedSheet = metaBtn->disabledSelectedStyle();
+
+		m_tag = metaBtn->tag();
+		if (enabled) setStyleSheet(metaBtn->releasedStyle());
+		else setStyleSheet(metaBtn->disabledReleasedStyle());
+
+		if(!metaBtn->icon().isEmpty())
+			initIcon(metaBtn->icon());
+		initFunc(func);
+	}
 	QString tag() { return m_tag; }
 	Command* initWidth(int width) { setFixedWidth(width); return this; }
 	Command* initStyleSheet(QString sheet) { setStyleSheet(sheet); return this; }
 	Command* initEffect(QString released, QString selected, QString hovered = "")
 	{
 		m_releasedSheet = released;	m_hoveredSheet  = hovered; m_selectedSheet = selected;
+		return this;
+	}
+	Command* initDisabledEffect(QString released, QString selected, QString hovered = "")
+	{
+		m_disabledReleasedSheet = released;	m_disabledHoveredSheet = hovered; m_disabledSelectedSheet = selected;
 		return this;
 	}
 	Command* initFunc(FUNC func) {
@@ -56,6 +81,7 @@ public:
 		return this;
 	};
 	Command* initIcon(QString iconPath, QString txt) {
+		initIcon("");
 		QPixmap pixmap(iconPath);
 		m_pixmap = pixmap;
 		m_txt = txt;
@@ -97,24 +123,28 @@ protected:
 
 	void mousePressEvent(QMouseEvent *event) override
 	{
-		setStyleSheet(m_selectedSheet);
+		if(isEnabled()) setStyleSheet(m_selectedSheet);
+		else setStyleSheet(m_disabledSelectedSheet);
 	}
 	void enterEvent(QEvent * event)
 	{
 		Q_UNUSED(event);
-		setStyleSheet(m_hoveredSheet);
+		if (isEnabled()) setStyleSheet(m_hoveredSheet);
+		else setStyleSheet(m_disabledHoveredSheet);
 		/*Qt::CursorShape type = (ori == Qt::Vertical ? Qt::SizeHorCursor : Qt::SizeVerCursor);
 		this->setCursor(QCursor(type));*/
 	}
 	void leaveEvent(QEvent * event)
 	{
 		Q_UNUSED(event);
-		setStyleSheet(m_releasedSheet);
+		if(isEnabled()) setStyleSheet(m_releasedSheet);
+		else setStyleSheet(m_disabledReleasedSheet);
 	}
 	void mouseReleaseEvent(QMouseEvent *event) override
 	{
-		print("", "mouseReleaseEvent");
-		setStyleSheet(m_releasedSheet);
+		//print("", "mouseReleaseEvent");
+		if(isEnabled()) setStyleSheet(m_releasedSheet);
+		else setStyleSheet(m_disabledReleasedSheet);
 		m_cmd();
 	}
 
@@ -124,6 +154,9 @@ private:
 	QString m_releasedSheet = "color: white; background-color: transparent;";
 	QString m_hoveredSheet = "color: white; background-color: transparent;";
 	QString m_selectedSheet = "color: white; background-color: transparent;";
+	QString m_disabledReleasedSheet = "color: white; background-color: transparent;";
+	QString m_disabledHoveredSheet = "color: white; background-color: transparent;";
+	QString m_disabledSelectedSheet = "color: white; background-color: transparent;";
 	FUNC m_cmd;
 };
 
