@@ -8,7 +8,9 @@
 #include "cs_file.h"
 #include "cs_metatable.h"
 #include "cs_model.h"
-
+#include "cs_style.h"
+#include "cs_command.h"
+typedef std::function<void()> FUNC;
 class CPTextEdit : public QTextEdit
 {
 	Q_OBJECT
@@ -236,32 +238,83 @@ class CPTable : public QWidget
 {
 	Q_OBJECT
 public:
-	CPTable(MetaTable* meta, int itemCount)
+	CPTable(MetaTable* meta)
 	{
 		m_meta = meta;
-		m_itemCount = itemCount;
 		setStyleSheet("background:#2dd0d2");
 		setLayout(new QVBoxLayout);
 		layout()->setSpacing(0);
 		layout()->setMargin(0);
-		layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-
-		m_table = new QTableWidget(this);
-		m_table->setRowCount(m_itemCount);
-		m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
-		m_table->setSelectionMode(QAbstractItemView::SingleSelection);
-		m_table->horizontalScrollBar()->setDisabled(true);
-		m_table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-		m_table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-		m_table->verticalHeader()->hide();
-		m_table->setColumnCount(m_meta->cols().size());
-
-		m_table->setHorizontalHeaderLabels(m_meta->header()->meta());
+		setFixedHeight(0);
+	}
+	CPTable* initRowCount(int itemCount)
+	{
+		m_itemCount = itemCount;
+		return this;
+	}
+	CPTable* initTableWidthPercent(QList<double> meta)
+	{
+		m_wMeta = meta;
+		return this;
+	}
+	CPTable* initPage()
+	{		
+		if (m_itemCount > 0)
+		{
+			layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+			if (m_lbEmpty != nullptr)
+			{
+				delete m_lbEmpty;
+				m_lbEmpty = nullptr;
+			}
+			if (m_table != nullptr)
+			{
+				delete m_table;
+				m_table = nullptr;
+			}
+			m_table = new QTableWidget;
+			for(int i=0; i< m_wMeta.size(); i++)
+			{
+				double p = m_wMeta.at(i);
+				m_table->setColumnWidth(i, m_meta->width() *p);
+			}
+			m_table->setRowCount(m_itemCount);
+			m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
+			m_table->setSelectionMode(QAbstractItemView::SingleSelection);
+			m_table->horizontalScrollBar()->setDisabled(true);
+			m_table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+			m_table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+			m_table->verticalHeader()->hide();
+			m_table->setColumnCount(m_meta->cols().size());
+			m_table->setHorizontalHeaderLabels(m_meta->header()->meta());
+			m_table->setFixedHeight(m_meta->hRow() * m_itemCount + m_table->horizontalHeader()->height());
+			layout()->addWidget(m_table);
+			initHeight(m_table->height());
+			//setFixedHeight(m_table->height());
+		}
+		else
+		{
+			if (m_table != nullptr)
+			{
+				delete m_table;
+				m_table = nullptr;
+			}
+			if (m_lbEmpty != nullptr)
+			{
+				delete m_lbEmpty;
+				m_lbEmpty = nullptr;
+			}
+			m_lbEmpty = (new CPLabel(width(), 100, kr("항목이 존재하지 않습니다.")))->initAlignment(Qt::AlignCenter);			
+			layout()->addWidget(m_lbEmpty);
+			int hh = m_lbEmpty->height();
+			initHeight(m_lbEmpty->height());
+		}
+		return this;
 	}
 	CPTable* resize()
 	{
 		int idx = 0; int w = m_meta->width();
-		qDebug() << "SIZE : " << w;
+		//qDebug() << "SIZE : " << w;
 		while (idx < m_meta->cols().size()-1)
 		{
 			m_table->setColumnWidth(idx, m_meta->cols()[idx]);
@@ -291,6 +344,15 @@ public:
 		m_meta->setWidth(w);
 		return this;
 	}
+	CPTable* initHeight(int h)
+	{
+		m_meta->setHeight(h);
+		return this;
+	}
+	QTableWidget* table()
+	{
+		return m_table;
+	}
 	int metaHeight()
 	{
 		return m_meta->height();
@@ -302,11 +364,13 @@ private:
 	MetaTable* m_meta = nullptr;
 	//CPWidget* m_main = nullptr;
 	QTableWidget* m_table = nullptr;
+	CPLabel* m_lbEmpty = nullptr;
 	int m_itemCount = 0;
 	bool m_visible = false;
+	QList<double> m_wMeta;
 };
 
-class   CPDialog : public QDialog
+class  CPDialog : public QDialog
 {
     Q_OBJECT
 
@@ -356,3 +420,207 @@ protected:
     CPWidget* m_wdTail = nullptr;
 	Model* m; 
 };
+
+class CPBoxSign : public CPWidget
+{
+	Q_OBJECT
+public:
+	CPBoxSign(int width, int height, QLayout* ly, QWidget *parent = 0) : CPWidget(width, height, ly, parent)
+	{
+		initStyleSheet("border: 1px solid black;");
+		initAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+		m_lbSign1 = (new CPLabel(60, 30, kr("O")))->initStyleSheet("background:white; border:1px solid black")->initAlignment(Qt::AlignCenter);
+		m_lbSign2 = (new CPLabel(60, 30, kr("O")))->initStyleSheet("background:white; border:1px solid black")->initAlignment(Qt::AlignCenter);
+		m_lbSign3 = (new CPLabel(60, 30, kr("O")))->initStyleSheet("background:white; border:1px solid black")->initAlignment(Qt::AlignCenter);
+		append((new CPLabel(60, 30, kr("서명 :   ")))->initAlignment(Qt::AlignRight | Qt::AlignVCenter)->initStyleSheet("border: 0px solid black;"));
+		append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("담당자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign1));
+		append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("관리자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign2));
+		append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("보직자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign3));
+		append(new CPWidget(10, 1, new QHBoxLayout));
+
+		Button* metaBtn = Style::instance()->main()->body()->content()->btnSign();
+		Command* m_btnSign =
+			(new Command("sign", kr(""), metaBtn->width(), metaBtn->height()))
+			->initStyleSheet(metaBtn->releasedStyle())
+			->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
+			->initIcon(metaBtn->icon())
+			->initFunc([=]() {});
+		append(m_btnSign);
+	}
+
+	CPBoxSign* initState(QString s1, QString s2, QString s3)
+	{
+		m_lbSign1->initText(s1);
+		m_lbSign2->initText(s2);
+		m_lbSign3->initText(s3);
+		return this;
+	}
+	CPBoxSign* initFunc(FUNC func)
+	{
+		m_btnSign->initFunc(func);
+		return this;
+	}
+
+private:
+	CPLabel* m_lbSign1;
+	CPLabel* m_lbSign2;
+	CPLabel* m_lbSign3;
+	Command* m_btnSign;
+};
+
+//class CPMNTTable : public QWidget
+//{
+//	Q_OBJECT
+//public:
+//	CPMNTTable(int width, int height= 0, QWidget* parent = 0) : QWidget(parent)
+//	{
+//		setLayout(new QVBoxLayout);
+//		layout()->setSpacing(0);
+//		layout()->setMargin(0);
+//		setFixedSize(width, height);
+//		initialize();
+//		connect(this, SIGNAL(modelChanged()), this, SLOT(updateModel()));
+//	}
+//	CPMNTTable* setModel(QList<Rent*> m)
+//	{
+//		m_model.clear();
+//		m_model = m;
+//		emit modelChanged();
+//		return this;
+//	}
+//	//CPMNTTable* initVisible(bool visibvle)
+//	//{
+//	//	if (m_boxSign != nullptr)
+//	//		m_boxSign->initWidth(visibvle ? width() - 25 : 0);
+//
+//	//	m_table
+//	//	m_lbEmpty
+//	//	return this;
+//	//}
+//	CPMNTTable* invoke()
+//	{
+//
+//		return this;
+//	}
+//	CPMNTTable* updateBoxSign(QString sign1, QString sign2, QString sign3)
+//	{
+//		m_boxSign->initState(sign1, sign2, sign3);
+//		return this;
+//	}
+//	CPMNTTable* resize(int w, int h)
+//	{
+//		setFixedSize(w, h);
+//		m_boxSign->initWidth(w - 25);
+//		m_table->setFixedSize(w, m_table->height());
+//		m_lbEmpty->setFixedSize(w, 100);
+//		return this;
+//	}
+//	public slots:
+//	void updateModel()
+//	{
+//		initialize();
+//		if (m_model.size() == 0)
+//		{
+//			clearBoxSign();
+//			clearTable();
+//		}
+//		else
+//		{
+//			clearLbEmpty();
+//		}
+//
+//		m_table = new QTableWidget(this);
+//		m_table->setRowCount(m_model.size());
+//		m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
+//		m_table->setSelectionMode(QAbstractItemView::SingleSelection);
+//		m_table->horizontalScrollBar()->setDisabled(true);
+//		m_table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//		m_table->horizontalHeader()->setStyleSheet("QHeaderView::section { background-color:#eeeeee }");
+//		m_table->verticalHeader()->hide();
+//
+//		
+//		//m_table->setFixedSize(width(), height());
+//		
+//		QStringList fff; fff << "AA";
+//		m_table->setHorizontalHeaderLabels(fff);
+//		m_table->setColumnCount(1);
+//		m_table->setColumnWidth(0, 50);
+//		for (int row = 0; row < m_model.size(); row++)
+//		{
+//			Rent* r = m_model.at(row);
+//			QTableWidgetItem* item0 = new QTableWidgetItem(QString("%1").arg(r->noAsset()));
+//			item0->setTextAlignment(Qt::AlignCenter);
+//			m_table->setItem(row, 0, item0);
+//		}
+//
+//		m_table->setFixedHeight(m_table->horizontalHeader()->height() + m_cellHeight*m_model.size());
+//		qDebug() << m_table->width() << "/" << m_table->height();
+//		setFixedSize(m_table->width(), m_table->height());
+//	}
+//signals:
+//	void modelChanged();
+//private:
+//	CPBoxSign* m_boxSign = nullptr;
+//	void newBoxSign()
+//	{
+//		m_boxSign = new CPBoxSign(width() - 25, 0, new QHBoxLayout);
+//	}
+//	void clearBoxSign()
+//	{
+//		if (m_boxSign != nullptr)
+//		{
+//			delete m_boxSign;
+//			m_boxSign = nullptr;
+//		}
+//	}
+//
+//	QTableWidget* m_table = nullptr;
+//	void newTable()
+//	{
+//		m_table = new QTableWidget;
+//	}
+//	void clearTable()
+//	{
+//		if (m_table != nullptr)
+//		{
+//			delete m_table;
+//			m_table = nullptr;
+//		}
+//	}
+//
+//	CPLabel* m_lbEmpty = nullptr;
+//	void newLbEmpty()
+//	{
+//		m_lbEmpty = (new CPLabel(width(), 100, kr("항목이 없습니다.")));
+//	}
+//	void clearLbEmpty()
+//	{
+//		if (m_lbEmpty != nullptr)
+//		{
+//			delete m_lbEmpty;
+//			m_lbEmpty = nullptr;
+//		}
+//	}
+//
+//	QList<Rent*> m_model;
+//	int m_cellHeight = 30;
+//
+//	void initialize()
+//	{
+//		clear();
+//		newBoxSign();
+//		newTable();
+//		newLbEmpty();
+//		
+//		layout()->addWidget(m_boxSign);
+//		layout()->addWidget(m_lbEmpty);
+//		layout()->addWidget(m_table);
+//	}
+//	void clear()
+//	{
+//		clearBoxSign();
+//		clearTable();
+//		clearLbEmpty();
+//	}
+//};

@@ -112,15 +112,16 @@ public:
 	{
 		QStringList metaHeader;
 		metaHeader << kr("번호") << kr("자산번호") << kr("장비명")
-			<< kr("취득금액") << kr("취득일자") << kr("대출여부") << kr("비고");
+			<< kr("대출날짜") << kr("대출자") << kr("서명") << kr("용도")
+			<< kr("반납날짜") << kr("확인자") << kr("서명") << kr("보안점검") << kr("확인");
 		header()->setMeta(metaHeader);
 		setHNavi(0);
 	}
 
 	const QString btnExtReleasedSheet = "text-align:left; border:0px; color: white; background-color: #143246;";
 	const QString btnExtHoverdSheet = "text-align:left; border:0px; color: white; background-color: #1e5064;";
-	const QString txt1 = kr("  ▼  월별대장");
-	const QString txt2 = kr("  ▲  월별대장");
+	const QString txt1 = kr("  ▼  ");
+	const QString txt2 = kr("  ▲  ");
 
 	const int hRow = 30;
 	const int wCol1 = 50;
@@ -145,10 +146,12 @@ public:
 	{
 		QStringList metaHeader;
 		metaHeader << kr("번호") << kr("자산번호") << kr("장비명")
-			<< kr("취득금액") << kr("취득일자") << kr("대출여부") << kr("비고");
+			<< kr("대출날짜") << kr("대출자") << kr("서명") << kr("용도")
+			<< kr("반납날짜") << kr("확인자") << kr("서명") << kr("보안점검") << kr("확인");
 		header()->setMeta(metaHeader);
 		setHNavi(0);
-		setCols({ 50, 150, 200, 150, 150, 55, 200 });
+
+		setCols({ 1,1,1,1,1,1,1,1,1,1,1,1 });
 		setHRow(30);
 	}
 	//const int hExt = 25;
@@ -199,26 +202,25 @@ public:
 	MetaTableCheck()
 	{
 		Model* m = Model::instance();
-		//for (int i = 0; i < 12; i++)
-		//{
-		//	QString mthTxt = QString("%1").arg(i + 1) + kr("월");
-		//	metaMonths << mthTxt;
-		//}
 		metaSignatory << kr("담당자") << kr("관리자") << kr("보직자");
 
 		foreach(Part* p, m->parts())
 			m_parts.append(p->namePart());
 
+		m_hView = (m_parts.size() + 2) * hCell + 24;
+		
+	}
+	void newMetaMonth()
+	{
+		metaMonths.clear();
+		Model* m = Model::instance();
 		QString partName = m_parts.at(0);
 		foreach(Sign* s, m->signatures())
 		{
 			if (!partName.compare(s->namePart()))
-				metaMonths << QString("%1").arg(s->month()) + kr("월");
+				metaMonths << QString("%1").arg(s->month());
 		}
-
-		m_hView = (m_parts.size() + 2) * hCell + 24;
-
-
+		m_wTable = metaMonths.size() * m_wCell * 3 + wPart;
 	}
 
 	//const int wTable = 1180;

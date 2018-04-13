@@ -23,21 +23,22 @@ ViewHome::ViewHome(QWidget *parent)
 	initParent();
 	//clearAutoLogin();
 	/* POSTPHONE AUTO LOGIN. */
-	//if (s->isLoginAuto())
-	//{
-	//	m->user()->setId(s->id());
-	//	m->user()->setPass(s->pass());
-	//	m->request(true, Notificator::RequestLogin);
-	//}
-	//else
-	//{
-	m_login = new CPLogin();
-	m_login->setParent(this);
-	m_login->show();
-	//}
+	if (s->isLoginAuto())
+	{
+		m->user()->setId(s->id());
+		m->user()->setPass(s->pass());
+		m->request(true, Notificator::RequestLogin);
+	}
+	else
+	{
+		m_login = new CPLogin();
+		m_login->setParent(this);
+		m_login->show();
+	}
 	connect(m, SIGNAL(devicesChanged()), this, SLOT(updateUI()));
 	connect(m, SIGNAL(rentsChanged()), this, SLOT(updateUI()));
 	connect(m, SIGNAL(signaturesChanged()), this, SLOT(updateMNGSign()));
+	connect(m, SIGNAL(signaturesChanged()), this, SLOT(updateMNTCheckTable()));
 	//setFixedSize(0, 0);
 	//run();
 }
@@ -103,6 +104,7 @@ void ViewHome::initListMNG()
 }
 void ViewHome::updateMNGSign()
 {
+	if (m_cmdProviderList->selectedTag().compare(TAG_MNG_LIST)) return;
 	foreach(Part* p, m->parts())
 	{
 		foreach(Sign* s, m->signatures())
@@ -145,32 +147,141 @@ void ViewHome::updateMNGSign()
 						m_lbSign3->initText("O");
 						break;
 					}
-						
+
 					}
 				}
 			}
 		}
 	}
 }
-void ViewHome::initListMNT()
+void ViewHome::updateMNTCheckTable()
 {
-	if (!initPage(TAG_MNT_LIST, kr("월별대장"))) return;
+	if (m_cmdProviderList->selectedTag().compare(TAG_MNT_LIST)) return;
+	m_checkTable->updateTable();
+
+	for (int i = 0; i < m->parts().size(); i++)
+	{
+		QString namePart = m->parts().at(i)->namePart();
+		foreach(Sign* s, m->signatures())
+		{
+			if (!s->namePart().compare(namePart) && s->month() == m_currentMonth.toInt() && s->year() == m_currentYear.toInt())
+			{
+				int markType = s->typeComplete();
+				if (markType == 0)
+					m_mntZoneSign.at(i)->initState("X", "X", "X");
+				else if (markType == 1)
+					m_mntZoneSign.at(i)->initState("O", "X", "X");
+				else if (markType == 2)
+					m_mntZoneSign.at(i)->initState("O", "O", "X");
+				else
+					m_mntZoneSign.at(i)->initState("O", "O", "O");
+			}
+		}
+
+		int itemCount = 0;
+		for (int i = 0; i < m->rents().size(); i++)
+		{
+			if (!namePart.compare(m->rents().at(i)->namePart()))
+				itemCount++;
+		}
+
+		CPTable* tb = m_mntTables.at(i);
+		tb->initWidth(m_content->width())
+		  ->initRowCount(itemCount)
+		  ->initTableWidthPercent({ 0.03, 0.08, 0.10, 0.12-7, 0.09, 
+			   0.10, 0.09, 0.12-7, 0.09, 0.10, 0.05, 0.03})
+		  ->initPage();
+
+		for (int row = 0; row < m->rents().size(); row++)
+		{
+			//m_tableCommon->setRowHeight(row, 50);
+			Rent* dv = m->rents().at(row);
+			qDebug() << dv->namePart() << "/" << m->parts().at(i)->namePart();
+			if (dv->namePart().compare(m->parts().at(i)->namePart())) continue;
+
+			QTableWidgetItem* item0 = new QTableWidgetItem(QString("%1").arg(row + 1));
+			item0->setTextAlignment(Qt::AlignCenter);
+			tb->table()->setItem(row, 0, item0);
+
+			QTableWidgetItem* item1 = new QTableWidgetItem(dv->noAsset());
+			item1->setTextAlignment(Qt::AlignCenter);
+			tb->table()->setItem(row, 1, item1);
+
+			QTableWidgetItem* item2 = new QTableWidgetItem(dv->nameDevice());
+			item2->setTextAlignment(Qt::AlignCenter);
+			tb->table()->setItem(row, 2, item2);
+
+			QTableWidgetItem* item3 = new QTableWidgetItem(dv->dateBorrowed());
+			item3->setTextAlignment(Qt::AlignCenter);
+			tb->table()->setItem(row, 3, item3);
+
+			QTableWidgetItem* item4 = new QTableWidgetItem(dv->nameUser());
+			item4->setTextAlignment(Qt::AlignCenter);
+			tb->table()->setItem(row, 4, item4);
+
+			CPLazyImage *lbSignBorrwed = new CPLazyImage(dv->signUser(), tb->table()->width() * 0.10);
+			lbSignBorrwed->setFixedSize(tb->table()->width() * 0.10, 50);
+			QHBoxLayout *lySignBorrwed = new QHBoxLayout();
+			lySignBorrwed->addWidget(lbSignBorrwed);
+			lySignBorrwed->setMargin(0);
+			QWidget *wdSignBorrwed = new QWidget();
+			wdSignBorrwed->setLayout(lySignBorrwed);
+			wdSignBorrwed->setStyleSheet("border: 0px;");
+			tb->table()->setCellWidget(row, 5, wdSignBorrwed);
+
+			QTableWidgetItem* itemPP = new QTableWidgetItem(dv->purpose());
+			itemPP->setTextAlignment(Qt::AlignCenter);
+			tb->table()->setItem(row, 6, itemPP);
+
+			QTableWidgetItem* item7 = new QTableWidgetItem(dv->dateReturned());
+			item7->setTextAlignment(Qt::AlignCenter);
+			tb->table()->setItem(row, 7, item7);
+
+			QTableWidgetItem* item8 = new QTableWidgetItem(dv->nameAdmin());
+			item8->setTextAlignment(Qt::AlignCenter);
+			tb->table()->setItem(row, 8, item8);
+
+			CPLazyImage *lbSignReturned = new CPLazyImage(dv->signAdmin(), tb->table()->width() * 0.10);
+			lbSignReturned->setFixedSize(tb->table()->width() * 0.10, 50);
+			QHBoxLayout *lySignReturned = new QHBoxLayout();
+			lySignReturned->addWidget(lbSignReturned);
+			lySignReturned->setMargin(0);
+			QWidget *wdSignReturned = new QWidget();
+			wdSignReturned->setLayout(lySignReturned);
+			wdSignReturned->setStyleSheet("border: 0px;");
+			tb->table()->setCellWidget(row, 9, wdSignReturned);
+
+			QTableWidgetItem* itemSecu = new QTableWidgetItem(dv->initial() ? "O" : "X");
+			itemSecu->setTextAlignment(Qt::AlignCenter);
+			tb->table()->setItem(row, 10, itemSecu);
+
+			QTableWidgetItem* item11 = new QTableWidgetItem(dv->completed() ? "O" : "X");
+			item11->setTextAlignment(Qt::AlignCenter);
+			tb->table()->setItem(row, 11, item11);
+		}
+	}
+}
+void ViewHome::initListMNT(bool pass)
+{
+	if (!initPage(TAG_MNT_LIST, kr("월별대장"), pass)) return;
+
 	initButtonsMNT();
 
-	m_lbCalendar = (new CPLabel(100, 30, getCurrentDate(0)))
+	QString dateTime = pass ? (m_currentYear + "." + m_currentMonth) : getCurrentDate(0);
+	m_lbCalendar = (new CPLabel(100, 30, dateTime))
 		->initAlignment(Qt::AlignCenter)->initFontSize(15);
 	m_contentGrid1_2->append(m_btnCalendarPrev)->append(m_lbCalendar)->append(m_btnCalendarNext);
 
 	MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
-	m_btnCheckExt = (new Command("check_ext", metaTable->txt2, m_content->width(), metaTable->hExt))
-		->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", metaTable->txt2)
+	m_btnCheckExt = (new Command("check_ext", metaTable->txt2 + kr("월별대장"), m_content->width(), metaTable->hExt))
+		->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", metaTable->txt2 + kr("월별대장"))
 		->initEffect(metaTable->btnExtReleasedSheet, metaTable->btnExtHoverdSheet, metaTable->btnExtHoverdSheet)
 		->initFunc([=]() {
 
 		bool folded = !m_btnCheckExt->selected();
 		int h = folded ? (12 * 30 + 24) : 0;
 		m_checkTable->initHeight(h);
-		m_btnCheckExt->initName(folded ? metaTable->txt2 : metaTable->txt1);
+		m_btnCheckExt->initName(folded ? metaTable->txt2 + kr("월별대장") : metaTable->txt1 + kr("월별대장"));
 		m_btnCheckExt->select(folded);
 		updateUI();
 	});
@@ -184,27 +295,49 @@ void ViewHome::initListMNT()
 
 	m_checkTable = new CheckTable();
 	m_mntStack->append(m_btnCheckExt)->append(m_checkTable);
+	/*** 상위 사인 점검 출력 ***/
 
 	m_mntTables.clear();
+	m_mntZoneSign.clear();
 	m_cmdProviderExt = new CommandProvider();
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < m->parts().size(); i++)
 	{
-		Command* m_btnExt = (new Command("ext_" + QString("%1").arg(i), metaTable->txt1, m_content->width(), metaTable->hExt))
-			->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", metaTable->txt2)
+		CPBoxSign* zoneSign = new CPBoxSign(m_content->width() - 25, 0, new QHBoxLayout);
+		m_mntZoneSign.append(zoneSign);
+
+		QString releaseTxt = metaTable->txt1 + m->parts().at(i)->namePart();
+		QString selectedTxt = metaTable->txt2 + m->parts().at(i)->namePart();
+		/** 확장버튼 생성 **/
+		Command* m_btnExt = (new Command(m->parts().at(i)->namePart(), releaseTxt, m_content->width(), metaTable->hExt))
+			->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", selectedTxt)
 			->initEffect(metaTable->btnExtReleasedSheet, metaTable->btnExtHoverdSheet, metaTable->btnExtHoverdSheet)
 			->initFunc([=]() {
 			Command* cmd = m_cmdProviderExt->command(i);
 			bool folded = cmd->selected();
-			cmd->initName(folded ? metaTable->txt1 : metaTable->txt2);
+
+			int hZoneSign = !folded ? 60 : 0;
+			bool searched = false;
+			for (int i = 0; i < m->rents().size(); i++)
+			{
+				if (!cmd->tag().compare(m->rents().at(i)->namePart()))
+					searched = true;
+			}
+			if (!searched) hZoneSign = 0;
+			zoneSign->setFixedHeight(hZoneSign);
+			cmd->initName(folded ? releaseTxt : selectedTxt);
 			cmd->select(!folded);
+
+			CPTable* tb = m_mntTables.at(i);
+			tb->setFixedHeight(folded ? 0 : tb->metaHeight());
 			updateUI();
 		});
 		m_cmdProviderExt->append(m_btnExt);
 		m_mntStack->append(m_btnExt);
+		m_mntStack->append(zoneSign);
 
-		CPTable* table = (new CPTable(new MetaTableExtendable, 30))->initWidth(m_content->width())->resize();
+		CPTable* table = (new CPTable(new MetaTableExtendable));// ->resize();
 		m_mntTables.append(table);
-		m_mntStack->append(table);
+		m_mntStack->append(table); 	/*** 표 넣기 ***/
 	}
 	updateUI();
 }
@@ -215,11 +348,11 @@ void ViewHome::initListEMP()
 	initButtonsEMP();
 	updateUI();
 }
-bool ViewHome::initPage(QString tag, QString titleTxt)
+bool ViewHome::initPage(QString tag, QString titleTxt, bool pass)
 {
 	m_titleTxt = titleTxt;
 	/* DON'T INITIALIZE. */
-	if (!m_cmdProviderList->selectedTag().compare(tag)) return false;
+	if (!m_cmdProviderList->selectedTag().compare(tag) && !pass) return false;
 
 	m->setPageNumber(1);		/* INITIALIZE PAGE NUMBER */
 	m_cmdProviderList->select(tag); /* SELECT BUTTON & UPDATE TAG */
@@ -378,7 +511,7 @@ void ViewHome::netGetRentList(int type)
 				n->getRentList(type, m_currentYear.toInt(), m_currentMonth.toInt())->request();
 			else
 				n->getTotalRentListMonth(m_currentYear.toInt(), m_currentMonth.toInt())->request();
-		}			
+		}
 		else if (!m_cmdProviderList->selectedTag().compare(TAG_MNT_LIST))
 		{
 			n->getTotalRentListMonth(m_currentYear.toInt(), m_currentMonth.toInt())->request();
@@ -387,7 +520,7 @@ void ViewHome::netGetRentList(int type)
 	}
 	case 3:
 	case 4:
-	{		
+	{
 		if (!m_cmdProviderList->selectedTag().compare(TAG_MNG_LIST))
 		{
 			if (m_cmdProviderView == nullptr)
@@ -401,7 +534,7 @@ void ViewHome::netGetRentList(int type)
 		{
 			n->getTotalRentListMonth(m_currentYear.toInt(), m_currentMonth.toInt())->request();
 		}
-		
+
 		break;
 	}
 	}
@@ -733,7 +866,7 @@ void ViewHome::initSlideButton()
 	});
 
 	m_btnLogout = new Command(m_styleHeader->btnLogout(),
-	[=]()
+		[=]()
 	{
 		m_question->initSize(350, 120)->setMessage(kr("로그아웃 하시겠습니까?"));
 		m_question->func = [=]() { n->logout()->request(); };
@@ -741,34 +874,34 @@ void ViewHome::initSlideButton()
 	}, true);
 
 	m_btnDVCList = new Command(m_styleSlide->btnDVCList(),
-	[=]()
+		[=]()
 	{
 		initListDVC();
-		netGetDeviceList();		
+		netGetDeviceList();
 	}, true);
 
 	m_btnMNGList = new Command(m_styleSlide->btnMNGList(),
-	[=]()
+		[=]()
 	{
 		initListMNG();
 		netGetRentList(0);
 	}, true);
 
 	m_btnMNTList = new Command(m_styleSlide->btnMNTList(),
-	[=]()
+		[=]()
 	{
 		initListMNT();
 		netGetRentList(0);
 	}, true);
 
-	m_btnEMPList = 	new Command(m_styleSlide->btnEMPList(),
-	[=]()
+	m_btnEMPList = new Command(m_styleSlide->btnEMPList(),
+		[=]()
 	{
 		initListEMP();
 	}, true);
 
 	m_btnImExport = new Command(m_styleSlide->btnImExport(),
-	[=]()
+		[=]()
 	{
 		m_barcoder = new Barcoder(kr("대출/반납하기"), 520, 230);
 		m_barcoder->show();
@@ -862,11 +995,11 @@ void ViewHome::initButtonsMNG()
 	else m_cmdProviderView = new CommandProvider();
 
 	m_btnPrint = new Command(m_styleContent->btnPrint(),
-	[=]() {	print(m_tableCommon);	}, true);
+		[=]() {	print(m_tableCommon);	}, true);
 
 	m_btnViewAll = new Command(m_styleContent->btnViewAll(),
-	[=]() 
-	{	
+		[=]()
+	{
 		if (m_cmdProviderView->selectedTag().compare(TAG_VIEW_ALL))
 		{
 			m_cmdProviderView->select(TAG_VIEW_ALL);
@@ -879,7 +1012,7 @@ void ViewHome::initButtonsMNG()
 	}, true);
 
 	m_btnViewDate = new Command(m_styleContent->btnViewDate(),
-	[=]()
+		[=]()
 	{
 		if (m_cmdProviderView->selectedTag().compare(TAG_VIEW_DATE))
 		{
@@ -895,14 +1028,14 @@ void ViewHome::initButtonsMNG()
 	}, true);
 
 	m_btnCalendarPrev = (new Command(m_styleContent->btnCalendarPrev(),
-	[=]()
+		[=]()
 	{
 		m_lbCalendar->initText(getCurrentDate(--m_countMonth));
 		netGetRentList(1);
 	}, true))->initVisible(false);
 
 	m_btnCalendarNext = (new Command(m_styleContent->btnCalendarNext(),
-	[=]()
+		[=]()
 	{
 		m_lbCalendar->initText(getCurrentDate(++m_countMonth));
 		netGetRentList(1);
@@ -915,23 +1048,25 @@ void ViewHome::initButtonsMNG()
 void ViewHome::initButtonsMNT()
 {
 	m_btnPrint = new Command(m_styleContent->btnPrint(),
-	[=]()
+		[=]()
 	{
 		print(m_tableCommon);
 	}, true);
 
 	m_btnCalendarPrev = (new Command(m_styleContent->btnCalendarPrev(),
-	[=]()
+		[=]()
 	{
 		m_lbCalendar->initText(getCurrentDate(--m_countMonth));
-		updateUI();
+		netGetRentList(1);
+		initListMNT(true);
 	}, true));
 
 	m_btnCalendarNext = (new Command(m_styleContent->btnCalendarNext(),
-	[=]()
+		[=]()
 	{
 		m_lbCalendar->initText(getCurrentDate(++m_countMonth));
-		updateUI();
+		netGetRentList(1);
+		initListMNT(true);
 	}, true));
 
 	m_contentGrid1_3->append(m_btnPrint);
@@ -939,7 +1074,7 @@ void ViewHome::initButtonsMNT()
 void ViewHome::initButtonsEMP()
 {
 	m_btnPrint = new Command(m_styleContent->btnPrint(),
-	[=]()
+		[=]()
 	{
 		print(m_tableCommon);
 	}, true);
@@ -1126,15 +1261,15 @@ void ViewHome::initTableMNT()
 	{
 		Command* cmd = m_cmdProviderExt->command(i);
 		cmd->initWidth(m_content->width());
-
+		
 		CPTable* tb = m_mntTables.at(i);
-		tb->initWidth(m_content->width())->initVible(cmd->selected())->resize();
 		hMntStack = hMntStack + cmd->height() + tb->height();
 	}
 	m_mntStack->setFixedSize(m_content->width() - 20, hMntStack);
 	m_mntScrArea->setFixedSize(m_mntStack->width() + 20, m_content->height() - m_contentRow1->height());
 	m_mntScrArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+	/* Calendar Buttons */
 	QString selectedTime = m_currentYear + m_currentMonth;
 	QString tYear = QDateTime::currentDateTime().addMonths(0).toString("yyyy");
 	QString tMonth = QDateTime::currentDateTime().addMonths(0).toString("MM");

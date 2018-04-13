@@ -569,9 +569,9 @@ NetWorker* NetWorker::getTotalRentListMonth(int year, int month)
 			d->setSignAdmin(obj["confirm_signature"].toString());
 			d->setPurpose(obj["purpose"].toString());
 			//d->setNoPart(obj["sem_part_no"].toInt());
-			d->setNamePart(obj["origin_part_name"].toString());
+			d->setNamePart(obj["sem_part_name"].toString());
 			d->isInitial(obj["is_initial"].toInt());
-			qDebug() << d->noRent() << "##/" << d->nameUser() << "/" << d->dateReturned();
+			qDebug() << d->noRent() << "##/" << d->nameUser() << "/" << d->dateReturned() <<"/"<<d->namePart();
 			list.append(d);
 		}
 		m->setRents(list);

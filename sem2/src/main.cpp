@@ -9,7 +9,7 @@
 #include "cs_alarm.h"
 #include "cs_login.h"
 #include "view_home.h"
-
+#include "cs_component.h"
 #include "cs_form_add.h"
 
 int main(int argc, char *argv[])
@@ -19,6 +19,19 @@ int main(int argc, char *argv[])
     ViewHome w;
     w.show();
 
+	//Model* m = Model::instance();
+	//QList<Rent*> list;
+	//Rent* r = new Rent();
+	//r->setNoAsset("A");
+
+	//Rent* r1 = new Rent();
+	//r1->setNoAsset("B");
+	//list.append(r);
+	//list.append(r1);
+
+	//CPMNTTable* t = new CPMNTTable(0);
+	//t->setModel(list);
+	//t->show();
 	//FormAdd* f = new FormAdd(410, 340);
 	//f->show();
 

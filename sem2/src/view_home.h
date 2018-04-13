@@ -31,6 +31,7 @@ public:
 	void prev();
 	void next();
 	void updateMNGSign();
+	void updateMNTCheckTable();
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
@@ -89,6 +90,7 @@ private:
 	CommandProvider* m_cmdProviderExt;
 
 	QList<CPTable*> m_mntTables;
+	QList<CPBoxSign*> m_mntZoneSign;
 
 	Command* m_btnSlideExt;
 
@@ -133,9 +135,10 @@ private:
 
 	void initListDVC();
 	void initListMNG();
-	void initListMNT();
+	void initListMNT(bool pass = false);
+	void initListMNT2();
 	void initListEMP();
-	bool initPage(QString tag, QString titleTxt);
+	bool initPage(QString tag, QString titleTxt, bool pass = false);
 
 	void newTable(int rowCount, QString tag);
 	void newNavi();
@@ -180,4 +183,5 @@ private:
 	void updateContentRow2();
 
 	QString m_titleTxt;
+	QString m_selectedPart = "";
 };
