@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "cs_qheader.h"
 #include "cs_component.h"
 #include "cs_signature.h"
@@ -15,7 +15,7 @@ public:
 		CPDialog(width, height, parent)
 	{
 		m_noSing = noSign;
-		setWindowTitle(kr("¼­¸íÇÏ±â"));
+		setWindowTitle(kr("ì„œëª…í•˜ê¸°"));
 		setFixedSize(width, height);
 		setLayout(new QVBoxLayout);
 		layout()->setSpacing(0);
@@ -25,9 +25,9 @@ public:
 		setModal(true);
 
 		Palette* p = new Palette();
-		Command* btnConfirm = (new GrayCommand("confirm", kr("È®ÀÎ"), 70, 30))
+		Command* btnConfirm = (new GrayCommand("confirm", kr("í™•ì¸"), 70, 30))
 			->initFunc([=]() { confirm(); });
-		Command* btnCancel = (new GrayCommand("cancel", kr("Ãë¼Ò"), 70, 30))
+		Command* btnCancel = (new GrayCommand("cancel", kr("ì·¨ì†Œ"), 70, 30))
 			->initFunc([=]() { cancel(); });
 
 		m_signZone = new Signature(this);
@@ -61,8 +61,8 @@ public:
 		close();
 		//qDebug() << "confirm";
 		//m_question = new Question(
-		//	kr("¾Ë¸²"),
-		//	kr("¼­¸íÀ» ¿Ï·áÇÏ½Ã°Ú½À´Ï±î?\n\n"), 300, 180);
+		//	kr("ì•Œë¦¼"),
+		//	kr("ì„œëª…ì„ ì™„ë£Œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?\n\n"), 300, 180);
 		//m_question->func = [=]() {};
 		//m_question->show();
 

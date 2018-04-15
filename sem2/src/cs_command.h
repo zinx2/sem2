@@ -36,6 +36,7 @@ public:
 			initIcon(metaBtn->icon());
 		initFunc(func);
 	}
+
 	QString tag() { return m_tag; }
 	Command* initWidth(int width) { setFixedWidth(width); return this; }
 	Command* initStyleSheet(QString sheet) { setStyleSheet(sheet); return this; }
@@ -89,6 +90,8 @@ public:
 	};
     Command* initEnabled(bool enabled) {
         setEnabled(enabled);
+		if (enabled) setStyleSheet(m_releasedSheet);
+		else setStyleSheet(m_disabledReleasedSheet);
         return this;
     };
 	Command* initVisible(bool visible) {
@@ -112,7 +115,7 @@ public:
 			font.setPointSize(font.pointSize() + 2);
 			//font.setBold(true);
 			painter.setFont(font);
-			painter.drawText(66, height() / 2 + 5, m_txt);
+			painter.drawText(66, height() / 2 + 6, m_txt);
 		}
 	}
 
@@ -148,7 +151,7 @@ protected:
 		m_cmd();
 	}
 
-private:
+protected:
 	bool m_selected = false;
 	QString m_tag;
 	QString m_releasedSheet = "color: white; background-color: transparent;";
@@ -158,6 +161,35 @@ private:
 	QString m_disabledHoveredSheet = "color: white; background-color: transparent;";
 	QString m_disabledSelectedSheet = "color: white; background-color: transparent;";
 	FUNC m_cmd;
+};
+class LogoutCommand : public Command
+{
+	Q_OBJECT
+public:
+	LogoutCommand(Button* metaBtn, FUNC func = [=]() {}, bool enabled = true)
+		: Command(metaBtn, func, enabled)
+	{
+		initName("");
+		initIcon(metaBtn->icon(), metaBtn->name());
+	}
+
+	void paintEvent(QPaintEvent* e)
+	{
+		QPushButton::paintEvent(e);
+
+		if (!m_pixmap.isNull())
+		{
+			const int y = (height() - m_pixmap.height()) / 2; // add margin if needed
+			QPainter painter(this);
+			painter.drawPixmap(86, y, m_pixmap); // hardcoded horizontal margin
+
+			QFont font = painter.font();
+			font.setPointSize(font.pointSize() + 2);
+			//font.setBold(true);
+			painter.setFont(font);
+			painter.drawText(12, height() / 2 + 6, kr("로그아웃"));
+		}
+	}
 };
 class GrayCommand : public Command
 {

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "cs_qheader.h"
 #include "cs_component.h"
 #include "cs_command.h"
@@ -19,7 +19,7 @@ public:
 		layout()->setAlignment(Qt::AlignTop);
 		
 		Palette* p = new Palette();
-		Command* btnConfirm = (new Command("confirm", kr("Ȯ��"), 80, 40))
+		Command* btnConfirm = (new Command("confirm", kr("확인"), 80, 40))
 			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
 			->initFunc([=]() { confirm(); });
 		

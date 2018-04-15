@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "cs_qheader.h"
 #include "cs_component.h"
 #include "cs_question.h"
@@ -10,10 +10,10 @@ class FormReturn : public CPDialog
 {
 	Q_OBJECT
 public:
-	//type 0:´ëÃâ, 1:¹Ý³³
+	//type 0:ëŒ€ì¶œ, 1:ë°˜ë‚©
 	explicit FormReturn(int width, int height, QWidget *parent = 0) : CPDialog(width, height, parent)
 	{
-		setWindowTitle(kr("¹Ý³³ÇÏ±â"));
+		setWindowTitle(kr("ë°˜ë‚©í•˜ê¸°"));
 		setFixedSize(width, height);
 		setLayout(new QVBoxLayout);
 		layout()->setSpacing(0);
@@ -22,22 +22,22 @@ public:
 		m_net = NetWorker::instance();
 		setModal(true);
 		Palette* p = new Palette();
-		btnConfirm = (new GrayCommand("confirm", kr("È®ÀÎ"), 70, 30))->initEnabled(false)
+		btnConfirm = (new GrayCommand("confirm", kr("í™•ì¸"), 70, 30))->initEnabled(false)
 			->initFunc([=]() { confirm(); });
-		Command* btnCancel = (new GrayCommand("cancel", kr("Ãë¼Ò"), 70, 30))
+		Command* btnCancel = (new GrayCommand("cancel", kr("ì·¨ì†Œ"), 70, 30))
 			->initFunc([=]() { cancel(); });
-		Command* btnInit = (new GrayCommand("init", kr("ÃÊ±âÈ­"), 70, 30))
+		Command* btnInit = (new GrayCommand("init", kr("ì´ˆê¸°í™”"), 70, 30))
 			->initFunc([=]() { init(); });
-		Command* btnEmployee = (new GrayCommand("search_part", kr("Á÷¿øÃ£±â"), 70, 30))->initEnabled(false)
+		Command* btnEmployee = (new GrayCommand("search_part", kr("ì§ì›ì°¾ê¸°"), 70, 30))->initEnabled(false)
 			->initFunc([=]()
 		{
-			SelectorEmployee* selector = new SelectorEmployee(kr("Á÷¿øÃ£±â"), 400, 500);
+			SelectorEmployee* selector = new SelectorEmployee(kr("ì§ì›ì°¾ê¸°"), 400, 500);
 			selector->setParent(this);
 			selector->setTag(TAG_FORM_RETURN);
 			selector->show();
 		});
 
-		m_lbMessage = new QLabel(kr("Á÷¿øÀ» ¼±ÅÃÇÏ¼¼¿ä."));
+		m_lbMessage = new QLabel(kr("ì§ì›ì„ ì„ íƒí•˜ì„¸ìš”."));
 		m_lbMessage->setFixedSize(width - 250, 25);
 		m_lbMessage->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
 
@@ -48,9 +48,9 @@ public:
 		layout()->addWidget(
 			(new CPWidget(width, 45, new QHBoxLayout))
 			->initContentsMargins(0, 0, 0, 0)
-			->append(new CPLabel(35, 25, kr("Àåºñ¸í")))
+			->append(new CPLabel(35, 25, kr("ìž¥ë¹„ëª…")))
 			->append(edNameDevice)
-			->append(new CPLabel(60, 25, kr("ÀÚ»ê¹øÈ£")))
+			->append(new CPLabel(60, 25, kr("ìžì‚°ë²ˆí˜¸")))
 			->append(edNoAsset));
 
 		/* ROW 2 */
@@ -59,10 +59,10 @@ public:
 		layout()->addWidget(
 			(new CPWidget(width, 45, new QHBoxLayout))
 			->initContentsMargins(2, 0, 0, 0)
-			->append(new CPLabel(35, 25, kr("È®ÀÎÀÚ")))
+			->append(new CPLabel(35, 25, kr("í™•ì¸ìž")))
 			->append(edNameUserOrAdmin)
 			->append(btnEmployee)
-			->append(new CPLabel(55, 25, kr("¹Ý³³ÀÏ")))
+			->append(new CPLabel(55, 25, kr("ë°˜ë‚©ì¼")))
 			->append(edDateBorrowedOrReturned));
 
 		/* ROW 3 */
@@ -70,19 +70,19 @@ public:
 		layout()->addWidget(
 			(new CPWidget(width, 60, new QHBoxLayout))
 			->initContentsMargins(0, 0, 0, 0)
-			->append((new CPLabel(35, 60, kr("¿ëµµ")))->initAlignment(Qt::AlignTop | Qt::AlignRight)->initContentsMargins(0, 0, 0, 0))
+			->append((new CPLabel(35, 60, kr("ìš©ë„")))->initAlignment(Qt::AlignTop | Qt::AlignRight)->initContentsMargins(0, 0, 0, 0))
 			->append(edUse));
 
 		/* ROW 4 */
-		rbYes = new QRadioButton(kr("¿¹"), this);
+		rbYes = new QRadioButton(kr("ì˜ˆ"), this);
 		rbYes->setFixedWidth(50);
-		rbNo = new QRadioButton(kr("¾Æ´Ï¿À"), this);
+		rbNo = new QRadioButton(kr("ì•„ë‹ˆì˜¤"), this);
 		rbNo->setFixedWidth(70);
 		rbNo->setChecked(true);
 		layout()->addWidget(
 			(new CPWidget(width, 35, new QHBoxLayout))
 			->initContentsMargins(10, 0, 0, 0)->initAlignment(Qt::AlignLeft)
-			->append((new CPLabel(130, 25, kr("º¸¾ÈÁ¡°Ë(ÃÊ±âÈ­) ¿©ºÎ")))->initAlignment(Qt::AlignVCenter | Qt::AlignLeft))
+			->append((new CPLabel(130, 25, kr("ë³´ì•ˆì ê²€(ì´ˆê¸°í™”) ì—¬ë¶€")))->initAlignment(Qt::AlignVCenter | Qt::AlignLeft))
 			->append(rbYes)
 			->append(rbNo));
 
@@ -92,7 +92,7 @@ public:
 		layout()->addWidget(
 			(new CPWidget(width, 210, new QVBoxLayout))
 			->initContentsMargins(10, 0, 0, 0)
-			->append((new CPLabel(70, 25, kr("¼­¸í")))->initAlignment(Qt::AlignBottom))
+			->append((new CPLabel(70, 25, kr("ì„œëª…")))->initAlignment(Qt::AlignBottom))
 			->append(szSign));
 
 		layout()->addWidget((new CPWidget(width, 30, new QHBoxLayout))
@@ -136,15 +136,15 @@ public:
 		qDebug() << "confirm";
 		if (!szSign->toImage()) return;
 
-		QString strNameDevice = kr("Àåºñ¸í : ") + edNameDevice->text() + "\n";
-		QString strNoAsset = kr("ÀÚ»ê¹øÈ£ : ") + edNoAsset->text() + "\n";
-		QString strDate = kr("¹Ý³³³¯Â¥ : ") + edDateBorrowedOrReturned->text() + "\n";
-		QString strNameUser = kr("È®ÀÎÀÚ : ") + edNameUserOrAdmin->text() + "\n";
-		QString strUse = kr("¿ëµµ : ") + edUse->toPlainText() + "\n";
+		QString strNameDevice = kr("ìž¥ë¹„ëª… : ") + edNameDevice->text() + "\n";
+		QString strNoAsset = kr("ìžì‚°ë²ˆí˜¸ : ") + edNoAsset->text() + "\n";
+		QString strDate = kr("ë°˜ë‚©ë‚ ì§œ : ") + edDateBorrowedOrReturned->text() + "\n";
+		QString strNameUser = kr("í™•ì¸ìž : ") + edNameUserOrAdmin->text() + "\n";
+		QString strUse = kr("ìš©ë„ : ") + edUse->toPlainText() + "\n";
 
 		m_question = new Question(
-			kr("¾Ë¸²"),
-			kr("¹Ý³³½Ã°Ú½À´Ï±î?\n\n")
+			kr("ì•Œë¦¼"),
+			kr("ë°˜ë‚©ì‹œê² ìŠµë‹ˆê¹Œ?\n\n")
 			+ strNameDevice
 			+ strNoAsset
 			+ strDate
@@ -189,19 +189,19 @@ public:
 
 		if (edNameDevice->text().isEmpty())
 		{
-			m_lbMessage->setText(kr("Àåºñ¸íÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä."));
+			m_lbMessage->setText(kr("ìž¥ë¹„ëª…ì„ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
 		}
 		else if (edNoAsset->text().isEmpty())
 		{
-			m_lbMessage->setText(kr("ÀÚ»ê¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä."));
+			m_lbMessage->setText(kr("ìžì‚°ë²ˆí˜¸ë¥¼ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
 		}
 		else if (edNameUserOrAdmin->text().isEmpty())
 		{
-			m_lbMessage->setText(kr("´ëÃâÀÚ¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä."));
+			m_lbMessage->setText(kr("ëŒ€ì¶œìžë¥¼ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
 		}
 		else if (edUse->toPlainText().isEmpty())
 		{
-			m_lbMessage->setText(kr("¿ëµµ¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä."));
+			m_lbMessage->setText(kr("ìš©ë„ë¥¼ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
 		}
 		else
 		{
@@ -210,7 +210,7 @@ public:
 	}
 	void search()
 	{
-		SelectorEmployee* selector = new SelectorEmployee(kr("Á÷¿ø Ã£±â"), 400, 500, this);
+		SelectorEmployee* selector = new SelectorEmployee(kr("ì§ì› ì°¾ê¸°"), 400, 500, this);
 		selector->setParent(this);
 		selector->show();
 	}

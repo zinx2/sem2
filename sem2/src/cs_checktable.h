@@ -117,9 +117,12 @@ public:
 			table->setRowCount(m_meta->parts().size());
 			table->horizontalHeader()->setStyleSheet("QHeaderView::section { background-color:#eeeeee }");
 
+			QString currentYear = QDateTime::currentDateTime().toString("yyyy");
 			QString currentMonth = QDateTime::currentDateTime().toString("M");
+			QString metaMonth = m_meta->metaMonths.at(i);
+			QString metaYear = m_meta->metaYears.at(i);
 
-			if (!currentMonth.compare(QString("%1").arg(i + 1)))
+			if (!currentMonth.compare(metaMonth) && !currentYear.compare(metaYear))
 				table->setStyleSheet("QTableView {border-right:0px solid white; background-color: #0083B0}");
 			else
 				table->setStyleSheet("QTableView {border-right:0px solid white;}");

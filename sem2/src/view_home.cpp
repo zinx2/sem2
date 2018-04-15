@@ -157,7 +157,22 @@ void ViewHome::initListMNT(bool skip)
 	m_cmdProviderExt = new CommandProvider();
 	for (int i = 0; i < m->parts().size(); i++)
 	{
-		CPBoxSign* zoneSign = new CPBoxSign(m_content->width() - 25, 0, new QHBoxLayout);
+		CPBoxSign* zoneSign = new CPBoxSign(m_content->width() - 25, 0, new QHBoxLayout,
+			[=]() {
+			QString currentNamePart = m_mntZoneSign.at(i)->namePart();//zoneSign->namePart();
+			int currentYear = m_currentYear.toInt();
+			int currentMonth = m_currentMonth.toInt();
+			foreach(Sign* s, m->signatures())
+			{
+				if (!currentNamePart.compare(s->namePart()) && currentYear == s->year() && currentMonth == s->month())
+				{
+					FormSignature* sg = new FormSignature(s->noSign(), 500, 250);
+					sg->show();
+					break;
+				}
+			}
+		});
+		zoneSign->setNamePart(m->parts().at(i)->namePart());
 		m_mntZoneSign.append(zoneSign);
 
 		QString releaseTxt = metaTable->txt1 + m->parts().at(i)->namePart();
@@ -435,6 +450,7 @@ void ViewHome::netHandler()
 				{
 					count = count - 1;
 					typeAdminStr = kr("파트담당자");
+					m_btnMNGList->initVisible(true);
 					m_btnMNTList->initVisible(false);
 					break;
 				}
@@ -442,14 +458,16 @@ void ViewHome::netHandler()
 				{
 					count = count - 1;
 					typeAdminStr = kr("파트장");
+					m_btnMNGList->initVisible(true);
 					m_btnMNTList->initVisible(false);
 					break;
 				}
 				case User::SpecialList:
 				{
 					count = count - 1;
-					typeAdminStr = kr("보직자");
-					m_btnMNGList->initVisible(false);
+					typeAdminStr = kr("결재자");
+					m_btnMNGList->initVisible(true);
+					m_btnMNTList->initVisible(true);
 					break;
 				}
 				case User::SystemAdmin:
@@ -531,7 +549,7 @@ void ViewHome::netHandler()
 		}
 		else if (type == Notificator::Exit)
 		{
-			//close();
+			close();
 		}
 		else if (type == Notificator::DVIList)
 		{
@@ -623,7 +641,9 @@ void ViewHome::netHandler()
 			result = noti->result();
 			if (result) {
 				msg = kr("정상적으로 처리되었습니다.");
-				updateMNGSign();
+				QString tag = m_cmdProviderList->selectedTag();
+				if(!tag.compare(TAG_MNG_LIST)) updateMNGSign();
+				else if (!tag.compare(TAG_MNT_LIST)) updateMNTCheckTable();
 			}
 			else msg = noti->message();
 			m_alarm->initSize(350, 120)->setMessage(msg);
@@ -632,6 +652,10 @@ void ViewHome::netHandler()
 		else if (type == Notificator::SignForMonth)
 		{
 			QTimer::singleShot(500, this, SLOT(netSignForMonth()));
+		}
+		else if (type == Notificator::MNGList)
+		{
+			updateUI();
 		}
 		else
 		{
@@ -770,6 +794,7 @@ void ViewHome::initContentRow2()
 		{
 			if (!userNamePart.compare(s->namePart()) && currentYear == s->year() && currentMonth == s->month())
 			{
+				int noSign = s->noSign();
 				FormSignature* sg = new FormSignature(s->noSign(), 500, 250);
 				sg->show();
 				return;
@@ -850,6 +875,10 @@ void ViewHome::initFooter()
 {
 	m_footer = new QWidget(this);
 	m_footer->setStyleSheet("background: " + m_styleFooter->palette()->navy01);
+	m_footer->setLayout(new QHBoxLayout);
+	m_footer->setFixedSize(m_styleFooter->width(), m_styleFooter->height());
+	m_footer->layout()->setAlignment(Qt::AlignCenter);
+	m_footer->layout()->addWidget((new CPLabel(500, 25, m_styleFooter->txtCopyright))->initAlignment(Qt::AlignCenter)->initStyleSheet("color: white")->initFontSize(11));
 	layout()->addWidget(m_footer);
 }
 void ViewHome::initSlideButton()
@@ -866,7 +895,7 @@ void ViewHome::initSlideButton()
 		updateUI();
 	});
 
-	m_btnLogout = new Command(m_styleHeader->btnLogout(),
+	m_btnLogout = new LogoutCommand(m_styleHeader->btnLogout(),
 		[=]()
 	{
 		m_question->initSize(350, 120)->setMessage(kr("로그아웃 하시겠습니까?"));
@@ -1047,6 +1076,17 @@ void ViewHome::initButtonsMNG()
 			//updateMNGSign();
 		}
 	}, true);
+
+	if (m->user()->typeAdmin() == User::SpecialList)
+	{
+		m_btnViewAll->initVisible(false);
+		m_btnViewDate->initVisible(false);
+	}
+	else
+	{
+		m_btnViewAll->initVisible(true);
+		m_btnViewDate->initVisible(true);
+	}
 
 	m_btnCalendarPrev = (new Command(m_styleContent->btnCalendarPrev(),
 		[=]()
@@ -1269,26 +1309,7 @@ void ViewHome::initTableMNG()
 				p->btnSelectedStyleDiabled);
 	}
 
-	QString userPartName = m->user()->namePart();
-	foreach(Sign* s, m->signatures())
-	{
-		QString objNamePart = s->namePart();
-		if (objNamePart.compare(userPartName)) continue;
-
-		int objYear = s->year(); int objMonth = s->month();
-		if (m_currentYear.toInt() != objYear || m_currentMonth.toInt() != objMonth) continue;
-
-		int typeAdmin = m->user()->typeAdmin();
-		int typeComplete = s->typeComplete();
-		bool enable = false;
-
-		if (typeAdmin == User::SpecialList) enable = typeComplete == 2 ? true : false; //보직자
-		else if (typeAdmin == User::PartChair) enable = typeComplete == 1 ? true : false; //파트장
-		else if (typeAdmin == User::PartManager) enable = typeComplete == 0 ? true : false; //담당자
-		else return;
-
-		m_btnSign->setEnabled(enable);
-	}
+	updateMNGSign();
 }
 void ViewHome::initTableMNT()
 {
@@ -1330,6 +1351,32 @@ void ViewHome::initTableMNT()
 			->initDisabledEffect(p->btnSelectedStyleDiabled,
 				p->btnSelectedStyleDiabled,
 				p->btnSelectedStyleDiabled);
+	}
+
+	for (int i = 0; i < m->parts().size(); i++)
+	{
+		CPBoxSign* zoneSign = m_mntZoneSign.at(i);
+		QString currentPartName = m->parts().at(i)->namePart();
+		foreach(Sign* s, m->signatures())
+		{
+			QString objNamePart = s->namePart();
+			if (objNamePart.compare(currentPartName)) continue;
+
+			int objYear = s->year(); int objMonth = s->month();
+			if (m_currentYear.toInt() != objYear || m_currentMonth.toInt() != objMonth) continue;
+
+			int typeAdmin = m->user()->typeAdmin();
+			int typeComplete = s->typeComplete();
+
+			bool enable = false;
+			if (typeAdmin == User::SpecialList) enable = typeComplete == 2 ? true : false; //보직자
+			else if (typeAdmin == User::PartChair) enable = typeComplete == 1 ? true : false; //파트장
+			else if (typeAdmin == User::PartManager) enable = typeComplete == 0 ? true : false; //담당자			
+			zoneSign->initEanbleButton(enable);
+			break;
+		}
+
+		//m_mntTables.at(i)->initWidth(m_content->width())->initPage();
 	}
 }
 void ViewHome::initTableEMP()
@@ -1510,6 +1557,28 @@ void ViewHome::updateMNGSign()
 			}
 		}
 	}
+
+	QString userPartName = m->user()->namePart();
+	foreach(Sign* s, m->signatures())
+	{
+		QString objNamePart = s->namePart();
+		if (objNamePart.compare(userPartName)) continue;
+
+		int objYear = s->year(); int objMonth = s->month();
+		if (m_currentYear.toInt() != objYear || m_currentMonth.toInt() != objMonth) continue;
+
+		int typeAdmin = m->user()->typeAdmin();
+		int typeComplete = s->typeComplete();
+		bool enable = false;
+
+		if (typeAdmin == User::SpecialList) enable = typeComplete == 2 ? true : false; //보직자
+		else if (typeAdmin == User::PartChair) enable = typeComplete == 1 ? true : false; //파트장
+		else if (typeAdmin == User::PartManager) enable = typeComplete == 0 ? true : false; //담당자
+
+		int noSign = s->noSign();
+		m_btnSign->initEnabled(enable);
+		break;
+	}
 }
 void ViewHome::updateMNTCheckTable()
 {
@@ -1525,13 +1594,25 @@ void ViewHome::updateMNTCheckTable()
 			{
 				int markType = s->typeComplete();
 				if (markType == 0)
+				{
 					m_mntZoneSign.at(i)->initState("X", "X", "X");
+					m_mntZoneSign.at(i)->initEanbleButton(false);
+				}
 				else if (markType == 1)
+				{
 					m_mntZoneSign.at(i)->initState("O", "X", "X");
+					m_mntZoneSign.at(i)->initEanbleButton(false);
+				}
 				else if (markType == 2)
+				{
 					m_mntZoneSign.at(i)->initState("O", "O", "X");
+					m_mntZoneSign.at(i)->initEanbleButton(true);
+				}
 				else
+				{
 					m_mntZoneSign.at(i)->initState("O", "O", "O");
+					m_mntZoneSign.at(i)->initEanbleButton(false);
+				}
 			}
 		}
 

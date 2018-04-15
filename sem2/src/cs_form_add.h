@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "cs_qheader.h"
 #include "cs_component.h"
 #include "cs_signature.h"
@@ -13,10 +13,10 @@ class FormAdd : public CPDialog
 {
 	Q_OBJECT
 public:
-	//type 0:´ëÃâ, 1:¹Ý³³
+	//type 0:ëŒ€ì¶œ, 1:ë°˜ë‚©
 	explicit FormAdd(int width, int height, QWidget *parent = 0) : CPDialog(width, height, parent)
 	{
-		setWindowTitle(kr("ÀåºñÃß°¡"));
+		setWindowTitle(kr("ìž¥ë¹„ì¶”ê°€"));
 		setFixedSize(width, height);
 		setLayout(new QVBoxLayout);
 		layout()->setSpacing(0);
@@ -26,22 +26,22 @@ public:
 		setModal(true);
 
 		Palette* p = new Palette();
-		btnConfirm = (new GrayCommand("confirm", kr("È®ÀÎ"), 70, 30))->initEnabled(false)
+		btnConfirm = (new GrayCommand("confirm", kr("í™•ì¸"), 70, 30))->initEnabled(false)
 			->initFunc([=]() { confirm(); });
-		Command* btnCancel = (new GrayCommand("cancel", kr("Ãë¼Ò"), 70, 30))
+		Command* btnCancel = (new GrayCommand("cancel", kr("ì·¨ì†Œ"), 70, 30))
 			->initFunc([=]() { cancel(); });
-		Command* btnInit = (new GrayCommand("init", kr("ÃÊ±âÈ­"), 70, 30))
+		Command* btnInit = (new GrayCommand("init", kr("ì´ˆê¸°í™”"), 70, 30))
 			->initFunc([=]() { init(); });
-		Command* btnPart = (new Command("search_part", kr("ºÎ¼­Ã£±â"), 70, 30))
+		Command* btnPart = (new Command("search_part", kr("ë¶€ì„œì°¾ê¸°"), 70, 30))
 			->initFunc([=]()
 		{
-			SelectorPart* selector = new SelectorPart(kr("ºÎ¼­Ã£±â"), 400, 500);
+			SelectorPart* selector = new SelectorPart(kr("ë¶€ì„œì°¾ê¸°"), 400, 500);
 			selector->setParent(this);
 			selector->setTag(TAG_FORM_ADD);
 			selector->show();
 		});
 
-		m_lbMessage = new QLabel(kr("Àåºñ¸íÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä."));
+		m_lbMessage = new QLabel(kr("ìž¥ë¹„ëª…ì„ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
 		m_lbMessage->setFixedSize(width - 250, 25);
 		m_lbMessage->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
 
@@ -50,7 +50,7 @@ public:
 			(new CPWidget(width, 35, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append((new CPLabel(50, 25, kr("Àåºñ¸í"))))
+			->append((new CPLabel(50, 25, kr("ìž¥ë¹„ëª…"))))
 			->append(m_edNameDevice));
 
 		m_edNoAsset = (new CPLineEdit(200, 35, this))->initAlignment(Qt::AlignCenter);
@@ -58,7 +58,7 @@ public:
 			(new CPWidget(width, 35, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append(new CPLabel(50, 25, kr("ÀÚ»ê¹øÈ£")))
+			->append(new CPLabel(50, 25, kr("ìžì‚°ë²ˆí˜¸")))
 			->append(m_edNoAsset));
 
 		m_edPart = (new CPLineEdit(200, 35, this))->initReadOnly(true)->initText(kr(""))->initAlignment(Qt::AlignCenter);
@@ -66,7 +66,7 @@ public:
 			(new CPWidget(width, 35, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append(new CPLabel(50, 25, kr("¼Ò¼ÓÆÄÆ®")))
+			->append(new CPLabel(50, 25, kr("ì†Œì†íŒŒíŠ¸")))
 			->append(m_edPart)->append(btnPart));
 
 		m_edPrice = (new CPLineEdit(200, 35, this))->initAlignment(Qt::AlignCenter);
@@ -74,7 +74,7 @@ public:
 			(new CPWidget(width, 35, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append(new CPLabel(50, 25, kr("Ãëµæ±Ý¾×")))
+			->append(new CPLabel(50, 25, kr("ì·¨ë“ê¸ˆì•¡")))
 			->append(m_edPrice));
 
 		m_edDate = (new CPLineEdit(200, 35, this))->initAlignment(Qt::AlignCenter);
@@ -82,7 +82,7 @@ public:
 			(new CPWidget(width, 35, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append(new CPLabel(50, 25, kr("ÃëµæÀÏÀÚ")))
+			->append(new CPLabel(50, 25, kr("ì·¨ë“ì¼ìž")))
 			->append(m_edDate));
 
 		m_edMemo = (new CPTextEdit(width - 80, this))->initHeight(50);
@@ -90,7 +90,7 @@ public:
 			(new CPWidget(width, 60, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append((new CPLabel(50, 50, kr("ºñ°í")))->initAlignment(Qt::AlignTop | Qt::AlignRight)->initContentsMargins(0, 0, 5, 0))
+			->append((new CPLabel(50, 50, kr("ë¹„ê³ ")))->initAlignment(Qt::AlignTop | Qt::AlignRight)->initContentsMargins(0, 0, 5, 0))
 			->append(m_edMemo));
 
 		layout()->addWidget((new CPWidget(width, 30, new QHBoxLayout))
@@ -132,16 +132,16 @@ public:
 	{
 		qDebug() << "confirm";
 
-		QString strNameDevice = kr("Àåºñ¸í : ") + m_edNameDevice->text() + "\n";
-		QString strNoAsset = kr("ÀÚ»ê¹øÈ£ : ") + m_edNoAsset->text() + "\n";
-		QString strPart = kr("¼Ò¼ÓÆÄÆ® : ") + m_edPart->text() + "\n";
-		QString strPrice = kr("Ãëµæ±Ý¾× : ") + m_edPrice->text() + "\n";
-		QString strDate = kr("ÃëµæÀÏÀÚ : ") + m_edDate->text() + "\n";
-		QString strMemo = kr("ºñ°í : ") + m_edMemo->toPlainText() + "\n";
+		QString strNameDevice = kr("ìž¥ë¹„ëª… : ") + m_edNameDevice->text() + "\n";
+		QString strNoAsset = kr("ìžì‚°ë²ˆí˜¸ : ") + m_edNoAsset->text() + "\n";
+		QString strPart = kr("ì†Œì†íŒŒíŠ¸ : ") + m_edPart->text() + "\n";
+		QString strPrice = kr("ì·¨ë“ê¸ˆì•¡ : ") + m_edPrice->text() + "\n";
+		QString strDate = kr("ì·¨ë“ì¼ìž : ") + m_edDate->text() + "\n";
+		QString strMemo = kr("ë¹„ê³  : ") + m_edMemo->toPlainText() + "\n";
 
 		m_question = new Question(
-			kr("¾Ë¸²"),
-			kr("Àåºñ¸¦ Ãß°¡ÇÏ½Ã°Ú½À´Ï±î?\n\n")
+			kr("ì•Œë¦¼"),
+			kr("ìž¥ë¹„ë¥¼ ì¶”ê°€í•˜ì‹œê² ìŠµë‹ˆê¹Œ?\n\n")
 			+ strNameDevice
 			+ strNoAsset
 			+ strPart
@@ -164,12 +164,12 @@ public:
 	void allow()
 	{
 		qDebug() << "allow";
-		QString strNameDevice = kr("Àåºñ¸í : ") + m_edNameDevice->text() + "\n";
-		QString strNoAsset = kr("ÀÚ»ê¹øÈ£ : ") + m_edNoAsset->text() + "\n";
-		QString strPart = kr("¼Ò¼ÓÆÄÆ® : ") + m_edPart->text() + "\n";
-		QString strPrice = kr("Ãëµæ±Ý¾× : ") + m_edPrice->text() + "\n";
-		QString strDate = kr("ÃëµæÀÏÀÚ : ") + m_edDate->text() + "\n";
-		QString strMemo = kr("ºñ°í : ") + m_edMemo->toPlainText() + "\n";
+		QString strNameDevice = kr("ìž¥ë¹„ëª… : ") + m_edNameDevice->text() + "\n";
+		QString strNoAsset = kr("ìžì‚°ë²ˆí˜¸ : ") + m_edNoAsset->text() + "\n";
+		QString strPart = kr("ì†Œì†íŒŒíŠ¸ : ") + m_edPart->text() + "\n";
+		QString strPrice = kr("ì·¨ë“ê¸ˆì•¡ : ") + m_edPrice->text() + "\n";
+		QString strDate = kr("ì·¨ë“ì¼ìž : ") + m_edDate->text() + "\n";
+		QString strMemo = kr("ë¹„ê³  : ") + m_edMemo->toPlainText() + "\n";
 
 		m_net->addDevice(
 			m_selectedPart->noPart(),
@@ -201,19 +201,19 @@ public:
 
 		if (m_edNameDevice->text().isEmpty())
 		{
-			m_lbMessage->setText(kr("Àåºñ¸íÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä."));
+			m_lbMessage->setText(kr("ìž¥ë¹„ëª…ì„ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
 		}
 		else if (m_edNoAsset->text().isEmpty())
 		{
-			m_lbMessage->setText(kr("ÀÚ»ê¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä."));
+			m_lbMessage->setText(kr("ìžì‚°ë²ˆí˜¸ë¥¼ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
 		}
 		else if (m_edPrice->text().isEmpty())
 		{
-			m_lbMessage->setText(kr("Ãëµæ±Ý¾×À» ÀÔ·ÂÇØÁÖ¼¼¿ä."));
+			m_lbMessage->setText(kr("ì·¨ë“ê¸ˆì•¡ì„ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
 		}
 		else if (m_edDate->text().isEmpty())
 		{
-			m_lbMessage->setText(kr("ÃëµæÀÏÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä."));
+			m_lbMessage->setText(kr("ì·¨ë“ì¼ì„ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
 		}
 		else
 		{
@@ -240,14 +240,14 @@ public:
 			if (!d->noAsset().compare(barcode))
 			{
 				searchedCnt++;
-				m_lbMessage->setText(kr("ÀÌ¹Ì µî·ÏµÈ ÀåºñÀÔ´Ï´Ù."));
+				m_lbMessage->setText(kr("ì´ë¯¸ ë“±ë¡ëœ ìž¥ë¹„ìž…ë‹ˆë‹¤."));
 				btnConfirm->setEnabled(false);
 				return;
 			}
 		}
 		if (searchedCnt == 0)
 		{
-			m_lbMessage->setText(kr("µî·Ï °¡´ÉÇÑ ÀåºñÀÔ´Ï´Ù."));
+			m_lbMessage->setText(kr("ë“±ë¡ ê°€ëŠ¥í•œ ìž¥ë¹„ìž…ë‹ˆë‹¤."));
 			btnConfirm->setDisabled(
 				m_edNameDevice->text().isEmpty() ||
 				m_edNoAsset->text().isEmpty() ||
@@ -260,7 +260,7 @@ public:
 	}
 	void search()
 	{
-		SelectorPart* selector = new SelectorPart(kr("ºÎ¼­Ã£±â"), 400, 500, this);
+		SelectorPart* selector = new SelectorPart(kr("ë¶€ì„œì°¾ê¸°"), 400, 500, this);
 		selector->setParent(this);
 		selector->setTag(TAG_FORM_ADD);
 		selector->show();

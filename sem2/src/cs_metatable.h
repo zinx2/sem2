@@ -218,7 +218,10 @@ public:
 		foreach(Sign* s, m->signatures())
 		{
 			if (!partName.compare(s->namePart()))
+			{
+				metaYears << QString("%1").arg(s->year());
 				metaMonths << QString("%1").arg(s->month());
+			}
 		}
 		m_wTable = metaMonths.size() * m_wCell * 3 + wPart;
 	}
@@ -232,6 +235,7 @@ public:
 	//const int wCell = 30;
 	const int hCell = 30;
 
+	QList<QString> metaYears;
 	QList<QString> metaMonths;
 	QList<QString> metaSignatory;
 	QList<QString> parts() { return m_parts; }

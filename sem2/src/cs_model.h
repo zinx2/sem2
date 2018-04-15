@@ -306,7 +306,7 @@ public:
 	void setNamePart(const QString m) { m_namePart = m; emit namePartChanged(); }
 	void setYear(const int m) { m_year = m; emit yearChanged(); }
 	void setMonth(const int m) { m_month = m; emit monthChanged(); }
-	void setTypeComplete(const bool m) { m_typeComplete = m; emit typeCompleteChanged(); }
+	void setTypeComplete(const int m) { m_typeComplete = m; emit typeCompleteChanged(); }
 
 signals:
 	void noSignChanged();

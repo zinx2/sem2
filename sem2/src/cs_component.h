@@ -10,7 +10,7 @@
 #include "cs_model.h"
 #include "cs_style.h"
 #include "cs_command.h"
-typedef std::function<void()> FUNC;
+
 class CPTextEdit : public QTextEdit
 {
 	Q_OBJECT
@@ -252,7 +252,7 @@ public:
 	CPTable(MetaTable* meta)
 	{
 		m_meta = meta;
-		setStyleSheet("background:#2dd0d2");
+		//setStyleSheet("background:#2dd0d2");
 		setLayout(new QVBoxLayout);
 		layout()->setSpacing(0);
 		layout()->setMargin(0);
@@ -436,7 +436,7 @@ class CPBoxSign : public CPWidget
 {
 	Q_OBJECT
 public:
-	CPBoxSign(int width, int height, QLayout* ly, QWidget *parent = 0) : CPWidget(width, height, ly, parent)
+	CPBoxSign(int width, int height, QLayout* ly, FUNC func, QWidget *parent = 0) : CPWidget(width, height, ly, parent)
 	{
 		initStyleSheet("border: 1px solid black;");
 		initAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -451,12 +451,7 @@ public:
 		append(new CPWidget(10, 1, new QHBoxLayout));
 
 		Button* metaBtn = Style::instance()->main()->body()->content()->btnSign();
-		Command* m_btnSign =
-			(new Command("sign", kr(""), metaBtn->width(), metaBtn->height()))
-			->initStyleSheet(metaBtn->releasedStyle())
-			->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
-			->initIcon(metaBtn->icon())
-			->initFunc([=]() {});
+		m_btnSign = new Command(metaBtn, func);
 		append(m_btnSign);
 	}
 
@@ -472,12 +467,22 @@ public:
 		m_btnSign->initFunc(func);
 		return this;
 	}
+	CPBoxSign* initEanbleButton(bool enable)
+	{
+		m_btnSign->initEnabled(enable);
+		return this;
+	}
+	void setNamePart(QString m) { m_namePart = m; }
+	QString namePart() { return m_namePart; }
+
 
 private:
 	CPLabel* m_lbSign1;
 	CPLabel* m_lbSign2;
 	CPLabel* m_lbSign3;
 	Command* m_btnSign;
+
+	QString m_namePart;
 };
 
 //class CPMNTTable : public QWidget

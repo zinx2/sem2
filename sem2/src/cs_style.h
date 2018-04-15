@@ -331,9 +331,9 @@ public:
 		m_btnLogout = new Button();
 		m_btnLogout->setTag("logout");
 		m_btnLogout->setName("로그아웃");
-		m_btnLogout->setWidth(100);
+		m_btnLogout->setWidth(120);
 		m_btnLogout->setHeight(40);
-		m_btnLogout->setIcon(":/imgs/circle.png");
+		m_btnLogout->setIcon(":/imgs/logout_24dp.png");
 		m_btnLogout->setReleasedStyle(palette()->btnReleasedStyleGray);
 		m_btnLogout->setHoveredStyle(palette()->btnHoveredStyleGray);
 		m_btnLogout->setSelectedStyle(palette()->btnSelectedStyleGray);

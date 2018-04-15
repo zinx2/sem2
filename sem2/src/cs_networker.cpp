@@ -638,8 +638,8 @@ NetWorker* NetWorker::getTotalRentListMonth(int year, int month)
 		m->setRents(list);
 
 		QList<Sign*> list2;
-		jsonArr = jsonObj["data_list2"].toArray();
-		foreach(const QJsonValue &value, jsonArr)
+		QJsonArray jsonArr2 = jsonObj["data_list2"].toArray();
+		foreach(const QJsonValue &value, jsonArr2)
 		{
 			QJsonObject obj = value.toObject();
 			Sign *s = new Sign();
@@ -648,11 +648,12 @@ NetWorker* NetWorker::getTotalRentListMonth(int year, int month)
 			s->setYear(obj["year"].toInt());
 			s->setMonth(obj["month"].toInt());
 			s->setTypeComplete(obj["is_complete"].toInt());
-			qDebug() << s->noSign() << "##/" << s->namePart() << "/" << s->year();
+			qDebug() << s->noSign() << "@@/" << s->namePart() << "/" << s->year()
+			<< s->month() << "/" << s->typeComplete();
 			list2.append(s);
 		}
 		m->setSignatures(list2);
-
+		m->request(true, Notificator::MNGList);
 		m_netReply->deleteLater();
 		emit next();
 	}));
