@@ -25,11 +25,9 @@ public:
 		setModal(true);
 
 		Palette* p = new Palette();
-		Command* btnConfirm = (new Command("confirm", kr("확인"), 70, 30))
-			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
-			->initEnabled(false)->initFunc([=]() { confirm(); });
-		Command* btnCancel = (new Command("cancel", kr("취소"), 70, 30))
-			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		Command* btnConfirm = (new GrayCommand("confirm", kr("확인"), 70, 30))
+			->initFunc([=]() { confirm(); });
+		Command* btnCancel = (new GrayCommand("cancel", kr("취소"), 70, 30))
 			->initFunc([=]() { cancel(); });
 
 		m_signZone = new Signature(this);
@@ -57,17 +55,19 @@ public:
 	public slots:
 	void confirm()
 	{
-		m_signZone->toImage();
+		if (!m_signZone->toImage()) return;
 		m->setMessageInt(m_noSing);
-		qDebug() << "confirm";
-		m_question = new Question(
-			kr("알림"),
-			kr("서명을 완료하시겠습니까?\n\n"), 300, 180);
-		m_question->func = [=]() {};
-		m_question->show();
+		m_net->uploadFileSignForMonth(QDir::currentPath() + "/tmp.jpg")->request();
+		close();
+		//qDebug() << "confirm";
+		//m_question = new Question(
+		//	kr("알림"),
+		//	kr("서명을 완료하시겠습니까?\n\n"), 300, 180);
+		//m_question->func = [=]() {};
+		//m_question->show();
 
-		connect(m_question, SIGNAL(yes()), this, SLOT(allow()));
-		connect(m_question, SIGNAL(no()), this, SLOT(none()));
+		//connect(m_question, SIGNAL(yes()), this, SLOT(allow()));
+		//connect(m_question, SIGNAL(no()), this, SLOT(none()));
 
 	}
 	void allow()

@@ -426,6 +426,8 @@ public:
 		m_btnSign = new NavyButton();
 		m_btnSign->setWidth(40);
 		m_btnSign->setHeight(40);
+		m_btnSign->setTag("sign");
+		m_btnSign->setName("");
 		m_btnSign->setIcon(":/imgs/sign_24dp.png");
 
 	}

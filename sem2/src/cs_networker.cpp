@@ -30,8 +30,10 @@ void NetWorker::request()
 
     if (!host->type().compare("post"))
     {
-        req = createRequest(host->addr(), host->queries());
-        m_netReply = m_netManager.post(req, req.url().query().toUtf8());
+		QUrl url(DOMAIN_NAME + host->addr());
+		QNetworkRequest req(url);
+		req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
+        m_netReply = m_netManager.post(req, host->queries().toString(QUrl::FullyDecoded).toUtf8());
     }
     else if (!host->type().compare("get"))
     {
@@ -55,9 +57,17 @@ void NetWorker::request()
         if (!host->queries().isEmpty())
             url.setQuery(host->queries());
 
-        req.setUrl(url);
+		req.setUrl(url);
         m_netReply = m_netManager.post(req, multiPart);
         multiPart->setParent(m_netReply);
+
+		/*QUrl url(DOMAIN_NAME + host->addr());
+		QNetworkRequest req(url);
+		req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
+		m_netReply = m_netManager.post(req, multiPart);
+		multiPart->setParent(m_netReply);*/
+
+        
     }
     else return;
 
@@ -253,6 +263,7 @@ NetWorker* NetWorker::getUserList()
         QJsonObject jsonObj = jsonDoc.object();
         bool isSuccess = jsonObj["is_success"].toBool();
         if (!isSuccess) {
+			m->request(false, Notificator::None, jsonObj["error_message"].toString());
             m_netReply->deleteLater();
             emit next(); return;
         }
@@ -288,6 +299,7 @@ NetWorker* NetWorker::getPartList()
         QJsonObject jsonObj = jsonDoc.object();
         bool isSuccess = jsonObj["is_success"].toBool();
         if (!isSuccess) {
+			m->request(false, Notificator::None, jsonObj["error_message"].toString());
             m_netReply->deleteLater();
             emit next(); return;
         }
@@ -334,6 +346,7 @@ NetWorker* NetWorker::getDeviceList(int searchType, int now)
         qDebug() << m_netReply->readAll();
         bool isSuccess = jsonObj["is_success"].toBool();
         if (!isSuccess) {
+			m->request(false, Notificator::None, jsonObj["error_message"].toString());
             m_netReply->deleteLater();
             emit next(); return;
         }
@@ -392,6 +405,7 @@ NetWorker* NetWorker::getDeviceListForAdmin(int noPart, int searchType, int now)
 		qDebug() << m_netReply->readAll();
 		bool isSuccess = jsonObj["is_success"].toBool();
 		if (!isSuccess) {
+			m->request(false, Notificator::None, jsonObj["error_message"].toString());
 			m_netReply->deleteLater();
 			emit next(); return;
 		}
@@ -438,6 +452,12 @@ NetWorker* NetWorker::getRentList(int type, int year, int month)
 		return this;
 	}
 
+	if (type == 0)
+	{
+		year = 0; month = 0;
+	}
+
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
 	queries.addQueryItem("search_type", QString("%1").arg(type));
@@ -452,8 +472,9 @@ NetWorker* NetWorker::getRentList(int type, int year, int month)
         QJsonObject jsonObj = jsonDoc.object();
         bool isSuccess = jsonObj["is_success"].toBool();
         if (!isSuccess) {
-            m_netReply->deleteLater();
+			m->request(false, Notificator::None, jsonObj["error_message"].toString());
 			qDebug() << jsonObj["error_message"].toString();
+            m_netReply->deleteLater();
             emit next(); return;
         }
         int totalPage = jsonObj["total_page"].toInt();
@@ -518,6 +539,7 @@ NetWorker* NetWorker::getRentListForAdmin(int type, int year, int month)
 		bool isSuccess = jsonObj["is_success"].toBool();
 		if (!isSuccess) {
 			qDebug() << jsonObj["error_message"].toString();
+			m->request(false, Notificator::None, jsonObj["error_message"].toString());
 			m_netReply->deleteLater();
 			emit next(); return;
 		}
@@ -580,8 +602,9 @@ NetWorker* NetWorker::getTotalRentListMonth(int year, int month)
 		QJsonObject jsonObj = jsonDoc.object();
 		bool isSuccess = jsonObj["is_success"].toBool();
 		if (!isSuccess) {
-			m_netReply->deleteLater();
 			qDebug() << jsonObj["error_message"].toString();
+			m->request(false, Notificator::None, jsonObj["error_message"].toString());
+			m_netReply->deleteLater();
 			emit next(); return;
 		}
 		int totalPage = jsonObj["total_count"].toInt();
@@ -802,7 +825,7 @@ NetWorker* NetWorker::signBorrow()
         QJsonObject jsonObj = jsonDoc.object();
         bool isSuccess = jsonObj["is_success"].toBool();
         m_netReply->deleteLater();
-        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::MNGList));
+        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVIList));
         emit next();
     }));
     return this;
@@ -840,10 +863,56 @@ NetWorker* NetWorker::signReturn()
         QJsonObject jsonObj = jsonDoc.object();
         bool isSuccess = jsonObj["is_success"].toBool();
         m_netReply->deleteLater();
-        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::MNGList));
+        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVIList));
         emit next();
     }));
     return this;
+}
+NetWorker* NetWorker::signForMonth()
+{
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+	QString fileUrl = m->fileUrl();
+	if (fileUrl.isEmpty())
+	{
+		m->request(false, Notificator::ErrorNoFile);
+		return this;
+	}
+	int noSign = m->messageInt();
+	if (noSign < 0)
+	{
+		m->request(false, Notificator::ErrorNoRent);
+		return this;
+	}
+	/********** SET URL QUERIES **********/
+	QUrlQuery queries;
+	queries.addQueryItem("superior_sign_no", QString("%1").arg(noSign));
+	queries.addQueryItem("sign_url", QString("%1").arg(fileUrl));
+	m->setMessageInt(noSign);
+
+	m_hosts.append(new NetHost("post", "/sem/setSignForMonth", queries,
+		[&]()-> void {
+		QMutexLocker locker(&m_mtx);
+
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
+		QJsonObject jsonObj = jsonDoc.object();
+		bool isSuccess = jsonObj["is_success"].toBool();
+		if (isSuccess)
+		{
+			int noSign = m->messageInt();
+			foreach(Sign* s, m->signatures())
+			{
+				if (s->noSign() == noSign) s->setTypeComplete(s->typeComplete() + 1);
+			}
+		}
+		m->request(isSuccess, Notificator::Signed, jsonObj["error_message"].toString());
+		m_netReply->deleteLater();
+		emit next();
+	}));
+	return this;
 }
 NetWorker* NetWorker::returnDevice(QString barcode, bool isInitial)
 {
@@ -873,16 +942,16 @@ NetWorker* NetWorker::returnDevice(QString barcode, bool isInitial)
             int noRent = jsonObj["rent_no"].toInt();
 			if (noRent == 0)
 			{
-				noRent = m->messageInt();
-				if (noRent == 0)
-				{
-					m->request(false, Notificator::None, kr("장비 정보를 확인할 수 없습니다."));
-					return;
-				}				
+				m->request(false, Notificator::None, kr("장비 정보를 확인할 수 없습니다."));
+				return;
 			}
             m->setMessageInt(noRent);
 			uploadFileReturned("tmp.jpg")->request();
         }
+		else
+		{
+			m->request(false, Notificator::None, jsonObj["error_message"].toString());
+		}
 
         /*emit next();*/
     }));
@@ -890,6 +959,16 @@ NetWorker* NetWorker::returnDevice(QString barcode, bool isInitial)
 }
 NetWorker* NetWorker::uploadFileBorrowed(QString fileName)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+	if (fileName.isEmpty())
+	{
+		m->request(false, Notificator::ErrorNoFile);
+		return this;
+	}
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
     queries.addQueryItem("file_name", fileName);
@@ -913,6 +992,17 @@ NetWorker* NetWorker::uploadFileBorrowed(QString fileName)
 }
 NetWorker* NetWorker::uploadFileReturned(QString fileName)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+	if (fileName.isEmpty())
+	{
+		m->request(false, Notificator::ErrorNoFile);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
     queries.addQueryItem("file_name", fileName);
@@ -936,6 +1026,17 @@ NetWorker* NetWorker::uploadFileReturned(QString fileName)
 }
 NetWorker* NetWorker::uploadFileSignForMonth(QString fileName)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+	if (fileName.isEmpty())
+	{
+		m->request(false, Notificator::ErrorNoFile);
+		return this;
+	}
+
 	/********** SET URL QUERIES **********/
 	QUrlQuery queries;
 	queries.addQueryItem("file_name", fileName);
@@ -947,12 +1048,20 @@ NetWorker* NetWorker::uploadFileSignForMonth(QString fileName)
 		QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
 		QJsonObject jsonObj = jsonDoc.object();
 		bool isSuccess = jsonObj["is_success"].toBool();
-		QString url = jsonObj["file_url"].toString();
-		QString name = jsonObj["file_name"].toString();
+		if (!isSuccess)
+		{
+			m->request(false, Notificator::None, jsonObj["error_message"].toString());
+			m_netReply->deleteLater();
+			return;
+		}
+		else
+		{
+			QString url = jsonObj["file_url"].toString();
+			QString name = jsonObj["file_name"].toString();
+			m->setFileUrl(url);
+			m->request(false, Notificator::SignForMonth, jsonObj["error_message"].toString());
+		}
 		m_netReply->deleteLater();
-		m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::File, false));
-		m->setFileUrl(url);
-		signForMonth()->request();
 		//emit next();
 	}, fileName));
 	return this;
@@ -1080,7 +1189,7 @@ NetWorker* NetWorker::searchDeviceReturned(QString barcode)
             r->setPurpose(jsonObj["purpose"].toString());
             r->setDateBorrowed(jsonObj["rent_date"].toString());
             m->setSearchedRent(r);
-			m->request(false, Notificator::ConfirmedRent);
+			//m->request(true, Notificator::ConfirmedRent);
             qDebug() << r->noRent() << "/" << r->nameDevice() << "/" << r->noAsset() << "/" << r->purpose();
         }
 		else
@@ -1089,30 +1198,4 @@ NetWorker* NetWorker::searchDeviceReturned(QString barcode)
         m_netReply->deleteLater();
     }));
     return this;
-}
-NetWorker* NetWorker::signForMonth()
-{
-	if (!m->isLogined())
-	{
-		m->request(false, Notificator::ErrorNoLogined);
-		return this;
-	}
-
-	/********** SET URL QUERIES **********/
-	QUrlQuery queries;
-	queries.addQueryItem("superior_sign_no", QString("%1").arg(m->messageInt()));
-	queries.addQueryItem("sign_url", QString("%1").arg(m->fileUrl()));
-
-	m_hosts.append(new NetHost("post", "/sem/setSignForMonth", queries,
-		[&]()-> void {
-		QMutexLocker locker(&m_mtx);
-
-		QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
-		QJsonObject jsonObj = jsonDoc.object();
-		bool isSuccess = jsonObj["is_success"].toBool();
-		m_netReply->deleteLater();
-		m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), m->messageUpdateType()));
-		emit next();
-	}));
-	return this;
 }

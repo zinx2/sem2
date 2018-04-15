@@ -28,6 +28,7 @@ public:
 	void netGetDeviceList(int searchType=0);
 	void netGetRentList(int type);
 	void netGetEmployeeList();
+	void netSignForMonth();
 	void netLogin();
 	void prev();
 	void next();

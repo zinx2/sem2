@@ -21,13 +21,13 @@ public:
 		m_palette = new Palette();
 		m_btnBorrow = (new GrayCommand("btn_borrow", kr("대출하기"), 80, 40))->initEnabled(false)
 		->initFunc([=]() { 	m->request(true, Notificator::OpenFromBorrow); 	});
-
+		
 		m_btnReturn = (new GrayCommand("btn_return", kr("반납하기"), 80, 40))->initEnabled(false)
 		->initFunc([=]() { 	m->request(true, Notificator::OpenFromReturn); 	});
-
-		m_btnCancel = (new GrayCommand("btn_cancel", kr("취소"), 80, 40))->initEnabled(false)
+		
+		m_btnCancel = (new GrayCommand("btn_cancel", kr("취소"), 80, 40))
 		->initFunc([=]() { 	cancel(); });
-
+		
 		m_btnSearch = (new GrayCommand("btn_search", kr("검색"), 80, 40))
 		->initFunc([=]()
 		{
@@ -75,7 +75,7 @@ public:
 		//connect(edBarcode, SIGNAL(textChanged()), this, SLOT(recognize()));
 		connect(this, SIGNAL(rejected()), this, SLOT(cancel()));
 		connect(m, SIGNAL(modalChanged()), this, SLOT(exit()));
-		connect(m, SIGNAL(alarmedChanged()), this, SLOT(recognize()));
+		//connect(m, SIGNAL(alarmedChanged()), this, SLOT(recognize()));
 	}
 
     public slots:

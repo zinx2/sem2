@@ -343,7 +343,8 @@ public:
         EMPList, RequestPartsList,
 		ErrorNoLogined, ErrorNoBarcode,
 		OpenFromBorrow, OpenFromReturn,
-		ErrorNoFile, ErrorNoSaveFile, ErrorNoRent, ConfirmedRent
+		ErrorNoFile, ErrorNoSaveFile, ErrorNoRent, //ConfirmedRent
+		Signed, SignForMonth
     };
 
     Notificator() { }

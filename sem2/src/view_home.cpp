@@ -6,6 +6,7 @@
 #include "cs_barcoder.h"
 #include "cs_form_borrow.h"
 #include "cs_form_return.h"
+#include "cs_form_signature.h"
 ViewHome::ViewHome(QWidget *parent)
 	: QWidget(parent)
 {
@@ -121,7 +122,7 @@ void ViewHome::initListMNT(bool skip)
 		m_countMonth = 0;
 		dateTime = getCurrentDate(0);
 	}
-	
+
 	m_lbCalendar = (new CPLabel(100, 30, dateTime))
 		->initAlignment(Qt::AlignCenter)->initFontSize(15);
 	m_contentGrid1_2->append(m_btnCalendarPrev)->append(m_lbCalendar)->append(m_btnCalendarNext);
@@ -337,14 +338,14 @@ void ViewHome::netGetDeviceList(int searchType)
 {
 	switch (m->user()->typeAdmin())
 	{
-	case 1:
-	case 2:
+	case User::PartManager:
+	case User::PartChair:
 	{
 		n->getDeviceList(searchType)->request();
 		break;
 	}
-	case 3:
-	case 4:
+	case User::SpecialList:
+	case User::SystemAdmin:
 	{
 		n->getDeviceListForAdmin(0, searchType)->request();
 		break;
@@ -353,11 +354,13 @@ void ViewHome::netGetDeviceList(int searchType)
 }
 void ViewHome::netGetRentList(int type)
 {
+	qDebug() << m_currentYear.toInt() << "/" << m_currentMonth.toInt();
 	switch (m->user()->typeAdmin())
 	{
-	case 1:
-	case 2:
+	case User::PartManager:
+	case User::PartChair:
 	{
+		QString tag = m_cmdProviderList->selectedTag();
 		if (!m_cmdProviderList->selectedTag().compare(TAG_MNG_LIST))
 		{
 			if (m_cmdProviderView == nullptr)
@@ -373,8 +376,8 @@ void ViewHome::netGetRentList(int type)
 		}
 		break;
 	}
-	case 3:
-	case 4:
+	case User::SpecialList:
+	case User::SystemAdmin:
 	{
 		if (!m_cmdProviderList->selectedTag().compare(TAG_MNG_LIST))
 		{
@@ -398,6 +401,10 @@ void ViewHome::netGetEmployeeList()
 {
 	n->getUserList()->request();
 }
+void ViewHome::netSignForMonth()
+{
+	n->signForMonth()->request();
+}
 void ViewHome::netLogin()
 {
 	n->login(m->user()->id(), m->user()->pass())->request();
@@ -419,14 +426,49 @@ void ViewHome::netHandler()
 			m->login(result);
 			if (result) {
 
-				QString typeAdmin = "";
-				if (m->user()->typeAdmin() == 1) typeAdmin = kr("파트담당자");
-				else if (m->user()->typeAdmin() == 2) typeAdmin = kr("파트장");
-				else if (m->user()->typeAdmin() == 3) typeAdmin = kr("보직자");
-				else if (m->user()->typeAdmin() == 4) typeAdmin = kr("시스템관리자");
-				QString userType = m->user()->namePart() + " " + m->user()->nameUser() + kr("(") + typeAdmin + kr(")");
+				QString typeAdminStr = "";
+				int type = m->user()->typeAdmin();
+				int count = m_cmdProviderList->count();
+				switch (m->user()->typeAdmin())
+				{
+				case User::PartManager:
+				{
+					count = count - 1;
+					typeAdminStr = kr("파트담당자");
+					m_btnMNTList->initVisible(false);
+					break;
+				}
+				case User::PartChair:
+				{
+					count = count - 1;
+					typeAdminStr = kr("파트장");
+					m_btnMNTList->initVisible(false);
+					break;
+				}
+				case User::SpecialList:
+				{
+					count = count - 1;
+					typeAdminStr = kr("보직자");
+					m_btnMNGList->initVisible(false);
+					break;
+				}
+				case User::SystemAdmin:
+				{
+					typeAdminStr = kr("시스템관리자");
+					break;
+				}
+				default:
+					break;
+				}
+
+				int hSlide = m_styleSlide->height();
+				int hBtn = m_cmdProviderList->totalHeight() / m_cmdProviderList->count();
+				m_emptyArea->setFixedSize(1, hSlide - (hBtn * count) - 10 * (count + 2));
+
+				QString userType = m->user()->namePart() + " " + m->user()->nameUser() + kr("(") + typeAdminStr + kr(")");
 				m_lbUserInfo->setText(userType);
 
+				n->getPartList();
 				QTimer::singleShot(500, this, SLOT(netGetDeviceList()));
 
 				bool isLogined = s->isLoginAuto();
@@ -534,9 +576,18 @@ void ViewHome::netHandler()
 			m_alarm->initSize(350, 120)->setMessage(kr("자산번호가 잘못되었습니다."));
 			m_alarm->show();
 		}
-		else if (type == Notificator::DVISearch || type == Notificator::ConfirmedRent)
+		//else if (type == Notificator::ConfirmedRent)
+		//{
+		//	result = noti->result();
+		//	QString msg = "";
+		//	if (result) msg = kr("정상적으로 처리되었습니다.");
+		//	else msg = noti->message();
+		//	m_alarm->initSize(350, 120)->setMessage(msg);
+		//	m_alarm->show();
+		//}
+		else if (type == Notificator::DVISearch)
 		{
-			return;
+			m_barcoder->recognize();
 		}
 		else if (type == Notificator::OpenFromBorrow)
 		{
@@ -563,11 +614,27 @@ void ViewHome::netHandler()
 			else {
 				msg = noti->message();
 			}
-			m_alarm->initSize(350, 120)->setMessage(noti->message());
+			m_alarm->initSize(350, 120)->setMessage(msg);
 			m_alarm->show();
 		}
+		else if (type == Notificator::Signed)
+		{
+			QString msg = "";
+			result = noti->result();
+			if (result) {
+				msg = kr("정상적으로 처리되었습니다.");
+				updateMNGSign();
+			}
+			else msg = noti->message();
+			m_alarm->initSize(350, 120)->setMessage(msg);
+			m_alarm->show();
+		}
+		else if (type == Notificator::SignForMonth)
+		{
+			QTimer::singleShot(500, this, SLOT(netSignForMonth()));
+		}
 		else
-		{ 
+		{
 			result = noti->result();
 			if (!result)
 			{
@@ -695,13 +762,20 @@ void ViewHome::initContentRow2()
 		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("보직자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign3));
 
 	Button* metaBtn = m_styleContent->btnSign();
-	m_btnSign =
-		(new Command("sign", kr(""), metaBtn->width(), metaBtn->height()))
-		->initStyleSheet(metaBtn->releasedStyle())
-		->initEffect(metaBtn->releasedStyle(), metaBtn->selectedStyle(), metaBtn->hoveredStyle())
-		->initIcon(metaBtn->icon())
-		->initFunc([=]() {});
-
+	m_btnSign = new Command(metaBtn, [=]() {
+		QString userNamePart = m->user()->namePart();
+		int currentYear = m_currentYear.toInt();
+		int currentMonth = m_currentMonth.toInt();
+		foreach(Sign* s, m->signatures())
+		{
+			if (!userNamePart.compare(s->namePart()) && currentYear == s->year() && currentMonth == s->month())
+			{
+				FormSignature* sg = new FormSignature(s->noSign(), 500, 250);
+				sg->show();
+				return;
+			}
+		}
+	}, true);
 }
 void ViewHome::initStyles()
 {
@@ -838,8 +912,11 @@ void ViewHome::initSlideButton()
 	}, true);
 
 	m_cmdProviderList = new CommandProvider();
-	m_cmdProviderList->append(m_btnDVCList)->append(m_btnMNGList)
-		->append(m_btnMNTList)->append(m_btnEMPList)->append(m_btnImExport);
+	m_cmdProviderList->append(m_btnDVCList);
+	m_cmdProviderList->append(m_btnMNGList);
+	m_cmdProviderList->append(m_btnMNTList);
+	m_cmdProviderList->append(m_btnEMPList);
+	m_cmdProviderList->append(m_btnImExport);
 }
 void ViewHome::initButtonsDVC()
 {
@@ -907,7 +984,6 @@ void ViewHome::initSlide()
 	m_slideCol01 = new QWidget(m_slide);
 	m_slideCol01->setLayout(new QVBoxLayout);
 
-	int dd = m_styleSlide->height();
 	m_slideCol02 = (new CPWidget(m_styleSlide->wCol01, m_styleSlide->height(), new QVBoxLayout))
 		->initAlignment(Qt::AlignRight | Qt::AlignTop)
 		->initSpacing(10)->initContentsMargins(0, 10, 10, 0);
@@ -923,10 +999,10 @@ void ViewHome::initSlide()
 
 	m_slide->layout()->addWidget(m_slideCol01);
 	m_slide->layout()->addWidget(m_slideCol02);
-	m_slideCol02->append(m_btnDVCList)
-		->append(m_btnMNGList)
-		->append(m_btnMNTList)
-		->append(m_btnEMPList);
+	m_slideCol02->append(m_btnDVCList);
+	m_slideCol02->append(m_btnMNGList);
+	m_slideCol02->append(m_btnMNTList);
+	m_slideCol02->append(m_btnEMPList);
 
 	m_emptyArea = (new CPLabel(0, 0, ""));
 	m_slideCol02->append(m_emptyArea);
@@ -1192,6 +1268,27 @@ void ViewHome::initTableMNG()
 				p->btnSelectedStyleDiabled,
 				p->btnSelectedStyleDiabled);
 	}
+
+	QString userPartName = m->user()->namePart();
+	foreach(Sign* s, m->signatures())
+	{
+		QString objNamePart = s->namePart();
+		if (objNamePart.compare(userPartName)) continue;
+
+		int objYear = s->year(); int objMonth = s->month();
+		if (m_currentYear.toInt() != objYear || m_currentMonth.toInt() != objMonth) continue;
+
+		int typeAdmin = m->user()->typeAdmin();
+		int typeComplete = s->typeComplete();
+		bool enable = false;
+
+		if (typeAdmin == User::SpecialList) enable = typeComplete == 2 ? true : false; //보직자
+		else if (typeAdmin == User::PartChair) enable = typeComplete == 1 ? true : false; //파트장
+		else if (typeAdmin == User::PartManager) enable = typeComplete == 0 ? true : false; //담당자
+		else return;
+
+		m_btnSign->setEnabled(enable);
+	}
 }
 void ViewHome::initTableMNT()
 {
@@ -1206,7 +1303,7 @@ void ViewHome::initTableMNT()
 	{
 		Command* cmd = m_cmdProviderExt->command(i);
 		cmd->initWidth(m_content->width());
-		
+
 		CPTable* tb = m_mntTables.at(i);
 		hMntStack = hMntStack + cmd->height() + tb->height();
 	}
@@ -1260,7 +1357,7 @@ void ViewHome::initTableEMP()
 
 		QTableWidgetItem* item2 = new QTableWidgetItem(dv->manager() ? "O" : "X");
 		item2->setTextAlignment(Qt::AlignCenter);
-		m_tableCommon->setItem(row, 2, item2);		
+		m_tableCommon->setItem(row, 2, item2);
 	}
 }
 void ViewHome::updateBody()
@@ -1316,7 +1413,20 @@ void ViewHome::updateSlide()
 	m_slide->setFixedSize(wSlide, hSlide);
 	m_slideCol01->setFixedSize(wSlideCol01, hSlide);
 	m_slideCol02->setFixedSize(wSlideCol02, hSlide);
-	m_emptyArea->setFixedSize(1, hSlide - m_cmdProviderList->totalHeight() - 10 * (m_cmdProviderList->count() + 2));
+
+	int count = m_cmdProviderList->count();
+	switch (m->user()->typeAdmin())
+	{
+	case User::PartManager:
+	case User::PartChair:
+	case User::SpecialList:
+	{
+		count = count - 1;
+		break;
+	}
+	}
+	int hBtn = m_cmdProviderList->totalHeight() / m_cmdProviderList->count();
+	m_emptyArea->setFixedSize(1, hSlide - (hBtn * count) - 10 * (count + 2));
 }
 void ViewHome::updateContentRow1()
 {
@@ -1355,50 +1465,47 @@ void ViewHome::updateContentRow2()
 void ViewHome::updateMNGSign()
 {
 	if (m_cmdProviderList->selectedTag().compare(TAG_MNG_LIST)) return;
-	foreach(Part* p, m->parts())
+	foreach(Sign* s, m->signatures())
 	{
-		foreach(Sign* s, m->signatures())
+		//qDebug() << p->namePart() << "/" << s->namePart();
+		if (!m->user()->namePart().compare(s->namePart()))
 		{
-			//qDebug() << p->namePart() << "/" << s->namePart();
-			if (!p->namePart().compare(s->namePart()))
+			if (m_currentYear.toInt() == s->year() && m_currentMonth.toInt() == s->month())
 			{
-				if (m_currentYear.toInt() == s->year() && m_currentMonth.toInt() == s->month())
+				switch (s->typeComplete())
 				{
-					switch (s->typeComplete())
-					{
-					case 0:
-					{
-						m_lbSign1->initText("X");
-						m_lbSign2->initText("X");
-						m_lbSign3->initText("X");
+				case 0:
+				{
+					m_lbSign1->initText("X");
+					m_lbSign2->initText("X");
+					m_lbSign3->initText("X");
 
-						/*if(m->user()->typeAdmin() == User::PartManager)
-						m_btnSign*/
-						break;
-					}
-					case 1:
-					{
-						m_lbSign1->initText("O");
-						m_lbSign2->initText("X");
-						m_lbSign3->initText("X");
-						break;
-					}
-					case 2:
-					{
-						m_lbSign1->initText("O");
-						m_lbSign2->initText("O");
-						m_lbSign3->initText("X");
-						break;
-					}
-					case 3:
-					{
-						m_lbSign1->initText("O");
-						m_lbSign2->initText("O");
-						m_lbSign3->initText("O");
-						break;
-					}
+					/*if(m->user()->typeAdmin() == User::PartManager)
+					m_btnSign*/
+					break;
+				}
+				case 1:
+				{
+					m_lbSign1->initText("O");
+					m_lbSign2->initText("X");
+					m_lbSign3->initText("X");
+					break;
+				}
+				case 2:
+				{
+					m_lbSign1->initText("O");
+					m_lbSign2->initText("O");
+					m_lbSign3->initText("X");
+					break;
+				}
+				case 3:
+				{
+					m_lbSign1->initText("O");
+					m_lbSign2->initText("O");
+					m_lbSign3->initText("O");
+					break;
+				}
 
-					}
 				}
 			}
 		}

@@ -22,19 +22,13 @@ public:
 		m_net = NetWorker::instance();
 		setModal(true);
 		Palette* p = new Palette();
-		btnConfirm = (new Command("confirm", kr("확인"), 70, 30))
-			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)
-			->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
-			->initDisabledEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
-			->initEnabled(false)->initFunc([=]() { confirm(); });
-		Command* btnCancel = (new Command("cancel", kr("취소"), 70, 30))
-			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		btnConfirm = (new GrayCommand("confirm", kr("확인"), 70, 30))->initEnabled(false)
+			->initFunc([=]() { confirm(); });
+		Command* btnCancel = (new GrayCommand("cancel", kr("취소"), 70, 30))
 			->initFunc([=]() { cancel(); });
-		Command* btnInit = (new Command("init", kr("초기화"), 70, 30))
-			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		Command* btnInit = (new GrayCommand("init", kr("초기화"), 70, 30))
 			->initFunc([=]() { init(); });
-		Command* btnEmployee = (new Command("search_part", kr("직원찾기"), 70, 30))
-			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		Command* btnEmployee = (new GrayCommand("search_part", kr("직원찾기"), 70, 30))
 			->initFunc([=]()
 		{
 			SelectorEmployee* selector = new SelectorEmployee(kr("직원찾기"), 400, 500);
