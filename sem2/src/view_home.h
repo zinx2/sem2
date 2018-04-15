@@ -27,11 +27,13 @@ public:
 	void netHandler();
 	void netGetDeviceList(int searchType=0);
 	void netGetRentList(int type);
+	void netGetEmployeeList();
 	void netLogin();
 	void prev();
 	void next();
 	void updateMNGSign();
 	void updateMNTCheckTable();
+	void initListDVC();
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
@@ -133,9 +135,9 @@ private:
 	CPLabel* m_lbSign2 = nullptr;
 	CPLabel* m_lbSign3 = nullptr;
 
-	void initListDVC();
+
 	void initListMNG();
-	void initListMNT(bool pass = false);
+	void initListMNT(bool skip = true);
 	void initListMNT2();
 	void initListEMP();
 	bool initPage(QString tag, QString titleTxt, bool pass = false);

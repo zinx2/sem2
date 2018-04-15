@@ -118,7 +118,7 @@ public:
 
 	bool selected() { return m_selected; }
 	Command* select(bool m) { m_selected = m; return this; }
-
+	
 protected:
 
 	void mousePressEvent(QMouseEvent *event) override
@@ -159,7 +159,27 @@ private:
 	QString m_disabledSelectedSheet = "color: white; background-color: transparent;";
 	FUNC m_cmd;
 };
-
+class GrayCommand : public Command
+{
+	Q_OBJECT
+public:
+	GrayCommand(QString tag, QString name, int width, int height) : Command(tag, name, width, height)
+	{
+		Palette* p = new Palette();
+		initFontSize(12);
+		initStyleSheet(p->btnReleasedStyleGrayNoRadius);
+		initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius);
+		initDisabledEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius);
+	}
+	GrayCommand(Button* metaBtn, FUNC func = [=]() {}, bool enabled = true) : Command(metaBtn, func, enabled)
+	{
+		Palette* p = new Palette();
+		initFontSize(12);
+		initStyleSheet(p->btnReleasedStyleGrayNoRadius);
+		initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius);
+		initDisabledEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius);
+	}
+};
 class CommandProvider : public QObject
 {
 public:

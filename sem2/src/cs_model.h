@@ -337,10 +337,13 @@ class Notificator : public QObject
 public:
     enum UpdateType{
         None, File, Login, RequestLogin, Join, Logout, Exit, LogoutRequest,
-        DVIList, DVIModified, DVIBorrowedSearch, DVIReturnedSearch,
-        DVIBorrowed,
+        DVIList, DVIModified, DVISearch, DVIReturnedSearch,
+        DVIBorrowed, DVIReturned,
         MNGList, MNGModified,
-        EMPList, RequestPartsList
+        EMPList, RequestPartsList,
+		ErrorNoLogined, ErrorNoBarcode,
+		OpenFromBorrow, OpenFromReturn,
+		ErrorNoFile, ErrorNoSaveFile, ErrorNoRent, ConfirmedRent
     };
 
     Notificator() { }
@@ -348,8 +351,8 @@ public:
         : m_result(result), m_message(message), m_type(type), m_dialog(dialog) { }
     Notificator(bool result, QString message, QString url, QString name, int type = UpdateType::None)
         : m_result(result), m_message(message), m_type(type), m_url(url), m_name(name) { }
-	Notificator(bool result, int type = UpdateType::None)
-		: m_result(result), m_type(type) {  }
+	Notificator(bool result, int type = UpdateType::None, QString message="")
+		: m_result(result), m_type(type), m_message(message) {  }
 
     int type() const { return m_type; }
     int no() const { return m_no; }
@@ -493,6 +496,13 @@ public:
         return tmp;
     }
 
+	Notificator::UpdateType messageUpdateType() 
+	{
+		Notificator::UpdateType tmp = m_messageUpdateType;
+		m_messageUpdateType = Notificator::None;
+		return tmp;
+	}
+	bool isLogined() { return m_logined; }
     public slots:
     void setDevices(QList<Device*> m) { m_devices.clear(); m_devices = m; emit devicesChanged(); }
     void setParts(QList<Part*> m) { m_parts.clear();  m_parts = m; emit partsChanged(); }
@@ -529,10 +539,11 @@ public:
     void setMessageInt(int m) { m_messageInt = m; emit messageIntChanged(); }
 	void setUser(User* m) { m_user = m; emit userChanged(); }
 	void checkAuto(bool m) { m_checkedAuto = m; }
+	void login(bool m) { m_logined = m; }
 
-	void request(bool result, Notificator::UpdateType type)
+	void request(bool result, Notificator::UpdateType type, QString message="")
 	{
-		setNotificator(new Notificator(result, type));
+		setNotificator(new Notificator(result, type, message));
 	}
 signals:
     void messageChanged();
@@ -592,7 +603,8 @@ private:
     bool m_pressedCtrl = false;
     bool m_modal = false;
 	bool m_checkedAuto = false;
-
+	bool m_logined = false;
+	
     qreal m_scale = 1;
     int m_scaledItemWidth = 720;
     int m_scaledItemHeight = 1080;
@@ -606,11 +618,12 @@ private:
     int m_countCurrentDevice = 0;
     int m_pageNumber = 1;
 
-    Device* m_searchedDevice;
-    Rent* m_searchedRent;
+    Device* m_searchedDevice = nullptr;
+    Rent* m_searchedRent = nullptr;
 
     QString m_fileUrl = "";
     int m_messageInt = -1;
+	Notificator::UpdateType m_messageUpdateType = Notificator::None;
 
 	User* m_user;
 };

@@ -17,21 +17,41 @@ FormEdit::FormEdit(int row, int width, int height, QWidget *parent)
 
 	m_net = NetWorker::instance();
 	setModal(true);
-	btnConfirm = new Command("confirm", kr("확인"), 70, 30);
-	btnConfirm->setStyleSheet("background: #e1e1e1;");
-	btnConfirm->setEnabled(false);
-	Command* btnCancel = new Command("cancel", kr("취소"), 70, 30);
-	btnCancel->setStyleSheet("background: #e1e1e1;");
-	Command* btnSaerch = new Command("search", kr("부서찾기"), 70, 30);
-	btnSaerch->setStyleSheet("background: #e1e1e1;");
-	Command* btnInit = new Command("init", kr("초기화"), 70, 30);
-	btnInit->setStyleSheet("background: #e1e1e1;");
+	Palette* p = new Palette();
+	btnConfirm = (new Command("confirm", kr("확인"), 70, 30))
+		->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		->initEnabled(false)->initFunc([=]() { confirm(); });
+	Command* btnCancel = (new Command("cancel", kr("취소"), 70, 30))
+		->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		->initFunc([=]() { cancel(); });
+	Command* btnInit = (new Command("init", kr("초기화"), 70, 30))
+		->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		->initFunc([=]() { init(); });
+	Command* btnPart = (new Command("search_part", kr("부서찾기"), 70, 30))
+		->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		->initFunc([=]()
+	{
+		SelectorPart* selector = new SelectorPart(kr("부서찾기"), 400, 500);
+		selector->setParent(this);
+		selector->setTag(TAG_FORM_EDIT);
+		selector->show();
+	});
 
 	m_lbMessage = new QLabel(kr("장비명을 입력해주세요."));
 	m_lbMessage->setFixedSize(width - 250, 25);
 	m_lbMessage->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
 
 	m_device = m->devices().at(row);
+	qDebug() << m_device->namePart();
+	foreach(Part* p, m->parts())
+	{
+		qDebug() << p->namePart();
+		if (!m_device->namePart().compare(p->namePart()))
+		{
+			m_selectedPart = p;
+		}
+	}	
+	
 	m_edNameDevice = (new CPLineEdit(200, 35, this))->initAlignment(Qt::AlignCenter)->initText(m_device->nameDevice());
 	layout()->addWidget(
 		(new CPWidget(width, 35, new QHBoxLayout, this))
@@ -54,8 +74,7 @@ FormEdit::FormEdit(int row, int width, int height, QWidget *parent)
 		->initAlignment(Qt::AlignLeft)->initSpacing(10)
 		->initContentsMargins(10, 10, 0, 0)
 		->append(new CPLabel(50, 25, kr("소속파트")))
-		->append(m_edPart)
-	/*->append(btnSaerch)*/);
+		->append(m_edPart)->append(btnPart));
 
 	m_edPrice = (new CPLineEdit(200, 35, this))->initAlignment(Qt::AlignCenter)->initText(QString("%1").arg(m_device->price()));
 	layout()->addWidget(
@@ -84,19 +103,14 @@ FormEdit::FormEdit(int row, int width, int height, QWidget *parent)
 	layout()->addWidget((new CPWidget(width, 30, new QHBoxLayout))
 		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
 		->initSpacing(10)->initContentsMargins(0, 10, 0, 0)
-		->append(m_lbMessage)->append(btnInit)->append(btnSaerch)->append(btnCancel));
+		->append(m_lbMessage)->append(btnInit)->append(btnConfirm)->append(btnCancel));
 
 	//height = 35 * 5 + 5 + 95;
 	//m_wdContents->setFixedHeight(height);
 	setFixedHeight(height + 10);
 
-	connect(btnConfirm, SIGNAL(clicked()), this, SLOT(confirm()));
-	connect(btnCancel, SIGNAL(clicked()), this, SLOT(cancel()));
-	connect(btnInit, SIGNAL(clicked()), this, SLOT(init()));
 	connect(m_edMemo, SIGNAL(textChanged()), this, SLOT(activate()));
-	connect(btnSaerch, SIGNAL(clicked()), this, SLOT(search()));
 	connect(this, SIGNAL(rejected()), this, SLOT(cancel()));
-
 
 	connect(m_edNameDevice, SIGNAL(textChanged(const QString &)), this, SLOT(activate(const QString &)));
 	connect(m_edNoAsset, SIGNAL(textChanged(const QString &)), this, SLOT(recognize(const QString &)));
@@ -108,6 +122,7 @@ void FormEdit::search()
 {
 	SelectorPart* selector = new SelectorPart(kr("부서찾기"), 400, 500, this);
 	selector->setParent(this);
+	selector->setTag(TAG_FORM_EDIT);
 	selector->show();
 }
 void FormEdit::recognize(const QString & str)
@@ -209,13 +224,14 @@ void FormEdit::confirm()
 
 	m_question = new Question(
 		kr("알림"),
-		kr("장비를 추가하시겠습니까?\n\n")
+		kr("장비를 수정하시겠습니까?\n\n")
 		+ strNameDevice
 		+ strNoAsset
 		+ strPart
 		+ strPrice
 		+ strDate
 		+ strMemo, 300, 180);
+	m_question->func = [=]() {};
 	m_question->show();
 
 	connect(m_question, SIGNAL(yes()), this, SLOT(allow()));
@@ -238,8 +254,9 @@ void FormEdit::allow()
 	QString strDate = kr("취득일자 : ") + m_edDate->text() + "\n";
 	QString strMemo = kr("비고 : ") + m_edMemo->toPlainText() + "\n";
 
-	m_net->addDevice(
-		1/*m_part->noPart()*/,
+	m_net->editDevice(
+		m_device->noDevice(),
+		m_selectedPart->noPart(),
 		m_edNameDevice->text(),
 		m_edNoAsset->text(),
 		m_edNoAsset->text(),
@@ -258,12 +275,6 @@ void FormEdit::none()
 	qDebug() << "none";
 	m_question->hide();
 }
-void FormEdit::notify(int row)
-{
-	m_part = m->parts().at(row);
-	m_edPart->setText(m_part->namePart());
-	update();
-}
 
 void FormEdit::init()
 {
@@ -273,4 +284,13 @@ void FormEdit::init()
 	m_edDate->setText("");
 	m_edMemo->setText("");
 	m_edNameDevice->setText("");
+}
+
+void FormEdit::notify(int index, QString tag)
+{
+	if (!tag.compare(TAG_FORM_EDIT))
+	{
+		m_selectedPart = m->parts().at(index);
+		m_edPart->setText(m_selectedPart->namePart());
+	}
 }

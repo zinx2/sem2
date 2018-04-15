@@ -19,32 +19,17 @@ public:
 		btnInit->setStyleSheet("background: #e1e1e1;");
 
 		m_palette = new Palette();
-		m_btnBorrow = (new Command("btn_borrow", kr("대출하기"), 80, 40))->initFontSize(12)
-			->initStyleSheet(m_palette->btnReleasedStyleGrayNoRadius)->initEffect(m_palette->btnReleasedStyleGrayNoRadius, m_palette->btnHoveredStyleGrayNoRadius, m_palette->btnSelectedStyleGrayNoRadius)
-			->initFunc([=]()
-		{
-			//DialogFormDeviceReturn* wddSignature = new DialogFormDeviceReturn(m_noDevice, "반납하기", 500, 540, this);
-			//wddSignature->setData(edBarcode->toPlainText());
-			//wddSignature->show();
-		})->initEnabled(false);
-		m_btnReturn = (new Command("btn_return", kr("반납하기"), 80, 40))->initFontSize(12)
-			->initStyleSheet(m_palette->btnReleasedStyleGrayNoRadius)->initEffect(m_palette->btnReleasedStyleGrayNoRadius, m_palette->btnHoveredStyleGrayNoRadius, m_palette->btnSelectedStyleGrayNoRadius)
-			->initFunc([=]()
-		{
-			//DialogFormDeviceReturn* wddSignature = new DialogFormDeviceReturn(m_noDevice, "반납하기", 500, 540, this);
-			//wddSignature->setData(edBarcode->toPlainText());
-			//wddSignature->show();
-		})->initEnabled(false);
+		m_btnBorrow = (new GrayCommand("btn_borrow", kr("대출하기"), 80, 40))->initEnabled(false)
+		->initFunc([=]() { 	m->request(true, Notificator::OpenFromBorrow); 	});
 
-		m_btnCancel = (new Command("btn_cancel", kr("취소"), 80, 40))->initFontSize(12)
-			->initStyleSheet(m_palette->btnReleasedStyleGrayNoRadius)->initEffect(m_palette->btnReleasedStyleGrayNoRadius, m_palette->btnHoveredStyleGrayNoRadius, m_palette->btnSelectedStyleGrayNoRadius)
-			->initFunc([=]()
-		{
-			cancel();
-		});
-		m_btnSearch = (new Command("btn_search", kr("검색"), 80, 40))->initFontSize(12)
-			->initStyleSheet(m_palette->btnReleasedStyleGrayNoRadius)->initEffect(m_palette->btnReleasedStyleGrayNoRadius, m_palette->btnHoveredStyleGrayNoRadius, m_palette->btnSelectedStyleGrayNoRadius)
-			->initFunc([=]()
+		m_btnReturn = (new GrayCommand("btn_return", kr("반납하기"), 80, 40))->initEnabled(false)
+		->initFunc([=]() { 	m->request(true, Notificator::OpenFromReturn); 	});
+
+		m_btnCancel = (new GrayCommand("btn_cancel", kr("취소"), 80, 40))->initEnabled(false)
+		->initFunc([=]() { 	cancel(); });
+
+		m_btnSearch = (new GrayCommand("btn_search", kr("검색"), 80, 40))
+		->initFunc([=]()
 		{
 			QString barcode = m_edBarcode->text();
 			if (barcode.size() == 0) {
@@ -62,7 +47,7 @@ public:
 			bool validate;
 			int noDevice = barcode.toInt(&validate);
 			if (validate)
-				NetWorker::instance()->searchDeviceReturned(noDevice)->request();
+				NetWorker::instance()->getDeviceInfo(noDevice)->request();
 			else
 				m_lbNameDevice->setText(kr("유효하지 않은 자산번호입니다."));
 		});
@@ -111,7 +96,7 @@ public:
 
     void recognize()
 	{
-		if (m->alarmed() && m->notificator()->type() == Notificator::DVIReturnedSearch)
+		if (m->alarmed() && m->notificator()->type() == Notificator::DVISearch)
 		{
 			bool result = m->notificator()->result();
 			if (result)
@@ -122,37 +107,14 @@ public:
 					kr("반납되지 않은 장비입니다. \n반납을 원히사면 '반납하기' 버튼을 눌러주세요.") :
 					kr("반납된 장비입니다. \n대출을 원하시면 '대출하기' 버튼을 눌러주세요.");
 				
-				m_btnReturn->setEnabled(!d->borrowed()); /* 대출되지 않았을 때는 반납버튼 사용불가 */
-				if (m_btnReturn->isEnabled()) {
-					m_btnReturn->initStyleSheet(m_palette->btnReleasedStyleNavy);
-					m_btnReturn->initEffect(m_palette->btnReleasedStyleNavy, m_palette->btnSelectedStyleNavy, m_palette->btnHoveredStyleNavy);
-				}
-				else {
-					m_btnReturn->initStyleSheet(m_palette->btnEnable);
-					m_btnReturn->initEffect(m_palette->btnEnable, m_palette->btnEnable, m_palette->btnEnable);
-				}
-					
-				m_btnBorrow->setEnabled(d->borrowed());  /* 대출되지 않았을 때만 대출버튼 사용가능 */
-				if (m_btnBorrow->isEnabled()) {
-					m_btnBorrow->initStyleSheet(m_palette->btnReleasedStyleNavy);
-					m_btnBorrow->initEffect(m_palette->btnReleasedStyleNavy, m_palette->btnSelectedStyleNavy, m_palette->btnHoveredStyleNavy);
-				}
-				else {
-					m_btnBorrow->initStyleSheet(m_palette->btnEnable);
-					m_btnBorrow->initEffect(m_palette->btnEnable, m_palette->btnEnable, m_palette->btnEnable);
-				}
-
-
+				m_btnReturn->setEnabled(d->borrowed()); /* 대출되지 않았을 때는 반납버튼 사용불가 */					
+				m_btnBorrow->setEnabled(!d->borrowed());  /* 대출되지 않았을 때만 대출버튼 사용가능 */
 				m_lbNameDevice->setText(aboutDevice);
 			}
 			else
 			{
 				m_btnReturn->initEnabled(false);
-				m_btnReturn->initStyleSheet(m_palette->btnEnable);
-				m_btnReturn->initEffect(m_palette->btnEnable, m_palette->btnEnable, m_palette->btnEnable);
 				m_btnBorrow->initEnabled(false);
-				m_btnBorrow->initStyleSheet(m_palette->btnEnable);
-				m_btnBorrow->initEffect(m_palette->btnEnable, m_palette->btnEnable, m_palette->btnEnable);
 
 				m_lbNameDevice->setText(kr("검색된 장비가 없습니다."));
 			}

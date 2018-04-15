@@ -1,19 +1,19 @@
-ï»¿#pragma once
+#pragma once
 #include "cs_qheader.h"
 #include "cs_component.h"
 #include "cs_question.h"
 #include "cs_signature.h"
 #include "cs_command.h"
 #include "cs_selector_employee.h"
-#define TAG_FORM_BORROW "form_borrow"
-class FormBorrow : public CPDialog
+#define TAG_FORM_RETURN "form_return"
+class FormReturn : public CPDialog
 {
 	Q_OBJECT
 public:
-	//type 0:ëŒ€ì¶œ, 1:ë°˜ë‚©
-	explicit FormBorrow(int width, int height, QWidget *parent = 0) : CPDialog(width, height, parent)
+	//type 0:´ëÃâ, 1:¹Ý³³
+	explicit FormReturn(int width, int height, QWidget *parent = 0) : CPDialog(width, height, parent)
 	{
-		setWindowTitle(kr("ëŒ€ì¶œí•˜ê¸°"));
+		setWindowTitle(kr("¹Ý³³ÇÏ±â"));
 		setFixedSize(width, height);
 		setLayout(new QVBoxLayout);
 		layout()->setSpacing(0);
@@ -22,41 +22,41 @@ public:
 		m_net = NetWorker::instance();
 		setModal(true);
 		Palette* p = new Palette();
-		btnConfirm = (new Command("confirm", kr("í™•ì¸"), 70, 30))
+		btnConfirm = (new Command("confirm", kr("È®ÀÎ"), 70, 30))
 			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)
 			->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
 			->initDisabledEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
 			->initEnabled(false)->initFunc([=]() { confirm(); });
-		Command* btnCancel = (new Command("cancel", kr("ì·¨ì†Œ"), 70, 30))
+		Command* btnCancel = (new Command("cancel", kr("Ãë¼Ò"), 70, 30))
 			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
 			->initFunc([=]() { cancel(); });
-		Command* btnInit = (new Command("init", kr("ì´ˆê¸°í™”"), 70, 30))
+		Command* btnInit = (new Command("init", kr("ÃÊ±âÈ­"), 70, 30))
 			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
 			->initFunc([=]() { init(); });
-		Command* btnEmployee = (new Command("search_part", kr("ì§ì›ì°¾ê¸°"), 70, 30))
+		Command* btnEmployee = (new Command("search_part", kr("Á÷¿øÃ£±â"), 70, 30))
 			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
 			->initFunc([=]()
 		{
-			SelectorEmployee* selector = new SelectorEmployee(kr("ì§ì›ì°¾ê¸°"), 400, 500);
+			SelectorEmployee* selector = new SelectorEmployee(kr("Á÷¿øÃ£±â"), 400, 500);
 			selector->setParent(this);
-			selector->setTag(TAG_FORM_BORROW);
+			selector->setTag(TAG_FORM_RETURN);
 			selector->show();
 		});
 
-		m_lbMessage = new QLabel(kr("ì§ì›ì„ ì„ íƒí•˜ì„¸ìš”."));
+		m_lbMessage = new QLabel(kr("Á÷¿øÀ» ¼±ÅÃÇÏ¼¼¿ä."));
 		m_lbMessage->setFixedSize(width - 250, 25);
 		m_lbMessage->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
 
-		Device* dv = m->searchedDevice();
+		m_device = m->searchedDevice();
 		/* ROW 1 */
-		edNameDevice = (new CPDialogLineEdit(200, dv->nameDevice()))->initReadOnly(true);
-		edNoAsset = (new CPDialogLineEdit(170, dv->noAsset()))->initReadOnly(true);
+		edNameDevice = (new CPDialogLineEdit(200, m_device->nameDevice()))->initReadOnly(true);
+		edNoAsset = (new CPDialogLineEdit(170, m_device->noAsset()))->initReadOnly(true);
 		layout()->addWidget(
 			(new CPWidget(width, 45, new QHBoxLayout))
 			->initContentsMargins(0, 0, 0, 0)
-			->append(new CPLabel(35, 25, kr("ìž¥ë¹„ëª…")))
+			->append(new CPLabel(35, 25, kr("Àåºñ¸í")))
 			->append(edNameDevice)
-			->append(new CPLabel(60, 25, kr("ìžì‚°ë²ˆí˜¸")))
+			->append(new CPLabel(60, 25, kr("ÀÚ»ê¹øÈ£")))
 			->append(edNoAsset));
 
 		/* ROW 2 */
@@ -65,30 +65,30 @@ public:
 		layout()->addWidget(
 			(new CPWidget(width, 45, new QHBoxLayout))
 			->initContentsMargins(2, 0, 0, 0)
-			->append(new CPLabel(35, 25, kr("ëŒ€ì¶œìž")))
+			->append(new CPLabel(35, 25, kr("È®ÀÎÀÚ")))
 			->append(edNameUserOrAdmin)
 			->append(btnEmployee)
-			->append(new CPLabel(55, 25, kr("ëŒ€ì¶œì¼")))
+			->append(new CPLabel(55, 25, kr("¹Ý³³ÀÏ")))
 			->append(edDateBorrowedOrReturned));
 
 		/* ROW 3 */
-		edUse = (new CPTextEdit(width - 60, this))->initHeight(50)->initText(dv->memo());
+		edUse = (new CPTextEdit(width - 60, this))->initHeight(50)->initText(m_device->memo())->initReadOnly(true);
 		layout()->addWidget(
 			(new CPWidget(width, 60, new QHBoxLayout))
 			->initContentsMargins(0, 0, 0, 0)
-			->append((new CPLabel(35, 60, kr("ìš©ë„")))->initAlignment(Qt::AlignTop | Qt::AlignRight)->initContentsMargins(0, 0, 0, 0))
+			->append((new CPLabel(35, 60, kr("¿ëµµ")))->initAlignment(Qt::AlignTop | Qt::AlignRight)->initContentsMargins(0, 0, 0, 0))
 			->append(edUse));
 
 		/* ROW 4 */
-		rbYes = new QRadioButton(kr("ì˜ˆ"), this);
+		rbYes = new QRadioButton(kr("¿¹"), this);
 		rbYes->setFixedWidth(50);
-		rbNo = new QRadioButton(kr("ì•„ë‹ˆì˜¤"), this);
+		rbNo = new QRadioButton(kr("¾Æ´Ï¿À"), this);
 		rbNo->setFixedWidth(70);
 		rbNo->setChecked(true);
 		layout()->addWidget(
 			(new CPWidget(width, 35, new QHBoxLayout))
-			->initContentsMargins(10, 0, 0, 0)->initAlignment(Qt::AlignLeft)->initEnabled(false)
-			->append((new CPLabel(130, 25, kr("ë³´ì•ˆì ê²€(ì´ˆê¸°í™”) ì—¬ë¶€")))->initAlignment(Qt::AlignVCenter | Qt::AlignLeft))
+			->initContentsMargins(10, 0, 0, 0)->initAlignment(Qt::AlignLeft)
+			->append((new CPLabel(130, 25, kr("º¸¾ÈÁ¡°Ë(ÃÊ±âÈ­) ¿©ºÎ")))->initAlignment(Qt::AlignVCenter | Qt::AlignLeft))
 			->append(rbYes)
 			->append(rbNo));
 
@@ -98,7 +98,7 @@ public:
 		layout()->addWidget(
 			(new CPWidget(width, 210, new QVBoxLayout))
 			->initContentsMargins(10, 0, 0, 0)
-			->append((new CPLabel(70, 25, kr("ì„œëª…")))->initAlignment(Qt::AlignBottom))
+			->append((new CPLabel(70, 25, kr("¼­¸í")))->initAlignment(Qt::AlignBottom))
 			->append(szSign));
 
 		layout()->addWidget((new CPWidget(width, 30, new QHBoxLayout))
@@ -116,6 +116,8 @@ public:
 		connect(edDateBorrowedOrReturned, SIGNAL(textChanged(const QString &)), this, SLOT(activate(const QString &)));
 		connect(edUse, SIGNAL(textChanged()), this, SLOT(activate()));
 		connect(this, SIGNAL(rejected()), this, SLOT(cancel()));
+
+		connect(m, SIGNAL(alarmedChanged()), this, SLOT(recognize()));
 	}
 
 	void setData(QString noAsset)
@@ -142,37 +144,16 @@ public:
 	void confirm()
 	{
 		qDebug() << "confirm";
-		if (!szSign->toImage()) return;
-
-		QString strNameDevice = kr("ìž¥ë¹„ëª… : ") + edNameDevice->text() + "\n";
-		QString strNoAsset = kr("ìžì‚°ë²ˆí˜¸ : ") + edNoAsset->text() + "\n";
-		QString strDate = kr("ëŒ€ì¶œë‚ ì§œ : ") + edDateBorrowedOrReturned->text() + "\n";
-		QString strNameUser = kr("ëŒ€ì¶œìž : ") + edNameUserOrAdmin->text() + "\n";
-		QString strUse = kr("ìš©ë„ : ") + edUse->toPlainText() + "\n";
-
-		m_question = new Question(
-			kr("ì•Œë¦¼"),
-			kr("ëŒ€ì¶œì‹œê² ìŠµë‹ˆê¹Œ?\n\n")
-			+ strNameDevice
-			+ strNoAsset
-			+ strDate
-			+ strNameUser
-			+ strUse, 300, 220);
-		m_question->func = [=]() {};
-		m_question->show();
-
-		connect(m_question, SIGNAL(yes()), this, SLOT(allow()));
-		connect(m_question, SIGNAL(no()), this, SLOT(none()));
+		m_net->searchDeviceReturned(edNoAsset->text())->request();
 
 	}
 	void cancel() { close(); }
-	void init() { szSign->init();	}
+	void init() { szSign->init(); }
 	void allow()
 	{
-		m_net->borrowDevice(
-			edNoAsset->text(),
-			m_selectedEmployee->noUser(),
-			edUse->toPlainText())->request();
+		Rent* r = m->searchedRent();
+		m->setMessageInt(r->noRent());
+		m_net->returnDevice(edNoAsset->text(), rbYes->isChecked())->request();
 
 		disconnect(m_question, SIGNAL(yes()), this, SLOT(allow()));
 
@@ -199,19 +180,19 @@ public:
 
 		if (edNameDevice->text().isEmpty())
 		{
-			m_lbMessage->setText(kr("ìž¥ë¹„ëª…ì„ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
+			m_lbMessage->setText(kr("Àåºñ¸íÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä."));
 		}
 		else if (edNoAsset->text().isEmpty())
 		{
-			m_lbMessage->setText(kr("ìžì‚°ë²ˆí˜¸ë¥¼ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
+			m_lbMessage->setText(kr("ÀÚ»ê¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä."));
 		}
 		else if (edNameUserOrAdmin->text().isEmpty())
 		{
-			m_lbMessage->setText(kr("ëŒ€ì¶œìžë¥¼ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
+			m_lbMessage->setText(kr("´ëÃâÀÚ¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä."));
 		}
 		else if (edUse->toPlainText().isEmpty())
 		{
-			m_lbMessage->setText(kr("ìš©ë„ë¥¼ ìž…ë ¥í•´ì£¼ì„¸ìš”."));
+			m_lbMessage->setText(kr("¿ëµµ¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä."));
 		}
 		else
 		{
@@ -220,7 +201,7 @@ public:
 	}
 	void search()
 	{
-		SelectorEmployee* selector = new SelectorEmployee(kr("ì§ì› ì°¾ê¸°"), 400, 500, this);
+		SelectorEmployee* selector = new SelectorEmployee(kr("Á÷¿ø Ã£±â"), 400, 500, this);
 		selector->setParent(this);
 		selector->show();
 	}
@@ -235,10 +216,48 @@ public:
 
 	void notify(int index, QString tag)
 	{
-		if (!tag.compare(TAG_FORM_BORROW))
+		if (!tag.compare(TAG_FORM_RETURN))
 		{
 			m_selectedEmployee = m->employees().at(index);
 			edNameUserOrAdmin->setText(m_selectedEmployee->nameUser());
+		}
+	}
+
+	void recognize()
+	{
+		if (m->alarmed() && m->notificator()->type() == Notificator::ConfirmedRent)
+		{
+			bool result = m->notificator()->result();
+			if (result)
+			{
+				if (!szSign->toImage()) return;
+
+				Rent* r = m->searchedRent();
+				QString strNameDevice = kr("Àåºñ¸í : ") + r->nameDevice() + "\n";
+				QString strNoAsset = kr("ÀÚ»ê¹øÈ£ : ") + r->noAsset() + "\n";
+				QString strDate = kr("¹Ý³³³¯Â¥ : ") + r->dateBorrowed() + "\n";
+				QString strNameUser = kr("È®ÀÎÀÚ : ") + r->nameUser() + "\n";
+				QString strUse = kr("¿ëµµ : ") + r->purpose() + "\n";
+
+				m_question = new Question(
+					kr("¾Ë¸²"),
+					kr("¹Ý³³½Ã°Ú½À´Ï±î?\n\n")
+					+ strNameDevice
+					+ strNoAsset
+					+ strDate
+					+ strNameUser
+					+ strUse, 300, 220);
+				m_question->func = [=]() {};
+				m_question->show();
+
+				connect(m_question, SIGNAL(yes()), this, SLOT(allow()));
+				connect(m_question, SIGNAL(no()), this, SLOT(none()));
+			}
+			else
+				m->request(false, Notificator::None, kr("Àåºñ Á¤º¸¸¦ È®ÀÎÇÒ ¼ö ¾ø½À´Ï´Ù."));
+
+			update();
+			m->alarm(false);
 		}
 	}
 
@@ -258,6 +277,7 @@ private:
 	Signature* szSign;
 	Question* m_question;
 
+	Device* m_device;
 	Employee* m_selectedEmployee;
 	NetWorker* m_net;
 	void error(QString message);

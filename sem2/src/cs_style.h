@@ -184,9 +184,9 @@ public:
 		setReleasedStyle(palette()->btnReleasedStyleNavy);
 		setHoveredStyle(palette()->btnHoveredStyleNavy);
 		setSelectedStyle(palette()->btnSelectedStyleNavy);
-		setDisabledReleasedStyle(palette()->btnReleasedStyleNavy);
-		setDisabledHoveredStyle(palette()->btnHoveredStyleNavy);
-		setDisabledSelectedStyle(palette()->btnSelectedStyleNavy);
+		setDisabledReleasedStyle(palette()->btnSelectedStyleDiabled);
+		setDisabledHoveredStyle(palette()->btnSelectedStyleDiabled);
+		setDisabledSelectedStyle(palette()->btnSelectedStyleDiabled);
 	}
 };
 

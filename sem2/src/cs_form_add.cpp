@@ -27,12 +27,18 @@ FormAdd::FormAdd(int width, int height, QWidget *parent)
 	Command* btnCancel = (new Command("cancel", kr("취소"), 70, 30))
 		->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
 		->initFunc([=]() { cancel(); });
-	Command* btnSaerch = (new Command("search", kr("부서찾기"), 70, 30))
-		->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
-		->initFunc([=]() { search(); });
 	Command* btnInit = (new Command("init", kr("초기화"), 70, 30))
 		->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
 		->initFunc([=]() { init(); });
+	Command* btnPart = (new Command("search_part", kr("부서찾기"), 70, 30))
+		->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		->initFunc([=]() 
+		{ 
+			SelectorPart* selector = new SelectorPart(kr("부서찾기"), 400, 500);
+			selector->setParent(this);
+			selector->setTag(TAG_FORM_ADD);
+			selector->show();
+		});
 
 	m_lbMessage = new QLabel(kr("장비명을 입력해주세요."));
 	m_lbMessage->setFixedSize(width - 250, 25);
@@ -54,14 +60,13 @@ FormAdd::FormAdd(int width, int height, QWidget *parent)
 		->append(new CPLabel(50, 25, kr("자산번호")))
 		->append(m_edNoAsset));
 
-	m_edPart = (new CPLineEdit(200, 35, this))->initReadOnly(true)->initText(kr("시스템파트"))->initAlignment(Qt::AlignCenter);
+	m_edPart = (new CPLineEdit(200, 35, this))->initReadOnly(true)->initText(kr(""))->initAlignment(Qt::AlignCenter);
 	layout()->addWidget(
 		(new CPWidget(width, 35, new QHBoxLayout, this))
 		->initAlignment(Qt::AlignLeft)->initSpacing(10)
 		->initContentsMargins(10, 10, 0, 0)
 		->append(new CPLabel(50, 25, kr("소속파트")))
-		->append(m_edPart)
-	/*->append(btnSaerch)*/);
+		->append(m_edPart)->append(btnPart));
 
 	m_edPrice = (new CPLineEdit(200, 35, this))->initAlignment(Qt::AlignCenter);
 	layout()->addWidget(
@@ -90,19 +95,14 @@ FormAdd::FormAdd(int width, int height, QWidget *parent)
 	layout()->addWidget((new CPWidget(width, 30, new QHBoxLayout))
 		->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
 		->initSpacing(10)->initContentsMargins(0, 10, 0, 0)
-		->append(m_lbMessage)->append(btnInit)->append(btnSaerch)->append(btnCancel));
+		->append(m_lbMessage)->append(btnInit)->append(btnConfirm)->append(btnCancel));
 
 	//height = 35 * 5 + 5 + 95;
 	//m_wdContents->setFixedHeight(height);
 	setFixedHeight(height + 10);
 
-	connect(btnConfirm, SIGNAL(clicked()), this, SLOT(confirm()));
-	connect(btnCancel, SIGNAL(clicked()), this, SLOT(cancel()));
-	connect(btnInit, SIGNAL(clicked()), this, SLOT(init()));
 	connect(m_edMemo, SIGNAL(textChanged()), this, SLOT(activate()));
-	connect(btnSaerch, SIGNAL(clicked()), this, SLOT(search()));
 	connect(this, SIGNAL(rejected()), this, SLOT(cancel()));
-
 
 	connect(m_edNameDevice, SIGNAL(textChanged(const QString &)), this, SLOT(activate(const QString &)));
 	connect(m_edNoAsset, SIGNAL(textChanged(const QString &)), this, SLOT(recognize(const QString &)));
@@ -114,6 +114,7 @@ void FormAdd::search()
 {
 	SelectorPart* selector = new SelectorPart(kr("부서찾기"), 400, 500, this);
 	selector->setParent(this);
+	selector->setTag(TAG_FORM_ADD);
 	selector->show();
 }
 void FormAdd::recognize(const QString & str)
@@ -222,6 +223,7 @@ void FormAdd::confirm()
 		+ strPrice
 		+ strDate
 		+ strMemo, 300, 180);
+	m_question->func = [=]() {};
 	m_question->show();
 
 	connect(m_question, SIGNAL(yes()), this, SLOT(allow()));
@@ -245,7 +247,7 @@ void FormAdd::allow()
 	QString strMemo = kr("비고 : ") + m_edMemo->toPlainText() + "\n";
 
 	m_net->addDevice(
-		1/*m_part->noPart()*/,
+		m_selectedPart->noPart(),
 		m_edNameDevice->text(),
 		m_edNoAsset->text(),
 		m_edNoAsset->text(),
@@ -264,12 +266,6 @@ void FormAdd::none()
 	qDebug() << "none";
 	m_question->hide();
 }
-void FormAdd::notify(int row)
-{
-	m_part = m->parts().at(row);
-	m_edPart->setText(m_part->namePart());
-	update();
-}
 
 void FormAdd::init()
 {
@@ -279,4 +275,13 @@ void FormAdd::init()
 	m_edDate->setText("");
 	m_edMemo->setText("");
 	m_edNameDevice->setText("");
+}
+
+void FormAdd::notify(int index, QString tag)
+{
+	if (!tag.compare(TAG_FORM_ADD))
+	{
+		m_selectedPart = m->parts().at(index);
+		m_edPart->setText(m_selectedPart->namePart());
+	}
 }

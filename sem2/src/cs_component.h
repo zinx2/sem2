@@ -58,6 +58,17 @@ public:
 		return this;
 	}
 };
+class CPDialogLineEdit : public CPLineEdit
+{
+	Q_OBJECT
+public:
+	CPDialogLineEdit(int width, QString title="", QWidget *parent = 0) : CPLineEdit(width, 35, parent)
+	{
+		initAlignment(Qt::AlignCenter);
+		initText(title);
+	}
+};
+
 class CPLabel : public QLabel
 {
 	Q_OBJECT

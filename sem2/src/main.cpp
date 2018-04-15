@@ -4,6 +4,7 @@
 #include <QFontDataBase>
 
 #include "cs_selector_part.h"
+#include "cs_form_signature.h"
 #include "cs_barcoder.h"
 #include "cs_form_borrow.h"
 #include "cs_alarm.h"
@@ -11,13 +12,28 @@
 #include "view_home.h"
 #include "cs_component.h"
 #include "cs_form_add.h"
-
+#include "cs_form_borrow.h"
+#include "cs_form_return.h"
 int main(int argc, char *argv[])
 {
     QFontDatabase::addApplicationFont(":/NanumBarunGothic.ttf");
     QApplication a(argc, argv);
+
+	//Barcoder*
+	//FormReturn* fr = new FormReturn("QWQWQ", 500, 450);
+	//fr->show();
+	//FormSignature* sg = new FormSignature(0, 500, 250);
+	//sg->show();
+
+	//FormBorrow* fb = new FormBorrow(500, 450);
+	//fb->show();
+
+	//FormAdd* fa = new FormAdd(410, 340);
+	//fa->show();
     ViewHome w;
     w.show();
+
+
 
 	//Model* m = Model::instance();
 	//QList<Rent*> list;

@@ -76,18 +76,21 @@ public:
 	NetWorker* getTotalRentListMonth(int year, int month);
 
     NetWorker* borrowDevice(QString barcode, int noUser, QString purpose);
-    NetWorker* returnDevice(QString barcode, int noAdmin, int noDevice, bool isInitial=false);
+    NetWorker* returnDevice(QString barcode, bool isInitial=false);
     NetWorker* signBorrow();
     NetWorker* signReturn();
+	NetWorker* searchDeviceReturned(QString barcode);
+	NetWorker* signForMonth();
     NetWorker* addDevice(int noPart, QString nameDevice, QString noAsset, QString barcode, QString price, QString date, QString memo = "");
     NetWorker* editDevice(int noDevice, int noPart, QString nameDevice, QString noAsset, QString barcode, QString price, QString date, QString memo = "");
     NetWorker* removeDevice(int noDevice);
     NetWorker* uploadFileBorrowed(QString fileName);
     NetWorker* uploadFileReturned(QString fileName);
+	NetWorker* uploadFileSignForMonth(QString fileName);
     NetWorker* uploadFile(QString fileName);
     NetWorker* expire(int noUser);
     NetWorker* getDeviceInfo(int barcode);
-    NetWorker* searchDeviceReturned(int barcode);
+
 	
     QMutex& mtx() { return m_mtx; }
 

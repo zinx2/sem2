@@ -208,6 +208,12 @@ NetWorker* NetWorker::login(QString id, QString pass)
 
 NetWorker* NetWorker::logout()
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
 	/********** SET URL QUERIES **********/
 	QUrlQuery queries;
 	queries.addQueryItem("sem_admin_no", QString("%1").arg(m->user()->noAdmin()));
@@ -253,6 +259,7 @@ NetWorker* NetWorker::getUserList()
 
         QList<Employee*> list;
         QJsonArray jsonArr = jsonObj["data_list"].toArray();
+		qDebug() << "@@@ getUserList @@@";
         foreach(const QJsonValue &value, jsonArr)
         {
             QJsonObject obj = value.toObject();
@@ -264,6 +271,7 @@ NetWorker* NetWorker::getUserList()
             qDebug() << d->noUser() << "/" << d->nameUser() << "/" << d->manager();
             list.append(d);
         }
+		qDebug() << "@@@@@@@@@@@@@@@@@@@";
         m->setEmployees(list);
         m_netReply->deleteLater();
         emit next();
@@ -305,6 +313,12 @@ NetWorker* NetWorker::getPartList()
 }
 NetWorker* NetWorker::getDeviceList(int searchType, int now)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
     queries.addQueryItem("search_type", QString("%1").arg(searchType));
@@ -357,6 +371,12 @@ NetWorker* NetWorker::getDeviceList(int searchType, int now)
 }
 NetWorker* NetWorker::getDeviceListForAdmin(int noPart, int searchType, int now)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
 	/********** SET URL QUERIES **********/
 	QUrlQuery queries;
 	queries.addQueryItem("sem_part_no", QString("%1").arg(noPart));
@@ -412,6 +432,12 @@ NetWorker* NetWorker::getDeviceListForAdmin(int noPart, int searchType, int now)
 }
 NetWorker* NetWorker::getRentList(int type, int year, int month)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
 	queries.addQueryItem("search_type", QString("%1").arg(type));
@@ -470,6 +496,12 @@ NetWorker* NetWorker::getRentList(int type, int year, int month)
 }
 NetWorker* NetWorker::getRentListForAdmin(int type, int year, int month)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
 	/********** SET URL QUERIES **********/
 	QUrlQuery queries;
 	queries.addQueryItem("search_type", QString("%1").arg(type));
@@ -529,6 +561,12 @@ NetWorker* NetWorker::getRentListForAdmin(int type, int year, int month)
 }
 NetWorker* NetWorker::getTotalRentListMonth(int year, int month)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
 	/********** SET URL QUERIES **********/
 	QUrlQuery queries;
 	queries.addQueryItem("year", QString("%1").arg(year));
@@ -600,6 +638,12 @@ NetWorker* NetWorker::getTotalRentListMonth(int year, int month)
 
 NetWorker* NetWorker::borrowDevice(QString barcode, int noUser, QString purpose)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
     queries.addQueryItem("barcode", QString("%1").arg(barcode));
@@ -618,14 +662,25 @@ NetWorker* NetWorker::borrowDevice(QString barcode, int noUser, QString purpose)
         {
             int noRent = jsonObj["rent_no"].toInt();
             m->setMessageInt(noRent);
+			uploadFileBorrowed("tmp.jpg")->request();
         }
-        uploadFileBorrowed("tmp.jpg")->request();
+		else
+		{
+			m->request(false, Notificator::None, jsonObj["error_message"].toString());
+		}
+
         /*emit next();*/
     }));
     return this;
 }
 NetWorker* NetWorker::addDevice(int noPart, QString nameDevice, QString noAsset, QString barcode, QString price, QString date, QString memo)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
     queries.addQueryItem("part_no", QString("%1").arg(noPart));
@@ -642,18 +697,28 @@ NetWorker* NetWorker::addDevice(int noPart, QString nameDevice, QString noAsset,
         QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
         QJsonObject jsonObj = jsonDoc.object();
         bool isSuccess = jsonObj["is_success"].toBool();
-        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVIModified));
+		if (isSuccess)
+		{
+			int total = m->countTotalDevice() + 1;
+			int pageNumber = total / COUNT_PAGE;
+			m->setPageNumber(pageNumber + 1);
+		}
+
+        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVIList));
         m_netReply->deleteLater();
 
-        if ((m->countCurrentDevice() + 1) % COUNT_PAGE == 1)
-        {
-            m->setPageNumber(m->pageNumber() + 1);
-        }
+
     }));
     return this;
 }
-NetWorker* NetWorker::editDevice(int noDevice, int noPart, QString nameDevice, QString noAsset, QString barcode, QString price, QString date, QString memo)
+NetWorker* NetWorker::editDevice(int noDevice, int noPart, QString nameDevice, QString noAsset, QString barcode, QString price, QString date, QString memo) 
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
     queries.addQueryItem("sem_device_no", QString("%1").arg(noDevice));
@@ -671,16 +736,19 @@ NetWorker* NetWorker::editDevice(int noDevice, int noPart, QString nameDevice, Q
         QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
         QJsonObject jsonObj = jsonDoc.object();
         bool isSuccess = jsonObj["is_success"].toBool();
-        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVIModified));
+        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVIList));
         m_netReply->deleteLater();
-        if (!isSuccess) return;
-
-
     }));
     return this;
 }
 NetWorker* NetWorker::removeDevice(int noDevice)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
     queries.addQueryItem("sem_device_no", QString("%1").arg(noDevice));
@@ -691,22 +759,40 @@ NetWorker* NetWorker::removeDevice(int noDevice)
         QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
         QJsonObject jsonObj = jsonDoc.object();
         bool isSuccess = jsonObj["is_success"].toBool();
-        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVIModified));
-        m_netReply->deleteLater();
-        if ((m->countCurrentDevice() - 1) % COUNT_PAGE == 0)
-        {
-            if (m->pageNumber() > 1)
-                m->setPageNumber(m->pageNumber() - 1);
-        }
+		if ((m->countCurrentDevice() - 1) % COUNT_PAGE == 0)
+		{
+			if (m->pageNumber() > 1)
+				m->setPageNumber(m->pageNumber() - 1);
+		}
+        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVIList));
+        m_netReply->deleteLater();        
     }));
     return this;
 }
 NetWorker* NetWorker::signBorrow()
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+	QString fileUrl = m->fileUrl();
+	if (fileUrl.isEmpty())
+	{
+		m->request(false, Notificator::ErrorNoFile);
+		return this;
+	}
+	int noRent = m->messageInt();
+	if (noRent < 0)
+	{
+		m->request(false, Notificator::ErrorNoRent);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
-    queries.addQueryItem("sig_url", m->fileUrl());
-    queries.addQueryItem("rent_no", QString("%1").arg(m->messageInt()));
+    queries.addQueryItem("sig_url", fileUrl);
+    queries.addQueryItem("rent_no", QString("%1").arg(noRent));
 
     m_hosts.append(new NetHost("post", "/sem/setSign", queries,
         [&]()-> void {
@@ -723,10 +809,28 @@ NetWorker* NetWorker::signBorrow()
 }
 NetWorker* NetWorker::signReturn()
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+	QString fileUrl = m->fileUrl();
+	if (fileUrl.isEmpty())
+	{
+		m->request(false, Notificator::ErrorNoFile);
+		return this;
+	}
+	int noRent = m->messageInt();
+	if (noRent < 0)
+	{
+		m->request(false, Notificator::ErrorNoRent);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
-    queries.addQueryItem("sig_url", m->fileUrl());
-    queries.addQueryItem("rent_no", QString("%1").arg(m->messageInt()));
+    queries.addQueryItem("sig_url", fileUrl);
+    queries.addQueryItem("rent_no", QString("%1").arg(noRent));
 
     m_hosts.append(new NetHost("post", "/sem/setReturnSign", queries,
         [&]()-> void {
@@ -741,13 +845,19 @@ NetWorker* NetWorker::signReturn()
     }));
     return this;
 }
-NetWorker* NetWorker::returnDevice(QString barcode, int noAdmin, int noDevice, bool isInitial)
+NetWorker* NetWorker::returnDevice(QString barcode, bool isInitial)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
     queries.addQueryItem("barcode", barcode);
-    queries.addQueryItem("confirm_user_no", QString("%1").arg(noAdmin));
-    queries.addQueryItem("sem_device_no", QString("%1").arg(noDevice));
+    //queries.addQueryItem("confirm_user_no", QString("%1").arg(noAdmin));
+    //queries.addQueryItem("sem_device_no", QString("%1").arg(noDevice));
     queries.addQueryItem("is_initial", QString("%1").arg(isInitial));
 
     m_hosts.append(new NetHost("post", "/sem/returnDevice", queries,
@@ -761,9 +871,19 @@ NetWorker* NetWorker::returnDevice(QString barcode, int noAdmin, int noDevice, b
         if (isSuccess)
         {
             int noRent = jsonObj["rent_no"].toInt();
+			if (noRent == 0)
+			{
+				noRent = m->messageInt();
+				if (noRent == 0)
+				{
+					m->request(false, Notificator::None, kr("장비 정보를 확인할 수 없습니다."));
+					return;
+				}				
+			}
             m->setMessageInt(noRent);
+			uploadFileReturned("tmp.jpg")->request();
         }
-        uploadFileReturned("tmp.jpg")->request();
+
         /*emit next();*/
     }));
     return this;
@@ -814,6 +934,29 @@ NetWorker* NetWorker::uploadFileReturned(QString fileName)
     }, fileName));
     return this;
 }
+NetWorker* NetWorker::uploadFileSignForMonth(QString fileName)
+{
+	/********** SET URL QUERIES **********/
+	QUrlQuery queries;
+	queries.addQueryItem("file_name", fileName);
+
+	m_hosts.append(new NetHost("file", "/uploadMissionAnswerFile", queries,
+		[&]()-> void {
+		QMutexLocker locker(&m_mtx);
+
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
+		QJsonObject jsonObj = jsonDoc.object();
+		bool isSuccess = jsonObj["is_success"].toBool();
+		QString url = jsonObj["file_url"].toString();
+		QString name = jsonObj["file_name"].toString();
+		m_netReply->deleteLater();
+		m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::File, false));
+		m->setFileUrl(url);
+		signForMonth()->request();
+		//emit next();
+	}, fileName));
+	return this;
+}
 NetWorker* NetWorker::uploadFile(QString fileName)
 {
     /********** SET URL QUERIES **********/
@@ -839,6 +982,12 @@ NetWorker* NetWorker::uploadFile(QString fileName)
 }
 NetWorker* NetWorker::expire(int noUser)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
     queries.addQueryItem("sem_user_no", QString("%1").arg(noUser));
@@ -859,6 +1008,12 @@ NetWorker* NetWorker::expire(int noUser)
 
 NetWorker* NetWorker::getDeviceInfo(int barcode)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
     queries.addQueryItem("barcode", QString("%1").arg(barcode));
@@ -885,14 +1040,26 @@ NetWorker* NetWorker::getDeviceInfo(int barcode)
             m->setSearchedDevice(d);
             qDebug() << d->namePart() << "/" << d->nameDevice() << "/" << d->noAsset() << "/" << d->price() << "/" << d->borrowed();
         }
-        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVIBorrowedSearch, false));
+        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVISearch, false));
         m_netReply->deleteLater();
     }));
     return this;
 }
 
-NetWorker* NetWorker::searchDeviceReturned(int barcode)
+NetWorker* NetWorker::searchDeviceReturned(QString barcode)
 {
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
+	if (barcode.isEmpty())
+	{
+		m->request(false, Notificator::ErrorNoBarcode);
+		return this;
+	}
+
     /********** SET URL QUERIES **********/
     QUrlQuery queries;
     queries.addQueryItem("barcode", QString("%1").arg(barcode));
@@ -913,10 +1080,39 @@ NetWorker* NetWorker::searchDeviceReturned(int barcode)
             r->setPurpose(jsonObj["purpose"].toString());
             r->setDateBorrowed(jsonObj["rent_date"].toString());
             m->setSearchedRent(r);
+			m->request(false, Notificator::ConfirmedRent);
             qDebug() << r->noRent() << "/" << r->nameDevice() << "/" << r->noAsset() << "/" << r->purpose();
         }
-        m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), Notificator::DVIReturnedSearch, false));
+		else
+			m->request(false, Notificator::None, jsonObj["error_message"].toString());
+
         m_netReply->deleteLater();
     }));
     return this;
+}
+NetWorker* NetWorker::signForMonth()
+{
+	if (!m->isLogined())
+	{
+		m->request(false, Notificator::ErrorNoLogined);
+		return this;
+	}
+
+	/********** SET URL QUERIES **********/
+	QUrlQuery queries;
+	queries.addQueryItem("superior_sign_no", QString("%1").arg(m->messageInt()));
+	queries.addQueryItem("sign_url", QString("%1").arg(m->fileUrl()));
+
+	m_hosts.append(new NetHost("post", "/sem/setSignForMonth", queries,
+		[&]()-> void {
+		QMutexLocker locker(&m_mtx);
+
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(m_netReply->readAll());
+		QJsonObject jsonObj = jsonDoc.object();
+		bool isSuccess = jsonObj["is_success"].toBool();
+		m_netReply->deleteLater();
+		m->setNotificator(new Notificator(isSuccess, jsonObj["error_message"].toString(), m->messageUpdateType()));
+		emit next();
+	}));
+	return this;
 }
