@@ -26,17 +26,13 @@ public:
 		m_net = NetWorker::instance();
 		setModal(true);
 		Palette* p = new Palette();
-		btnConfirm = (new Command("confirm", kr("확인"), 70, 30))
-			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		btnConfirm = (new GrayCommand("confirm", kr("확인"), 70, 30))
 			->initEnabled(false)->initFunc([=]() { confirm(); });
-		Command* btnCancel = (new Command("cancel", kr("취소"), 70, 30))
-			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		Command* btnCancel = (new GrayCommand("cancel", kr("취소"), 70, 30))
 			->initFunc([=]() { cancel(); });
-		Command* btnInit = (new Command("init", kr("초기화"), 70, 30))
-			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		Command* btnInit = (new GrayCommand("init", kr("초기화"), 70, 30))
 			->initFunc([=]() { init(); });
-		Command* btnPart = (new Command("search_part", kr("부서찾기"), 70, 30))
-			->initStyleSheet(p->btnReleasedStyleGrayNoRadius)->initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius)
+		Command* btnPart = (new GrayCommand("search_part", kr("부서찾기"), 70, 30))
 			->initFunc([=]()
 		{
 			SelectorPart* selector = new SelectorPart(kr("부서찾기"), 400, 500);
@@ -76,13 +72,13 @@ public:
 			->append(new CPLabel(50, 25, kr("자산번호")))
 			->append(m_edNoAsset));
 
-		m_edPart = (new CPDialogLineEdit(200, m_device->namePart()))->initReadOnly(true);
+		m_edPart = (new CPDialogLineEdit(200, m->user()->namePart()))->initReadOnly(true);
 		layout()->addWidget(
 			(new CPWidget(width, 35, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
 			->append(new CPLabel(50, 25, kr("소속파트")))
-			->append(m_edPart)->append(btnPart));
+			->append(m_edPart)->append(btnPart->initVisible(false)));
 
 		m_edPrice = (new CPDialogLineEdit(200, QString("%1").arg(m_device->price())));
 		layout()->addWidget(

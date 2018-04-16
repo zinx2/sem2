@@ -446,8 +446,8 @@ public:
 		m_lbSign3 = (new CPLabel(60, 30, kr("O")))->initStyleSheet("background:white; border:1px solid black")->initAlignment(Qt::AlignCenter);
 		append((new CPLabel(60, 30, kr("서명 :   ")))->initAlignment(Qt::AlignRight | Qt::AlignVCenter)->initStyleSheet("border: 0px solid black;"));
 		append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("담당자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign1));
-		append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("관리자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign2));
-		append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("보직자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign3));
+		append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("파트장")))->initAlignment(Qt::AlignCenter))->append(m_lbSign2));
+		append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("결재자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign3));
 		append(new CPWidget(10, 1, new QHBoxLayout));
 
 		Button* metaBtn = Style::instance()->main()->body()->content()->btnSign();

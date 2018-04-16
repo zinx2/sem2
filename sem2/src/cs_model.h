@@ -21,7 +21,7 @@ public:
     int noDevice() const { return m_noDevice; }
     int noPart() const { return m_noPart; }
     QString nameDevice() const { return m_nameDevice; }
-    QString namePart() const { return m_nameDevice; }
+    QString namePart() const { return m_namePart; }
     QString noAsset() const { return m_noAsset; }
     QString barcode() const { return m_barcode; }
     int price() const { return m_price; }
@@ -509,7 +509,10 @@ public:
     void setParts(QList<Part*> m) { m_parts.clear();  m_parts = m; emit partsChanged(); }
     void setEmployees(QList<Employee*> m) { m_employees.clear();  m_employees = m; emit employeesChanged(); }
     void setRents(QList<Rent*> m) { m_rents.clear();  m_rents = m; emit rentsChanged(); }
-	void setSignatures(QList<Sign*> m) { m_signatures.clear();  m_signatures = m; emit signaturesChanged(); }
+	void setSignatures(QList<Sign*> m) { 
+		m_signatures.clear();  
+		m_signatures = m; 
+		emit signaturesChanged(); }
     void setMessage(QString m) { m_message = m; emit messageChanged(); }
     void selectItem(int m) { m_selectedItem = m; emit itemSelected(); }
     void setPath(QString m) { m_path = m; emit pathChanged(); }

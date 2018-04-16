@@ -128,15 +128,15 @@ void ViewHome::initListMNT(bool skip)
 	m_contentGrid1_2->append(m_btnCalendarPrev)->append(m_lbCalendar)->append(m_btnCalendarNext);
 
 	MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
-	m_btnCheckExt = (new Command("check_ext", metaTable->txt2 + kr("월별대장"), m_content->width(), metaTable->hExt))
-		->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", metaTable->txt2 + kr("월별대장"))
+	m_btnCheckExt = (new Command("check_ext", metaTable->txt2 + kr("월별점검"), m_content->width(), metaTable->hExt))
+		->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", metaTable->txt2 + kr("월별점검"))
 		->initEffect(metaTable->btnExtReleasedSheet, metaTable->btnExtHoverdSheet, metaTable->btnExtHoverdSheet)
 		->initFunc([=]() {
 
 		bool folded = !m_btnCheckExt->selected();
 		int h = folded ? (12 * 30 + 24) : 0;
 		m_checkTable->initHeight(h);
-		m_btnCheckExt->initName(folded ? metaTable->txt2 + kr("월별대장") : metaTable->txt1 + kr("월별대장"));
+		m_btnCheckExt->initName(folded ? metaTable->txt2 + kr("월별점검") : metaTable->txt1 + kr("월별점검"));
 		m_btnCheckExt->select(folded);
 		updateUI();
 	});
@@ -506,6 +506,28 @@ void ViewHome::netHandler()
 
 				if (m->user()->typeAlarm() == 1)
 				{
+					//switch (m->user()->typeAdmin())
+					//{
+					//case User::PartManager:
+					//case User::PartChair:
+					//{
+					//	m_alarm->setFunc([=]() {
+					//		initListMNG();
+					//		netGetRentList(0); 
+					//	});
+					//	
+					//	break;
+					//}
+					//case User::SpecialList:
+					//{
+					//	m_alarm->setFunc([=]() {
+					//		initListMNT();
+					//		netGetRentList(0);
+					//	});
+					//	break;
+					//}
+					//}					
+
 					m_alarm->initSize(350, 120)->setMessage(m->user()->textAlarm());
 					m_alarm->show();
 				}
@@ -782,8 +804,8 @@ void ViewHome::initContentRow2()
 	m_lbSign3 = (new CPLabel(60, 30, kr("X")))->initStyleSheet("background:white; border:1px solid black")->initAlignment(Qt::AlignCenter);
 	m_zoneSign = (new CPWidget(180, 60, new QHBoxLayout))->initStyleSheet("border: 1px solid black;")
 		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("담당자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign1))
-		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("관리자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign2))
-		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("보직자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign3));
+		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("파트장")))->initAlignment(Qt::AlignCenter))->append(m_lbSign2))
+		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("결재자")))->initAlignment(Qt::AlignCenter))->append(m_lbSign3));
 
 	Button* metaBtn = m_styleContent->btnSign();
 	m_btnSign = new Command(metaBtn, [=]() {
@@ -950,7 +972,9 @@ void ViewHome::initSlideButton()
 void ViewHome::initButtonsDVC()
 {
 	m_btnPrint = new Command(m_styleContent->btnPrint(),
-		[=]() {	print(m_tableCommon);	}, true);
+		[=]() {	
+		print(m_tableCommon);	
+	}, true);
 
 	m_btnEdit = new Command(m_styleContent->btnEdit(),
 		[=]()

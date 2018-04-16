@@ -202,7 +202,7 @@ public:
 	MetaTableCheck()
 	{
 		Model* m = Model::instance();
-		metaSignatory << kr("담당자") << kr("관리자") << kr("보직자");
+		metaSignatory << kr("담당자") << kr("파트장") << kr("결재자");
 
 		foreach(Part* p, m->parts())
 			m_parts.append(p->namePart());

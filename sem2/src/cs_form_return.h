@@ -22,7 +22,7 @@ public:
 		m_net = NetWorker::instance();
 		setModal(true);
 		Palette* p = new Palette();
-		btnConfirm = (new GrayCommand("confirm", kr("확인"), 70, 30))->initEnabled(false)
+		btnConfirm = (new GrayCommand("confirm", kr("확인"), 70, 30))
 			->initFunc([=]() { confirm(); });
 		Command* btnCancel = (new GrayCommand("cancel", kr("취소"), 70, 30))
 			->initFunc([=]() { cancel(); });
@@ -37,7 +37,7 @@ public:
 			selector->show();
 		});
 
-		m_lbMessage = new QLabel(kr("직원을 선택하세요."));
+		m_lbMessage = new QLabel(kr(""));
 		m_lbMessage->setFixedSize(width - 250, 25);
 		m_lbMessage->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
 

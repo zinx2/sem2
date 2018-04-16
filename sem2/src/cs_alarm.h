@@ -29,6 +29,8 @@ public:
 		CPWidget* wdBtn = (new CPWidget(width - 10, 60, new QHBoxLayout))->initAlignment(Qt::AlignRight|Qt::AlignVCenter)->append(btnConfirm);
 		layout()->addWidget(wdBtn);
 
+		m_func = [=]() {};
+
 		connect(this, SIGNAL(rejected()), this, SLOT(confirm()));
 	}
 	Alarm* initSize(int w, int h) { setFixedSize(w, h); return this; }
@@ -39,9 +41,12 @@ public:
 		//m->alarm(false);
 		m->setModal(false);
 		close();
+		m_func();
 	}
-
+	FUNC func() { return m_func; }
+	void setFunc(FUNC m) { m_func = m; }
 private:
 	CPWidget* m_zoneMessage;
 	CPLabel* m_lbMessage;
+	FUNC m_func;
 };
