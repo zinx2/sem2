@@ -39,9 +39,9 @@ class CPLineEdit : public QLineEdit
 {
 	Q_OBJECT
 public:
-    CPLineEdit(int width, int height=25, QWidget *parent = 0) : QLineEdit(parent)
+	CPLineEdit(int width, int height = 25, QWidget *parent = 0) : QLineEdit(parent)
 	{
-        setFixedSize(width, height);
+		setFixedSize(width, height);
 		setStyleSheet("background:white;");
 		QFont f = font();
 		f.setPointSize(10);
@@ -62,7 +62,7 @@ class CPDialogLineEdit : public CPLineEdit
 {
 	Q_OBJECT
 public:
-	CPDialogLineEdit(int width, QString title="", QWidget *parent = 0) : CPLineEdit(width, 35, parent)
+	CPDialogLineEdit(int width, QString title = "", QWidget *parent = 0) : CPLineEdit(width, 35, parent)
 	{
 		initAlignment(Qt::AlignCenter);
 		initText(title);
@@ -73,7 +73,7 @@ class CPLabel : public QLabel
 {
 	Q_OBJECT
 public:
-	CPLabel(int width, int height, QString txt="", QWidget *parent = 0) : QLabel(txt, parent)
+	CPLabel(int width, int height, QString txt = "", QWidget *parent = 0) : QLabel(txt, parent)
 	{
 		setFixedSize(width, height);
 		setAlignment(Qt::AlignVCenter | Qt::AlignRight);
@@ -102,7 +102,7 @@ public:
 		return this;
 	}
 	CPLabel* initFontType(QString name) {
-		QFont oldFont = this->font();		
+		QFont oldFont = this->font();
 		this->setFont(QFont(name, oldFont.pointSize(), oldFont.weight()));
 		return this;
 	}
@@ -128,18 +128,29 @@ public:
 	}
 };
 
+class Model; class NetWorker; class Settings;
+class Alarm; class Question;
+class Page : public QWidget
+{
+	Q_OBJECT
+public:
+	Page(int width, int height, QLayout* ly, QWidget *parent = 0);
+
+protected:
+	Model* m;
+	NetWorker* n;
+	Settings* s;
+
+	Alarm* m_alarm;
+	Question* m_question;
+
+};
+
 class CPWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	CPWidget(int width, int height, QLayout* ly, QWidget *parent = 0) : QWidget(parent)
-	{
-		setFixedSize(width, height);
-		setLayout(ly);
-		//layout()->setAlignment(Qt::AlignVCenter);
-		layout()->setSpacing(0);
-		layout()->setMargin(0);
-	}
+	CPWidget(int width, int height, QLayout* ly, QWidget *parent = 0);
 	CPWidget* initContentsMargins(int left, int right, int top, int bottom)
 	{
 		setContentsMargins(left, top, right, bottom);
@@ -175,7 +186,6 @@ public:
 		layout()->addWidget(w);
 		return this;
 	}
-
 };
 class CPLazyImage : public QLabel
 {
@@ -269,7 +279,7 @@ public:
 		return this;
 	}
 	CPTable* initPage()
-	{		
+	{
 		if (m_itemCount > 0)
 		{
 			layout()->setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -284,7 +294,7 @@ public:
 				m_table = nullptr;
 			}
 			m_table = new QTableWidget;
-			for(int i=0; i< m_wMeta.size(); i++)
+			for (int i = 0; i < m_wMeta.size(); i++)
 			{
 				double p = m_wMeta.at(i);
 				m_table->setColumnWidth(i, m_meta->width() *p);
@@ -315,7 +325,7 @@ public:
 				delete m_lbEmpty;
 				m_lbEmpty = nullptr;
 			}
-			m_lbEmpty = (new CPLabel(width(), 100, kr("항목이 존재하지 않습니다.")))->initAlignment(Qt::AlignCenter);			
+			m_lbEmpty = (new CPLabel(width(), 100, kr("항목이 존재하지 않습니다.")))->initAlignment(Qt::AlignCenter);
 			layout()->addWidget(m_lbEmpty);
 			int hh = m_lbEmpty->height();
 			initHeight(m_lbEmpty->height());
@@ -326,12 +336,12 @@ public:
 	{
 		int idx = 0; int w = m_meta->width();
 		//qDebug() << "SIZE : " << w;
-		while (idx < m_meta->cols().size()-1)
+		while (idx < m_meta->cols().size() - 1)
 		{
 			m_table->setColumnWidth(idx, m_meta->cols()[idx]);
 			w = w - m_meta->cols()[idx++];
 		}
-		m_table->setColumnWidth(idx, w);	
+		m_table->setColumnWidth(idx, w);
 
 		if (m_visible)
 		{
@@ -383,53 +393,53 @@ private:
 
 class  CPDialog : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit CPDialog(QString title, int w, int h, QWidget *parent=0) : QDialog(parent)
-    {
+	explicit CPDialog(QString title, int w, int h, QWidget *parent = 0) : QDialog(parent)
+	{
 		m = Model::instance();
-        Qt::WindowFlags flags = windowFlags();
-        Qt::WindowFlags helpFlag = Qt::WindowContextHelpButtonHint;
-        flags = flags & (~helpFlag);
+		Qt::WindowFlags flags = windowFlags();
+		Qt::WindowFlags helpFlag = Qt::WindowContextHelpButtonHint;
+		flags = flags & (~helpFlag);
 
-        setWindowTitle(title);
-        setWindowFlags(flags);
-        setFixedSize(w, h);
-        setLayout(new QVBoxLayout);
+		setWindowTitle(title);
+		setWindowFlags(flags);
+		setFixedSize(w, h);
+		setLayout(new QVBoxLayout);
 
-        m_wdContents = (new CPWidget(w, h-40, new QVBoxLayout))->initAlignment(Qt::AlignTop);
-        layout()->addWidget(m_wdContents);
+		m_wdContents = (new CPWidget(w, h - 40, new QVBoxLayout))->initAlignment(Qt::AlignTop);
+		layout()->addWidget(m_wdContents);
 
-        m_wdTail = (new CPWidget(w, 60, new QHBoxLayout))->initSpacing(10)->initContentsMargins(0,10,0,0)
-                    ->initAlignment(Qt::AlignVCenter|Qt::AlignRight);
-        layout()->addWidget(m_wdTail);
-    }
+		m_wdTail = (new CPWidget(w, 60, new QHBoxLayout))->initSpacing(10)->initContentsMargins(0, 10, 0, 0)
+			->initAlignment(Qt::AlignVCenter | Qt::AlignRight);
+		layout()->addWidget(m_wdTail);
+	}
 
-    explicit CPDialog(int w, int h, QWidget *parent=0) : QDialog(parent)
-    {
+	explicit CPDialog(int w, int h, QWidget *parent = 0) : QDialog(parent)
+	{
 		m = Model::instance();
-        Qt::WindowFlags flags = windowFlags();
-        Qt::WindowFlags helpFlag = Qt::WindowContextHelpButtonHint;
-        flags = flags & (~helpFlag);
+		Qt::WindowFlags flags = windowFlags();
+		Qt::WindowFlags helpFlag = Qt::WindowContextHelpButtonHint;
+		flags = flags & (~helpFlag);
 
-        setFixedSize(w, h);
-    }
+		setFixedSize(w, h);
+	}
 
-    virtual void notify(int index, QString tag="") {};
+	virtual void notify(int index, QString tag = "") {};
 
-public slots:
-    virtual void confirm() {};
-    virtual void cancel() {};
+	public slots:
+	virtual void confirm() {};
+	virtual void cancel() {};
 
 signals:
-    void yes();
-    void no();
+	void yes();
+	void no();
 
 protected:
-    CPWidget* m_wdContents = nullptr;
-    CPWidget* m_wdTail = nullptr;
-	Model* m; 
+	CPWidget* m_wdContents = nullptr;
+	CPWidget* m_wdTail = nullptr;
+	Model* m;
 };
 
 class CPBoxSign : public CPWidget

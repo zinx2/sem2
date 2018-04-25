@@ -30,9 +30,9 @@ void NetWorker::request()
 
     if (!host->type().compare("post"))
     {
-		QUrl url(DOMAIN_NAME + host->addr());
-		QNetworkRequest req(url);
-		req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
+        QUrl url(DOMAIN_NAME + host->addr());
+        QNetworkRequest req(url);
+        req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
         m_netReply = m_netManager.post(req, host->queries().toString(QUrl::FullyDecoded).toUtf8());
     }
     else if (!host->type().compare("get"))
@@ -57,34 +57,34 @@ void NetWorker::request()
         if (!host->queries().isEmpty())
             url.setQuery(host->queries());
 
-		req.setUrl(url);
+        req.setUrl(url);
         m_netReply = m_netManager.post(req, multiPart);
         multiPart->setParent(m_netReply);
 
-		/*QUrl url(DOMAIN_NAME + host->addr());
-		QNetworkRequest req(url);
-		req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
-		m_netReply = m_netManager.post(req, multiPart);
-		multiPart->setParent(m_netReply);*/
+        /*QUrl url(DOMAIN_NAME + host->addr());
+        QNetworkRequest req(url);
+        req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
+        m_netReply = m_netManager.post(req, multiPart);
+        multiPart->setParent(m_netReply);*/
 
-        
+
     }
     else return;
 
-	qDebug() << "########## NETWORK INFORMATION ##########";
-	QString msg = DOMAIN_NAME + host->addr();
-	QList<QPair<QString, QString>> qItems = host->queries().queryItems();
-	int size = qItems.size();
-	if (size > 0)
-	{
-		for(int i=0; i<size; i++)
-		{
-			QPair<QString, QString> p = qItems.at(i);
-			msg  += "\n[" + QString::number(i + 1) + "] key: " + p.first  + ", value: " +  p.second;
-		}		
-	}
-	qDebug().noquote() << msg;
-	qDebug() << "#########################################";
+    qDebug() << "########## NETWORK INFORMATION ##########";
+    QString msg = DOMAIN_NAME + host->addr();
+    QList<QPair<QString, QString>> qItems = host->queries().queryItems();
+    int size = qItems.size();
+    if (size > 0)
+    {
+        for(int i=0; i<size; i++)
+        {
+            QPair<QString, QString> p = qItems.at(i);
+            msg  += "\n[" + QString::number(i + 1) + "] key: " + p.first  + ", value: " +  p.second;
+        }
+    }
+    qDebug().noquote() << msg;
+    qDebug() << "#########################################";
 
     connect(m_netReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, QOverload<QNetworkReply::NetworkError>::of(&NetWorker::httpError));
     connect(m_netReply, &QNetworkReply::finished, host->func());

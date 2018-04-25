@@ -82,6 +82,7 @@ public:
 		return this;
 	};
 	Command* initIcon(QString iconPath, QString txt) {
+		initName("");
 		initIcon("");
 		QPixmap pixmap(iconPath);
 		m_pixmap = pixmap;
@@ -109,7 +110,7 @@ public:
 		{
 			const int y = (height() - m_pixmap.height()) / 2; // add margin if needed
 			QPainter painter(this);
-			painter.drawPixmap(8, y, m_pixmap); // hardcoded horizontal margin
+			painter.drawPixmap(10, y, m_pixmap); // hardcoded horizontal margin
 
 			QFont font = painter.font();
 			font.setPointSize(font.pointSize() + 2);
@@ -181,13 +182,13 @@ public:
 		{
 			const int y = (height() - m_pixmap.height()) / 2; // add margin if needed
 			QPainter painter(this);
-			painter.drawPixmap(86, y, m_pixmap); // hardcoded horizontal margin
+			painter.drawPixmap(10, y, m_pixmap); // hardcoded horizontal margin
 
 			QFont font = painter.font();
 			font.setPointSize(font.pointSize() + 2);
 			//font.setBold(true);
 			painter.setFont(font);
-			painter.drawText(12, height() / 2 + 6, kr("로그아웃"));
+			painter.drawText(65, height() / 2 + 8, kr("로그아웃"));
 		}
 	}
 };
@@ -198,7 +199,7 @@ public:
 	GrayCommand(QString tag, QString name, int width, int height) : Command(tag, name, width, height)
 	{
 		Palette* p = new Palette();
-		initFontSize(12);
+		initFontSize(10);
 		initStyleSheet(p->btnReleasedStyleGrayNoRadius);
 		initEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius);
 		initDisabledEffect(p->btnReleasedStyleGrayNoRadius, p->btnHoveredStyleGrayNoRadius, p->btnSelectedStyleGrayNoRadius);

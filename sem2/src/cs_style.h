@@ -201,7 +201,7 @@ public:
 
 		m_btnExt = new Button();
 		m_btnExt->setTag("");
-		m_btnExt->setWidth(20);
+		m_btnExt->setWidth(45);
 		m_btnExt->setHeight(height());
 		m_btnExt->setIcon("");
 		m_btnExt->setName("◀");
@@ -211,39 +211,39 @@ public:
 
 		m_btnDVCList = new Button();
 		m_btnDVCList->setTag(TAG_DVC_LIST);
-		m_btnDVCList->setHeight(50);
-		m_btnDVCList->setIcon(":/imgs/devices_36dp.png");
+		m_btnDVCList->setHeight(70);
+		m_btnDVCList->setIcon(":/imgs/devices_48dp.png");
 		m_btnDVCList->setReleasedStyle(palette()->btnReleasedStyle01);
 		m_btnDVCList->setHoveredStyle(palette()->btnHoveredStyleGray);
 		m_btnDVCList->setSelectedStyle(palette()->btnSelectedStyleGray);
 
 		m_btnMNGList = new Button();
 		m_btnMNGList->setTag(TAG_MNG_LIST);
-		m_btnMNGList->setHeight(50);
-		m_btnMNGList->setIcon(":/imgs/management_36dp.png");
+		m_btnMNGList->setHeight(70);
+		m_btnMNGList->setIcon(":/imgs/management_48dp.png");
 		m_btnMNGList->setReleasedStyle(palette()->btnReleasedStyleGray);
 		m_btnMNGList->setHoveredStyle(palette()->btnHoveredStyleGray);
 		m_btnMNGList->setSelectedStyle(palette()->btnSelectedStyleGray);
 
 		m_btnMNTList = new Button();
 		m_btnMNTList->setTag(TAG_MNT_LIST);
-		m_btnMNTList->setHeight(50);
-		m_btnMNTList->setIcon(":/imgs/calendar_36dp.png");
+		m_btnMNTList->setHeight(70);
+		m_btnMNTList->setIcon(":/imgs/calendar_48dp.png");
 		m_btnMNTList->setReleasedStyle(palette()->btnReleasedStyleGray);
 		m_btnMNTList->setHoveredStyle(palette()->btnHoveredStyleGray);
 		m_btnMNTList->setSelectedStyle(palette()->btnSelectedStyleGray);
 
 		m_btnEMPList = new Button();
 		m_btnEMPList->setTag(TAG_EMP_LIST);
-		m_btnEMPList->setHeight(50);
-		m_btnEMPList->setIcon(":/imgs/employee_36dp.png");
+		m_btnEMPList->setHeight(70);
+		m_btnEMPList->setIcon(":/imgs/employee_48dp.png");
 		m_btnEMPList->setReleasedStyle(palette()->btnReleasedStyleGray);
 		m_btnEMPList->setHoveredStyle(palette()->btnHoveredStyleGray);
 		m_btnEMPList->setSelectedStyle(palette()->btnSelectedStyleGray);
 
 		m_btnImExport = new Button();
-		m_btnImExport->setHeight(50);
-		m_btnImExport->setIcon(":/imgs/imexport_36dp.png");
+		m_btnImExport->setHeight(70);
+		m_btnImExport->setIcon(":/imgs/imexport_48dp.png");
 		m_btnImExport->setReleasedStyle(palette()->btnReleasedStyleGray);
 		m_btnImExport->setHoveredStyle(palette()->btnHoveredStyleGray);
 		m_btnImExport->setSelectedStyle(palette()->btnSelectedStyleGray);
@@ -251,14 +251,14 @@ public:
 		extend(false);
 	}
 
-	const int widthSpread = 200;
-	const int widthFold = 90;
+	const int widthSpread = 250;
+	const int widthFold = 130;
 
-	const int wBtnExtended = 160;
-	const int wBtnFolded = 50;
+	const int wBtnExtended = 190;
+	const int wBtnFolded = 70;
 
-	const int wCol01 = 20;
-	const int hBtnExt = 30;	/* 확장하기 버튼 */
+	const int wCol01 = 40;
+	const int hBtnExt = 40;	/* 확장하기 버튼 */
 
 	const QString btnExtReleasedSheet = "border:0px; background: transparent; color:white;";
 	const QString btnExtHoverdSheet = "border:0px; background: #1e5064; color:white;";
@@ -323,7 +323,7 @@ class StyleMainHeader : public StyleBasic {
 public:
 	StyleMainHeader()
 	{
-		m_height = 60;
+		m_height = 90;
 		font()->setLarge(24);
 		font()->setMidium(18);
 		font()->setSmall(14);
@@ -331,14 +331,14 @@ public:
 		m_btnLogout = new Button();
 		m_btnLogout->setTag("logout");
 		m_btnLogout->setName("로그아웃");
-		m_btnLogout->setWidth(120);
-		m_btnLogout->setHeight(40);
-		m_btnLogout->setIcon(":/imgs/logout_24dp.png");
+		m_btnLogout->setWidth(190);
+		m_btnLogout->setHeight(70);
+		m_btnLogout->setIcon(":/imgs/logout_48dp.png");
 		m_btnLogout->setReleasedStyle(palette()->btnReleasedStyleGray);
 		m_btnLogout->setHoveredStyle(palette()->btnHoveredStyleGray);
 		m_btnLogout->setSelectedStyle(palette()->btnSelectedStyleGray);
 	}
-	const int wCol01 = 500;
+	const int wCol01 = 600;
 	const char* txtTitle = "e-koreatech 자산 관리 시스템";
 	Button* btnLogout() { return m_btnLogout; }
 
@@ -350,7 +350,7 @@ class StyleMainFooter : public StyleBasic {
 public:
 	StyleMainFooter()
 	{
-		m_height = 40;
+		m_height = 60;
 		font()->setMidium(12);
 	}
 	const QString txtCopyright = "Copyright 2018. OLEI. All rights reserved.";
@@ -364,75 +364,75 @@ public:
 		m_btnPrint = new NavyButton();
 		m_btnPrint->setTag("print");
 		m_btnPrint->setName("인쇄하기");
-		m_btnPrint->setWidth(110);
-		m_btnPrint->setHeight(40);
-		m_btnPrint->setIcon(":/imgs/printer_24dp.png");
+		m_btnPrint->setWidth(180);
+		m_btnPrint->setHeight(70);
+		m_btnPrint->setIcon(":/imgs/printer_36dp.png");
 
 		m_btnNew = new NavyButton();
 		m_btnNew->setName("추가하기");
-		m_btnNew->setWidth(110);
-		m_btnNew->setHeight(40);
-		m_btnNew->setIcon(":/imgs/plus_24dp.png");
+		m_btnNew->setWidth(180);
+		m_btnNew->setHeight(70);
+		m_btnNew->setIcon(":/imgs/plus_36dp.png");
 
 		m_btnRemove = new NavyButton();
 		m_btnRemove->setName("삭제하기");
-		m_btnRemove->setWidth(110);
-		m_btnRemove->setHeight(40);
-		m_btnRemove->setIcon(":/imgs/remove_24dp.png");
+		m_btnRemove->setWidth(180);
+		m_btnRemove->setHeight(70);
+		m_btnRemove->setIcon(":/imgs/remove_36dp.png");
 
 		m_btnEdit = new NavyButton();
 		m_btnEdit->setName("수정하기");
 		m_btnEdit->setTag("edit");
-		m_btnEdit->setWidth(110);
-		m_btnEdit->setHeight(40);
-		m_btnEdit->setIcon(":/imgs/edit_24dp.png");
+		m_btnEdit->setWidth(180);
+		m_btnEdit->setHeight(70);
+		m_btnEdit->setIcon(":/imgs/edit_36dp.png");
 
 		m_btnNaviLeft = new NavyButton();
 		m_btnNaviLeft->setName("◀");
-		m_btnNaviLeft->setWidth(30);
-		m_btnNaviLeft->setHeight(30);
+		m_btnNaviLeft->setWidth(45);
+		m_btnNaviLeft->setHeight(45);
 
 		m_btnNaviRight = new NavyButton();
 		m_btnNaviRight->setName("▶");
-		m_btnNaviRight->setWidth(30);
-		m_btnNaviRight->setHeight(30);
+		m_btnNaviRight->setWidth(45);
+		m_btnNaviRight->setHeight(45);
 
 		m_btnViewAll = new NavyButton();
 		m_btnViewAll->setTag(TAG_VIEW_ALL);
 		m_btnViewAll->setName("전체보기");
-		m_btnViewAll->setWidth(110);
-		m_btnViewAll->setHeight(40);
-		m_btnViewAll->setIcon(":/imgs/all_24dp.png");
+		m_btnViewAll->setWidth(180);
+		m_btnViewAll->setHeight(70);
+		m_btnViewAll->setIcon(":/imgs/all_36dp.png");
 
 		m_btnViewDate = new NavyButton();
 		m_btnViewDate->setTag(TAG_VIEW_DATE);
 		m_btnViewDate->setName("월별보기");
-		m_btnViewDate->setWidth(110);
-		m_btnViewDate->setHeight(40);
-		m_btnViewDate->setIcon(":/imgs/calendar2_24dp.png");
+		m_btnViewDate->setWidth(180);
+		m_btnViewDate->setHeight(70);
+		m_btnViewDate->setIcon(":/imgs/calendar2_36dp.png");
 
 		m_btnCalendarPrev = new NavyButton();
 		m_btnCalendarPrev->setTag("cal_prev");
 		m_btnCalendarPrev->setName("◀");
-		m_btnCalendarPrev->setWidth(30);
-		m_btnCalendarPrev->setHeight(30);
+		m_btnCalendarPrev->setWidth(45);
+		m_btnCalendarPrev->setHeight(45);
 
 		m_btnCalendarNext = new NavyButton();
 		m_btnCalendarPrev->setTag("cal_next");
 		m_btnCalendarNext->setName("▶");
-		m_btnCalendarNext->setWidth(30);
-		m_btnCalendarNext->setHeight(30);
+		m_btnCalendarNext->setWidth(45);
+		m_btnCalendarNext->setHeight(45);
 
 		m_btnSign = new NavyButton();
-		m_btnSign->setWidth(40);
-		m_btnSign->setHeight(40);
+		m_btnSign->setWidth(60);
+		m_btnSign->setHeight(60);
 		m_btnSign->setTag("sign");
 		m_btnSign->setName("");
-		m_btnSign->setIcon(":/imgs/sign_24dp.png");
+		m_btnSign->setIcon(":/imgs/sign_36dp.png");
 
 	}
-	const int wGrid1_1 = 350;
-	const int hRow01 = 60;
+	const int wGrid1_1 = 200;
+	const int hRow01 = 80;
 
 	Button* btnPrint() { return m_btnPrint; }
 	Button* btnNew() { return m_btnNew; }

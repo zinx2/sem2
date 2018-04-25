@@ -26,13 +26,13 @@ public:
 		setModal(true);
 
 		Palette* p = new Palette();
-		btnConfirm = (new GrayCommand("confirm", kr("확인"), 70, 30))->initEnabled(false)
+		btnConfirm = (new GrayCommand("confirm", kr("확인"), 80, 40))->initEnabled(false)
 			->initFunc([=]() { confirm(); });
-		Command* btnCancel = (new GrayCommand("cancel", kr("취소"), 70, 30))
+		Command* btnCancel = (new GrayCommand("cancel", kr("취소"), 80, 40))
 			->initFunc([=]() { cancel(); });
-		Command* btnInit = (new GrayCommand("init", kr("초기화"), 70, 30))
+		Command* btnInit = (new GrayCommand("init", kr("초기화"), 80, 40))
 			->initFunc([=]() { init(); });
-		Command* btnPart = (new Command("search_part", kr("부서찾기"), 70, 30))
+		Command* btnPart = (new GrayCommand("search_part", kr("부서찾기"), 80, 40))
 			->initFunc([=]()
 		{
 			SelectorPart* selector = new SelectorPart(kr("부서찾기"), 400, 500);
@@ -42,65 +42,65 @@ public:
 		});
 
 		m_lbMessage = new QLabel(kr("장비명을 입력해주세요."));
-		m_lbMessage->setFixedSize(width - 250, 25);
+		m_lbMessage->setFixedSize(width - 300, 25);
 		m_lbMessage->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
 
-		m_edNameDevice = (new CPLineEdit(200, 35, this))->initAlignment(Qt::AlignCenter);
+		m_edNameDevice = (new CPLineEdit(240, 45, this))->initAlignment(Qt::AlignCenter);
 		layout()->addWidget(
-			(new CPWidget(width, 35, new QHBoxLayout, this))
+			(new CPWidget(width, 45, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append((new CPLabel(50, 25, kr("장비명"))))
+			->append((new CPLabel(80, 25, kr("장비명"))))
 			->append(m_edNameDevice));
 
-		m_edNoAsset = (new CPLineEdit(200, 35, this))->initAlignment(Qt::AlignCenter);
+		m_edNoAsset = (new CPLineEdit(240, 45, this))->initAlignment(Qt::AlignCenter);
 		layout()->addWidget(
-			(new CPWidget(width, 35, new QHBoxLayout, this))
+			(new CPWidget(width, 45, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append(new CPLabel(50, 25, kr("자산번호")))
+			->append(new CPLabel(80, 25, kr("자산번호")))
 			->append(m_edNoAsset));
 
-		m_edPart = (new CPLineEdit(200, 35, this))->initReadOnly(true)->initText(kr(""))->initAlignment(Qt::AlignCenter);
+		m_edPart = (new CPLineEdit(240, 45, this))->initReadOnly(true)->initText(kr(""))->initAlignment(Qt::AlignCenter);
 		layout()->addWidget(
-			(new CPWidget(width, 35, new QHBoxLayout, this))
+			(new CPWidget(width, 45, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append(new CPLabel(50, 25, kr("소속파트")))
+			->append(new CPLabel(80, 25, kr("소속파트")))
 			->append(m_edPart)->append(btnPart));
 
-		m_edPrice = (new CPLineEdit(200, 35, this))->initAlignment(Qt::AlignCenter);
+		m_edPrice = (new CPLineEdit(240, 45, this))->initAlignment(Qt::AlignCenter);
 		layout()->addWidget(
-			(new CPWidget(width, 35, new QHBoxLayout, this))
+			(new CPWidget(width, 45, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append(new CPLabel(50, 25, kr("취득금액")))
+			->append(new CPLabel(80, 25, kr("취득금액")))
 			->append(m_edPrice));
 
-		m_edDate = (new CPLineEdit(200, 35, this))->initAlignment(Qt::AlignCenter);
+		m_edDate = (new CPLineEdit(240, 45, this))->initAlignment(Qt::AlignCenter);
 		layout()->addWidget(
-			(new CPWidget(width, 35, new QHBoxLayout, this))
+			(new CPWidget(width, 45, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append(new CPLabel(50, 25, kr("취득일자")))
+			->append(new CPLabel(80, 25, kr("취득일자")))
 			->append(m_edDate));
 
-		m_edMemo = (new CPTextEdit(width - 80, this))->initHeight(50);
+		m_edMemo = (new CPTextEdit(width - 115, this))->initHeight(50);
 		layout()->addWidget(
 			(new CPWidget(width, 60, new QHBoxLayout, this))
 			->initAlignment(Qt::AlignLeft)->initSpacing(10)
 			->initContentsMargins(10, 10, 0, 0)
-			->append((new CPLabel(50, 50, kr("비고")))->initAlignment(Qt::AlignTop | Qt::AlignRight)->initContentsMargins(0, 0, 5, 0))
+			->append((new CPLabel(80, 50, kr("비고")))->initAlignment(Qt::AlignTop | Qt::AlignRight)->initContentsMargins(0, 0, 5, 0))
 			->append(m_edMemo));
 
-		layout()->addWidget((new CPWidget(width, 30, new QHBoxLayout))
+		layout()->addWidget((new CPWidget(width, 40, new QHBoxLayout))
 			->initAlignment(Qt::AlignRight | Qt::AlignVCenter)
-			->initSpacing(10)->initContentsMargins(0, 10, 0, 0)
+			->initSpacing(10)->initContentsMargins(0, 15, 0, 0)
 			->append(m_lbMessage)->append(btnInit)->append(btnConfirm)->append(btnCancel));
 
 		//height = 35 * 5 + 5 + 95;
 		//m_wdContents->setFixedHeight(height);
-		setFixedHeight(height + 10);
+		setFixedHeight(height);
 
 		connect(m_edMemo, SIGNAL(textChanged()), this, SLOT(activate()));
 		connect(this, SIGNAL(rejected()), this, SLOT(cancel()));

@@ -8,11 +8,11 @@
 #include "cs_style.h"
 class Barcoder : public CPDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    explicit Barcoder(QString title, int width, int height, QWidget *parent = 0) : CPDialog(title, width, height, parent)
+	explicit Barcoder(QString title, int width, int height, QWidget *parent = 0) : CPDialog(title, width, height, parent)
 	{
 		setModal(true);
 		Command* btnInit = new Command("init", kr("초기화"), 70, 30);
@@ -20,36 +20,16 @@ public:
 
 		m_palette = new Palette();
 		m_btnBorrow = (new GrayCommand("btn_borrow", kr("대출하기"), 80, 40))->initEnabled(false)
-		->initFunc([=]() { 	m->request(true, Notificator::OpenFromBorrow); 	});
-		
-		m_btnReturn = (new GrayCommand("btn_return", kr("반납하기"), 80, 40))->initEnabled(false)
-		->initFunc([=]() { 	m->request(true, Notificator::OpenFromReturn); 	});
-		
-		m_btnCancel = (new GrayCommand("btn_cancel", kr("취소"), 80, 40))
-		->initFunc([=]() { 	cancel(); });
-		
-		m_btnSearch = (new GrayCommand("btn_search", kr("검색"), 80, 40))
-		->initFunc([=]()
-		{
-			QString barcode = m_edBarcode->text();
-			if (barcode.size() == 0) {
-				m_lbNameDevice->setText(kr("자산번호를 입력해주세요."));
-				return;
-			}
-			if (barcode.at(barcode.size() - 1) == '\n')
-			{
-				QStringRef subString(&barcode, 0, barcode.size() - 1);
-				m_edBarcode->setText(subString.toString());
-				m_edBarcode->setAlignment(Qt::AlignHCenter);
-				barcode = subString.toString();
-			}
+			->initFunc([=]() { 	m->request(true, Notificator::OpenFromBorrow); 	});
 
-			bool validate;
-			int noDevice = barcode.toInt(&validate);
-			if (validate)
-				NetWorker::instance()->getDeviceInfo(noDevice)->request();
-			else
-				m_lbNameDevice->setText(kr("유효하지 않은 자산번호입니다."));
+		m_btnReturn = (new GrayCommand("btn_return", kr("반납하기"), 80, 40))->initEnabled(false)
+			->initFunc([=]() { 	m->request(true, Notificator::OpenFromReturn); 	});
+
+		m_btnCancel = (new GrayCommand("btn_cancel", kr("취소"), 80, 40))
+			->initFunc([=]() { 	cancel(); });
+
+		m_btnSearch = (new GrayCommand("btn_search", kr("검색"), 80, 40))
+			->initFunc([=]() { search();
 		});
 
 		m_zoneBarcode = (new CPWidget(width, 70, new QVBoxLayout))->initAlignment(Qt::AlignTop)->initContentsMargins(10, 0, 0, 0)->initSpacing(5)
@@ -71,30 +51,60 @@ public:
 		m_wdTail->layout()->addWidget(m_btnCancel);
 		m_wdTail->setContentsMargins(0, 0, 30, 0);
 
-		connect(btnInit, SIGNAL(clicked()), this, SLOT(init()));		
-		//connect(edBarcode, SIGNAL(textChanged()), this, SLOT(recognize()));
+		connect(btnInit, SIGNAL(clicked()), this, SLOT(init()));
 		connect(this, SIGNAL(rejected()), this, SLOT(cancel()));
 		connect(m, SIGNAL(modalChanged()), this, SLOT(exit()));
+		connect(m_edBarcode, SIGNAL(returnPressed()), this, SLOT(enter()));
+		
 		//connect(m, SIGNAL(alarmedChanged()), this, SLOT(recognize()));
 	}
 
-    public slots:
-    void confirm()
+	public slots:
+	void confirm()
 	{
 	}
+	void search()
+	{
+		QString barcode = m_edBarcode->text();
+		if (barcode.size() == 0) 
+			m_lbNameDevice->initText(kr("자산번호를 입력해주세요."));
 
-    void cancel()
+		if (barcode.at(barcode.size() - 1) == '\n')
+		{
+			QStringRef subString(&barcode, 0, barcode.size() - 1);
+			m_edBarcode->setText(subString.toString());
+			m_edBarcode->setAlignment(Qt::AlignHCenter);
+			barcode = subString.toString();
+		}
+
+		bool validate;
+		int noDevice = barcode.toInt(&validate);
+		if (validate)
+			NetWorker::instance()->getDeviceInfo(noDevice)->request();
+		else
+			m_lbNameDevice->setText(kr("유효하지 않은 자산번호입니다."));
+
+	}
+	void enter()
+	{
+		QString barcode = m_edBarcode->text();
+		QString str(barcode.at(barcode.size() - 1));
+		search();
+		m_edBarcode->setText("");
+	}
+
+	void cancel()
 	{
 		close();
 	}
-    void init()
+	void init()
 	{
 		m_lbNameDevice->setText("");
 		m_edBarcode->setText("");
 		m_edBarcode->setAlignment(Qt::AlignHCenter);
 	}
 
-    void recognize()
+	void recognize()
 	{
 		if (m->alarmed() && m->notificator()->type() == Notificator::DVISearch)
 		{
@@ -102,12 +112,12 @@ public:
 			if (result)
 			{
 				Device* d = m->searchedDevice();
-				QString aboutDevice = d->nameDevice() + "\n";
+				QString aboutDevice = kr("자산번호 : ") +QString("%1").arg(d->noAsset()) + "\n" + d->nameDevice() + "\n";
 				aboutDevice += d->borrowed() ?
 					kr("반납되지 않은 장비입니다. \n반납을 원히사면 '반납하기' 버튼을 눌러주세요.") :
 					kr("반납된 장비입니다. \n대출을 원하시면 '대출하기' 버튼을 눌러주세요.");
-				
-				m_btnReturn->setEnabled(d->borrowed()); /* 대출되지 않았을 때는 반납버튼 사용불가 */					
+
+				m_btnReturn->setEnabled(d->borrowed()); /* 대출되지 않았을 때는 반납버튼 사용불가 */
 				m_btnBorrow->setEnabled(!d->borrowed());  /* 대출되지 않았을 때만 대출버튼 사용가능 */
 				m_lbNameDevice->setText(aboutDevice);
 			}
@@ -122,28 +132,28 @@ public:
 			m->alarm(false);
 		}
 	}
-    void exit()
+	void exit()
 	{
 		close();
 	}
 
 
 private:
-    CPWidget* m_zoneBarcode;
-    CPWidget* m_zoneDevice;
+	CPWidget* m_zoneBarcode;
+	CPWidget* m_zoneDevice;
 
-    CPLineEdit* m_edBarcode;
-    CPLabel* m_lbNameDevice;
+	CPLineEdit* m_edBarcode;
+	CPLabel* m_lbNameDevice;
 	Command* m_btnBorrow;
-    Command* m_btnReturn;
+	Command* m_btnReturn;
 	Command* m_btnCancel;
 	Command* m_btnSearch;
 
-//    DialogFormDeviceReturn* m_signature;
+	//    DialogFormDeviceReturn* m_signature;
 
-    bool doNext = false;
-    int m_recognizationFinished = true;
-    int m_noDevice = -1;
+	bool doNext = false;
+	int m_recognizationFinished = true;
+	int m_noDevice = -1;
 
 	Palette* m_palette;
 };
