@@ -341,9 +341,13 @@ public:
 	const int wCol01 = 600;
 	const char* txtTitle = "e-koreatech 자산 관리 시스템";
 	Button* btnLogout() { return m_btnLogout; }
+	//QString txtTitle() { return m_txtTitle; }
+
+	//void setTxtTitle(QString m) { m = m_txtTitle; }
 
 private:
 	Button* m_btnLogout;
+	QString m_txtTitle;
 };
 
 class StyleMainFooter : public StyleBasic {

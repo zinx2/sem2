@@ -14,10 +14,30 @@
 #include "cs_form_add.h"
 #include "cs_form_borrow.h"
 #include "cs_form_return.h"
+#include "display_information.h"
 int main(int argc, char *argv[])
 {
     QFontDatabase::addApplicationFont(":/NanumBarunGothic.ttf");
     QApplication a(argc, argv);
+
+	DisplayInfo* d = new DisplayInfo;
+
+	qreal dotsLogical = QGuiApplication::primaryScreen()->logicalDotsPerInch();
+	if (dotsLogical == 96)
+	{
+		ViewHomePC w;
+		w.show();
+	} 
+	else if (dotsLogical > 96)
+	{
+		ViewHomeTablet w;
+		w.show();
+	}
+
+
+		
+		
+
 
 	//Barcoder*
 	//FormReturn* fr = new FormReturn("QWQWQ", 500, 450);
@@ -30,8 +50,8 @@ int main(int argc, char *argv[])
 
 	//FormAdd* fa = new FormAdd(410, 340);
 	//fa->show();
-    ViewHome w;
-    w.show();
+    /*ViewHome w;
+    w.show();*/
 
 
 

@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>fonts/NanumBarunGothic.ttf</file>
-        <file>imgs/circle.png</file>
         <file>imgs/calendar_36dp.png</file>
         <file>imgs/devices_36dp.png</file>
         <file>imgs/edit_24dp.png</file>
@@ -16,5 +15,19 @@
         <file>imgs/calendar2_24dp.png</file>
         <file>imgs/sign_24dp.png</file>
         <file>imgs/logout_24dp.png</file>
+        <file>imgs/all_36dp.png</file>
+        <file>imgs/calendar_48dp.png</file>
+        <file>imgs/calendar2_36dp.png</file>
+        <file>imgs/circle.png</file>
+        <file>imgs/devices_48dp.png</file>
+        <file>imgs/edit_36dp.png</file>
+        <file>imgs/employee_48dp.png</file>
+        <file>imgs/imexport_48dp.png</file>
+        <file>imgs/management_48dp.png</file>
+        <file>imgs/plus_36dp.png</file>
+        <file>imgs/printer_36dp.png</file>
+        <file>imgs/remove_36dp.png</file>
+        <file>imgs/sign_36dp.png</file>
+        <file>imgs/logout_48dp.png</file>
     </qresource>
 </RCC>

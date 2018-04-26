@@ -1,4 +1,4 @@
-Ôªø#include "view_home2.h"
+#include "view_home.h"
 #include "cs_qheader.h"
 #include "cs_checktable.h"
 #include "cs_form_add.h"
@@ -7,17 +7,16 @@
 #include "cs_form_borrow.h"
 #include "cs_form_return.h"
 #include "cs_form_signature.h"
-ViewHome::ViewHome(QWidget *parent)
-	: QWidget(parent)
+ViewHomeTablet::ViewHomeTablet(QWidget *parent) : ViewHome(parent)
 {
-	setWindowTitle(kr("Ïò®ÎùºÏù∏ÌèâÏÉùÍµêÏú°Ïõê ÏûêÏÇ∞ Í¥ÄÎ¶¨ ÏãúÏä§ÌÖú"));
+	setWindowTitle(kr("ø¬∂Û¿Œ∆Úª˝±≥¿∞ø¯ ¿⁄ªÍ ∞¸∏Æ Ω√Ω∫≈€"));
 
 	m = Model::instance();
 	n = NetWorker::instance();
 	s = Settings::instance();
 
-	m_alarm = new Alarm(kr("ÏïåÎ¶º"), "", 350, 200);
-	m_question = new Question(kr("ÏïåÎ¶º"), "", 350, 200);
+	m_alarm = new Alarm(kr("æÀ∏≤"), "", 350, 200);
+	m_question = new Question(kr("æÀ∏≤"), "", 350, 200);
 	connect(m, SIGNAL(alarmedChanged()), this, SLOT(netHandler()));
 
 	//m->request(true, Notificator::RequestPartsList);
@@ -45,7 +44,7 @@ ViewHome::ViewHome(QWidget *parent)
 	//setFixedSize(0, 0);
 	//run();
 }
-void ViewHome::initParent()
+void ViewHomeTablet::initParent()
 {
 	initStyles();
 	initSlideButton();
@@ -59,7 +58,7 @@ void ViewHome::initParent()
 
 	connect(m_styleSlide, SIGNAL(extendedChanged()), this, SLOT(onSlided()));
 }
-void ViewHome::resizeEvent(QResizeEvent *e)
+void ViewHomeTablet::resizeEvent(QResizeEvent *e)
 {
 	if (!m_initedUI) {
 		m_initedUI = true;
@@ -73,7 +72,7 @@ void ViewHome::resizeEvent(QResizeEvent *e)
 	//print("MAIN", newSize.width(), newSize.height());
 	updateUI();
 }
-void ViewHome::updateUI()
+void ViewHomeTablet::updateUI()
 {
 	updateBody();
 	updateContent();
@@ -90,10 +89,10 @@ void ViewHome::updateUI()
 	else if (!tag.compare(TAG_MNT_LIST)) initTableMNT();
 	else if (!tag.compare(TAG_EMP_LIST)) initTableEMP();
 }
-void ViewHome::initListDVC()
+void ViewHomeTablet::initListDVC()
 {
-	//if (!initPage(TAG_DVC_LIST, kr("Ïû•ÎπÑÎ™©Î°ù"))) return;
-	m_titleTxt = kr("Ïû•ÎπÑÎ™©Î°ù");
+	//if (!initPage(TAG_DVC_LIST, kr("¿Â∫Ò∏Ò∑œ"))) return;
+	m_titleTxt = kr("¿Â∫Ò∏Ò∑œ");
 	m_cmdProviderList->select(TAG_DVC_LIST); /* SELECT BUTTON & UPDATE TAG */
 	m_metaTable = new MetaTableDVC();
 	initWidgets();
@@ -103,18 +102,18 @@ void ViewHome::initListDVC()
 	initButtonsDVC();
 	updateUI();
 }
-void ViewHome::initListMNG()
+void ViewHomeTablet::initListMNG()
 {
-	if (!initPage(TAG_MNG_LIST, kr("Í¥ÄÎ¶¨ÎåÄÏû•"))) return;
+	if (!initPage(TAG_MNG_LIST, kr("∞¸∏Æ¥Î¿Â"))) return;
 	m_countMonth = 0;
 	getCurrentDate(0);
 	initButtonsMNG();
 	initMNGNaviCalendar();
 	updateUI();
 }
-void ViewHome::initListMNT(bool skip)
+void ViewHomeTablet::initListMNT(bool skip)
 {
-	if (!initPage(TAG_MNT_LIST, kr("ÏõîÎ≥ÑÎåÄÏû•"), skip)) return;
+	if (!initPage(TAG_MNT_LIST, kr("ø˘∫∞¥Î¿Â"), skip)) return;
 	initButtonsMNT();
 
 	QString dateTime = (m_currentYear + "." + m_currentMonth);
@@ -128,15 +127,15 @@ void ViewHome::initListMNT(bool skip)
 	m_contentGrid1_2->append(m_btnCalendarPrev)->append(m_lbCalendar)->append(m_btnCalendarNext);
 
 	MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
-	m_btnCheckExt = (new Command("check_ext", metaTable->txt2 + kr("ÏõîÎ≥ÑÏ†êÍ≤Ä"), m_content->width(), metaTable->hExt))
-		->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", metaTable->txt2 + kr("ÏõîÎ≥ÑÏ†êÍ≤Ä"))
+	m_btnCheckExt = (new Command("check_ext", metaTable->txt2 + kr("ø˘∫∞¡°∞À"), m_content->width(), metaTable->hExt))
+		->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", metaTable->txt2 + kr("ø˘∫∞¡°∞À"))
 		->initEffect(metaTable->btnExtReleasedSheet, metaTable->btnExtHoverdSheet, metaTable->btnExtHoverdSheet)
 		->initFunc([=]() {
 
 		bool folded = !m_btnCheckExt->selected();
 		int h = folded ? (12 * 30 + 24) : 0;
 		m_checkTable->initHeight(h);
-		m_btnCheckExt->initName(folded ? metaTable->txt2 + kr("ÏõîÎ≥ÑÏ†êÍ≤Ä") : metaTable->txt1 + kr("ÏõîÎ≥ÑÏ†êÍ≤Ä"));
+		m_btnCheckExt->initName(folded ? metaTable->txt2 + kr("ø˘∫∞¡°∞À") : metaTable->txt1 + kr("ø˘∫∞¡°∞À"));
 		m_btnCheckExt->select(folded);
 		updateUI();
 	});
@@ -150,7 +149,7 @@ void ViewHome::initListMNT(bool skip)
 
 	m_checkTable = new CheckTable();
 	m_mntStack->append(m_btnCheckExt)->append(m_checkTable);
-	/*** ÏÉÅÏúÑ ÏÇ¨Ïù∏ Ï†êÍ≤Ä Ï∂úÎ†• ***/
+	/*** ªÛ¿ß ªÁ¿Œ ¡°∞À √‚∑¬ ***/
 
 	m_mntTables.clear();
 	m_mntZoneSign.clear();
@@ -177,7 +176,7 @@ void ViewHome::initListMNT(bool skip)
 
 		QString releaseTxt = metaTable->txt1 + m->parts().at(i)->namePart();
 		QString selectedTxt = metaTable->txt2 + m->parts().at(i)->namePart();
-		/** ÌôïÏû•Î≤ÑÌäº ÏÉùÏÑ± **/
+		/** »Æ¿Âπˆ∆∞ ª˝º∫ **/
 		Command* m_btnExt = (new Command(m->parts().at(i)->namePart(), releaseTxt, m_content->width(), metaTable->hExt))
 			->initStyleSheet(metaTable->btnExtReleasedSheet)->initIcon("", selectedTxt)
 			->initEffect(metaTable->btnExtReleasedSheet, metaTable->btnExtHoverdSheet, metaTable->btnExtHoverdSheet)
@@ -207,18 +206,18 @@ void ViewHome::initListMNT(bool skip)
 
 		CPTable* table = (new CPTable(new MetaTableExtendable));// ->resize();
 		m_mntTables.append(table);
-		m_mntStack->append(table); 	/*** Ìëú ÎÑ£Í∏∞ ***/
+		m_mntStack->append(table); 	/*** «• ≥÷±‚ ***/
 	}
 	updateUI();
 }
-void ViewHome::initListEMP()
+void ViewHomeTablet::initListEMP()
 {
-	if (!initPage(TAG_EMP_LIST, kr("ÏßÅÏõêÍ¥ÄÎ¶¨"))) return;
+	if (!initPage(TAG_EMP_LIST, kr("¡˜ø¯∞¸∏Æ"))) return;
 	newTable(100, TAG_EMP_LIST);
 	initButtonsEMP();
 	updateUI();
 }
-bool ViewHome::initPage(QString tag, QString titleTxt, bool skip)
+bool ViewHomeTablet::initPage(QString tag, QString titleTxt, bool skip)
 {
 	m_titleTxt = titleTxt;
 	/* DON'T INITIALIZE. */
@@ -240,7 +239,7 @@ bool ViewHome::initPage(QString tag, QString titleTxt, bool skip)
 
 	return true;
 }
-void ViewHome::newTable(int rowCount, QString tag)
+void ViewHomeTablet::newTable(int rowCount, QString tag)
 {
 	if (m_tableCommon != nullptr)
 	{
@@ -257,7 +256,7 @@ void ViewHome::newTable(int rowCount, QString tag)
 	m_tableCommon->verticalHeader()->hide();
 	m_content->layout()->addWidget(m_tableCommon);
 }
-void ViewHome::newNavi()
+void ViewHomeTablet::newNavi()
 {
 	if (m_navi != nullptr)
 	{
@@ -323,13 +322,13 @@ void ViewHome::newNavi()
 
 }
 
-void ViewHome::prev()
+void ViewHomeTablet::prev()
 {
 	m->setPageNumber(m->pageNumber() - 1);
 	qDebug() << m->pageNumber();
 	netGetDeviceList();
 }
-void ViewHome::next()
+void ViewHomeTablet::next()
 {
 	m->setPageNumber(m->pageNumber() + 1);
 	qDebug() << m->pageNumber();
@@ -337,19 +336,19 @@ void ViewHome::next()
 }
 
 #pragma region UTILITY FUNCTION.
-QString ViewHome::getCountDevice()
+QString ViewHomeTablet::getCountDevice()
 {
 	int current = (m->countCurrentDevice() / COUNT_PAGE) + (m->countCurrentDevice() % COUNT_PAGE == 0 ? 0 : 1);
 	int total = (m->countTotalDevice() / COUNT_PAGE) + (m->countTotalDevice() % COUNT_PAGE == 0 ? 0 : 1);
 	return QString("%1").arg(current) + "/" + QString("%1").arg(total);
 }
-QString ViewHome::getCurrentDate(int month)
+QString ViewHomeTablet::getCurrentDate(int month)
 {
 	m_currentYear = QDateTime::currentDateTime().addMonths(month).toString("yyyy");
 	m_currentMonth = QDateTime::currentDateTime().addMonths(month).toString("MM");
 	return m_currentYear + "." + m_currentMonth;
 }
-void ViewHome::netGetDeviceList(int searchType)
+void ViewHomeTablet::netGetDeviceList(int searchType)
 {
 	switch (m->user()->typeAdmin())
 	{
@@ -367,7 +366,7 @@ void ViewHome::netGetDeviceList(int searchType)
 	}
 	}
 }
-void ViewHome::netGetRentList(int type)
+void ViewHomeTablet::netGetRentList(int type)
 {
 	qDebug() << m_currentYear.toInt() << "/" << m_currentMonth.toInt();
 	switch (m->user()->typeAdmin())
@@ -412,19 +411,19 @@ void ViewHome::netGetRentList(int type)
 	}
 	}
 }
-void ViewHome::netGetEmployeeList()
+void ViewHomeTablet::netGetEmployeeList()
 {
 	n->getUserList()->request();
 }
-void ViewHome::netSignForMonth()
+void ViewHomeTablet::netSignForMonth()
 {
 	n->signForMonth()->request();
 }
-void ViewHome::netLogin()
+void ViewHomeTablet::netLogin()
 {
 	n->login(m->user()->id(), m->user()->pass())->request();
 }
-void ViewHome::netHandler()
+void ViewHomeTablet::netHandler()
 {
 	if (m->alarmed())
 	{
@@ -449,7 +448,7 @@ void ViewHome::netHandler()
 				case User::PartManager:
 				{
 					count = count - 1;
-					typeAdminStr = kr("ÌååÌä∏Îã¥ÎãπÏûê");
+					typeAdminStr = kr("∆ƒ∆Æ¥„¥Á¿⁄");
 					m_btnMNGList->initVisible(true);
 					m_btnMNTList->initVisible(false);
 					break;
@@ -457,7 +456,7 @@ void ViewHome::netHandler()
 				case User::PartChair:
 				{
 					count = count - 1;
-					typeAdminStr = kr("ÌååÌä∏Ïû•");
+					typeAdminStr = kr("∆ƒ∆Æ¿Â");
 					m_btnMNGList->initVisible(true);
 					m_btnMNTList->initVisible(false);
 					break;
@@ -465,14 +464,14 @@ void ViewHome::netHandler()
 				case User::SpecialList:
 				{
 					count = count - 1;
-					typeAdminStr = kr("Í≤∞Ïû¨Ïûê");
+					typeAdminStr = kr("∞·¿Á¿⁄");
 					m_btnMNGList->initVisible(true);
 					m_btnMNTList->initVisible(true);
 					break;
 				}
 				case User::SystemAdmin:
 				{
-					typeAdminStr = kr("ÏãúÏä§ÌÖúÍ¥ÄÎ¶¨Ïûê");
+					typeAdminStr = kr("Ω√Ω∫≈€∞¸∏Æ¿⁄");
 					break;
 				}
 				default:
@@ -563,7 +562,7 @@ void ViewHome::netHandler()
 			QString message = noti->message();
 			if (message.isEmpty())
 			{
-				message = kr("ÌöåÏõêÍ∞ÄÏûÖÏóê ÏÑ±Í≥µÌïòÏòÄÏäµÎãàÎã§.");
+				message = kr("»∏ø¯∞°¿‘ø° º∫∞¯«œø¥Ω¿¥œ¥Ÿ.");
 			}
 
 			m_alarm->initSize(350, 120)->setMessage(message);
@@ -579,7 +578,7 @@ void ViewHome::netHandler()
 			QString msg = m->notificator()->message();
 			if (result)
 			{
-				msg = kr("Ï†ïÏÉÅÏ†ÅÏúºÎ°ú Ï≤òÎ¶¨ÎêòÏóàÏäµÎãàÎã§.");
+				msg = kr("¡§ªÛ¿˚¿∏∑Œ √≥∏Æµ«æ˙Ω¿¥œ¥Ÿ.");
 				updateUI();
 			}
 
@@ -596,34 +595,34 @@ void ViewHome::netHandler()
 		}
 		else if (type == Notificator::ErrorNoLogined)
 		{
-			m_alarm->initSize(350, 120)->setMessage(kr("Î°úÍ∑∏Ïù∏ÏùÑ Ìï¥Ï£ºÏÑ∏Ïöî."));
+			m_alarm->initSize(350, 120)->setMessage(kr("∑Œ±◊¿Œ¿ª «ÿ¡÷ººø‰."));
 			m_alarm->show();
 		}
 		else if (type == Notificator::ErrorNoFile)
 		{
-			m_alarm->initSize(350, 120)->setMessage(kr("ÏÑúÎ™ÖÏù¥ Ï°¥Ïû¨ÌïòÏßÄ ÏïäÏäµÎãàÎã§."));
+			m_alarm->initSize(350, 120)->setMessage(kr("º≠∏Ì¿Ã ¡∏¿Á«œ¡ˆ æ Ω¿¥œ¥Ÿ."));
 			m_alarm->show();
 		}
 		else if (type == Notificator::ErrorNoSaveFile)
 		{
-			m_alarm->initSize(350, 120)->setMessage(kr("ÏÑúÎ™ÖÏùÑ Ï†ÄÏû•Ìï† Ïàò ÏóÜÏäµÎãàÎã§."));
+			m_alarm->initSize(350, 120)->setMessage(kr("º≠∏Ì¿ª ¿˙¿Â«“ ºˆ æ¯Ω¿¥œ¥Ÿ."));
 			m_alarm->show();
 		}
 		else if (type == Notificator::ErrorNoRent)
 		{
-			m_alarm->initSize(350, 120)->setMessage(kr("ÎåÄÏ∂úÎ≤àÌò∏Í∞Ä ÏûòÎ™ªÎêòÏóàÏäµÎãàÎã§."));
+			m_alarm->initSize(350, 120)->setMessage(kr("¥Î√‚π¯»£∞° ¿ﬂ∏¯µ«æ˙Ω¿¥œ¥Ÿ."));
 			m_alarm->show();
 		}
 		else if (type == Notificator::ErrorNoBarcode)
 		{
-			m_alarm->initSize(350, 120)->setMessage(kr("ÏûêÏÇ∞Î≤àÌò∏Í∞Ä ÏûòÎ™ªÎêòÏóàÏäµÎãàÎã§."));
+			m_alarm->initSize(350, 120)->setMessage(kr("¿⁄ªÍπ¯»£∞° ¿ﬂ∏¯µ«æ˙Ω¿¥œ¥Ÿ."));
 			m_alarm->show();
 		}
 		//else if (type == Notificator::ConfirmedRent)
 		//{
 		//	result = noti->result();
 		//	QString msg = "";
-		//	if (result) msg = kr("Ï†ïÏÉÅÏ†ÅÏúºÎ°ú Ï≤òÎ¶¨ÎêòÏóàÏäµÎãàÎã§.");
+		//	if (result) msg = kr("¡§ªÛ¿˚¿∏∑Œ √≥∏Æµ«æ˙Ω¿¥œ¥Ÿ.");
 		//	else msg = noti->message();
 		//	m_alarm->initSize(350, 120)->setMessage(msg);
 		//	m_alarm->show();
@@ -652,7 +651,7 @@ void ViewHome::netHandler()
 				m->setPageNumber(1);
 				initListDVC();
 				QTimer::singleShot(500, this, SLOT(netGetDeviceList()));
-				msg = kr("Ï†ïÏÉÅÏ†ÅÏúºÎ°ú Ï≤òÎ¶¨ÎêòÏóàÏäµÎãàÎã§.");
+				msg = kr("¡§ªÛ¿˚¿∏∑Œ √≥∏Æµ«æ˙Ω¿¥œ¥Ÿ.");
 			}
 			else {
 				msg = noti->message();
@@ -668,9 +667,9 @@ void ViewHome::netHandler()
 			QString msg = "";
 			result = noti->result();
 			if (result) {
-				msg = kr("Ï†ïÏÉÅÏ†ÅÏúºÎ°ú Ï≤òÎ¶¨ÎêòÏóàÏäµÎãàÎã§.");
+				msg = kr("¡§ªÛ¿˚¿∏∑Œ √≥∏Æµ«æ˙Ω¿¥œ¥Ÿ.");
 				QString tag = m_cmdProviderList->selectedTag();
-				if(!tag.compare(TAG_MNG_LIST)) updateMNGSign();
+				if (!tag.compare(TAG_MNG_LIST)) updateMNGSign();
 				else if (!tag.compare(TAG_MNT_LIST)) updateMNTCheckTable();
 			}
 			else msg = noti->message();
@@ -704,13 +703,13 @@ void ViewHome::netHandler()
 }
 #pragma endregion
 
-void ViewHome::clearAutoLogin()
+void ViewHomeTablet::clearAutoLogin()
 {
 	s->setId("");
 	s->setPass("");
 	s->loginAuto(false);
 }
-void ViewHome::initWidgets()
+void ViewHomeTablet::initWidgets()
 {
 	if (m_contentGrid1_1 != nullptr)
 	{
@@ -763,7 +762,7 @@ void ViewHome::initWidgets()
 		m_mntScrArea = nullptr;
 	}
 }
-void ViewHome::initContentRow1()
+void ViewHomeTablet::initContentRow1()
 {
 	m_contentRow1 = (new CPWidget(m_styleContent->width(), m_styleContent->hRow01, new QHBoxLayout))
 		->initAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -799,7 +798,7 @@ void ViewHome::initContentRow1()
 		->initContentsMargins(0, 10, 0, 0);
 	m_contentRow1->append(m_contentGrid1_3);
 }
-void ViewHome::initContentRow2()
+void ViewHomeTablet::initContentRow2()
 {
 	int hRow02 = 0;
 	QString tag = m_cmdProviderList->selectedTag();
@@ -814,9 +813,9 @@ void ViewHome::initContentRow2()
 	m_lbSign2 = (new CPLabel(60, 30, kr("X")))->initStyleSheet("background:white; border:1px solid black")->initAlignment(Qt::AlignCenter);
 	m_lbSign3 = (new CPLabel(60, 30, kr("X")))->initStyleSheet("background:white; border:1px solid black")->initAlignment(Qt::AlignCenter);
 	m_zoneSign = (new CPWidget(180, 60, new QHBoxLayout))->initStyleSheet("border: 1px solid black;")
-		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("Îã¥ÎãπÏûê")))->initAlignment(Qt::AlignCenter))->append(m_lbSign1))
-		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("ÌååÌä∏Ïû•")))->initAlignment(Qt::AlignCenter))->append(m_lbSign2))
-		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("Í≤∞Ïû¨Ïûê")))->initAlignment(Qt::AlignCenter))->append(m_lbSign3));
+		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("¥„¥Á¿⁄")))->initAlignment(Qt::AlignCenter))->append(m_lbSign1))
+		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("∆ƒ∆Æ¿Â")))->initAlignment(Qt::AlignCenter))->append(m_lbSign2))
+		->append((new CPWidget(60, 60, new QVBoxLayout))->append((new CPLabel(60, 20, kr("∞·¿Á¿⁄")))->initAlignment(Qt::AlignCenter))->append(m_lbSign3));
 
 	Button* metaBtn = m_styleContent->btnSign();
 	m_btnSign = new Command(metaBtn, [=]() {
@@ -835,7 +834,7 @@ void ViewHome::initContentRow2()
 		}
 	}, true);
 }
-void ViewHome::initStyles()
+void ViewHomeTablet::initStyles()
 {
 	/*** GET STYLE INSTANCES. ***/
 	m_style = Style::instance()->main();
@@ -846,7 +845,7 @@ void ViewHome::initStyles()
 	m_styleSlide = m_styleBody->slide();
 	/*** GET STYLE INSTANCES. END. ***/
 }
-void ViewHome::initParentLayout()
+void ViewHomeTablet::initParentLayout()
 {
 	setMinimumWidth(m_style->width()); setMinimumHeight(m_style->height());
 	setLayout(new QVBoxLayout);
@@ -854,7 +853,7 @@ void ViewHome::initParentLayout()
 	layout()->setMargin(0);
 	layout()->setSpacing(0);
 }
-void ViewHome::initBody()
+void ViewHomeTablet::initBody()
 {
 	m_body = new QWidget(this);
 	m_body->setLayout(new QHBoxLayout);
@@ -862,7 +861,7 @@ void ViewHome::initBody()
 	m_body->layout()->setSpacing(0);
 	layout()->addWidget(m_body);
 }
-void ViewHome::initContent()
+void ViewHomeTablet::initContent()
 {
 	m_content = new QWidget(this);
 	m_content->setLayout(new QVBoxLayout);
@@ -871,7 +870,7 @@ void ViewHome::initContent()
 	m_content->layout()->setSpacing(0);
 	m_body->layout()->addWidget(m_content);
 }
-void ViewHome::initHeader()
+void ViewHomeTablet::initHeader()
 {
 #pragma region  INITIALIZE HEADER.
 	m_header = new QWidget(this);
@@ -904,7 +903,7 @@ void ViewHome::initHeader()
 	layout()->addWidget(m_header);
 #pragma endregion
 }
-void ViewHome::initFooter()
+void ViewHomeTablet::initFooter()
 {
 	m_footer = new QWidget(this);
 	m_footer->setStyleSheet("background: " + m_styleFooter->palette()->navy01);
@@ -914,16 +913,16 @@ void ViewHome::initFooter()
 	m_footer->layout()->addWidget((new CPLabel(500, 25, m_styleFooter->txtCopyright))->initAlignment(Qt::AlignCenter)->initStyleSheet("color: white")->initFontSize(11));
 	layout()->addWidget(m_footer);
 }
-void ViewHome::initSlideButton()
+void ViewHomeTablet::initSlideButton()
 {
-	m_btnSlideExt = (new Command("slide_ext", kr("‚óÄ"), m_styleSlide->wCol01, m_styleSlide->height()))
+	m_btnSlideExt = (new Command("slide_ext", kr("¢∏"), m_styleSlide->wCol01, m_styleSlide->height()))
 		->initStyleSheet(m_styleSlide->btnExtReleasedSheet)->initFontSize(8)
 		->initEffect(m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtReleasedSheet, m_styleSlide->btnExtHoverdSheet)
 		->initFunc([=]()
 	{
 		bool extended = m_styleSlide->extended();
 		m_styleSlide->extend(!extended);
-		QString arrow = m_styleSlide->extended() ? kr("‚ñ∂") : kr("‚óÄ");
+		QString arrow = m_styleSlide->extended() ? kr("¢∫") : kr("¢∏");
 		m_btnSlideExt->initName(arrow);
 		updateUI();
 	});
@@ -931,7 +930,7 @@ void ViewHome::initSlideButton()
 	m_btnLogout = new LogoutCommand(m_styleHeader->btnLogout(),
 		[=]()
 	{
-		m_question->initSize(350, 120)->setMessage(kr("Î°úÍ∑∏ÏïÑÏõÉ ÌïòÏãúÍ≤†ÏäµÎãàÍπå?"));
+		m_question->initSize(350, 120)->setMessage(kr("∑Œ±◊æ∆øÙ «œΩ√∞⁄Ω¿¥œ±Ó?"));
 		m_question->func = [=]() { n->logout()->request(); };
 		m_question->show();
 	}, true);
@@ -969,7 +968,7 @@ void ViewHome::initSlideButton()
 	m_btnImExport = new Command(m_styleSlide->btnImExport(),
 		[=]()
 	{
-		m_barcoder = new Barcoder(kr("ÎåÄÏ∂ú/Î∞òÎÇ©ÌïòÍ∏∞"), 520, 230);
+		m_barcoder = new Barcoder(kr("¥Î√‚/π›≥≥«œ±‚"), 520, 230);
 		m_barcoder->show();
 	}, true);
 
@@ -980,11 +979,11 @@ void ViewHome::initSlideButton()
 	m_cmdProviderList->append(m_btnEMPList);
 	m_cmdProviderList->append(m_btnImExport);
 }
-void ViewHome::initButtonsDVC()
+void ViewHomeTablet::initButtonsDVC()
 {
 	m_btnPrint = new Command(m_styleContent->btnPrint(),
-		[=]() {	
-		print(m_tableCommon);	
+		[=]() {
+		print(m_tableCommon);
 	}, true);
 	m_btnPrint->initIcon(m_styleContent->btnPrint()->icon(), kr(m_styleContent->btnPrint()->name()));
 
@@ -992,12 +991,12 @@ void ViewHome::initButtonsDVC()
 		[=]()
 	{
 		if (m_tableCommon->currentRow() < 0) {
-			m_alarm->initSize(350, 120)->setMessage(kr("ÏàòÏ†ïÌï† Ïû•ÎπÑÎ•º ÏÑ†ÌÉùÌïòÏÑ∏Ïöî."));
+			m_alarm->initSize(350, 120)->setMessage(kr("ºˆ¡§«“ ¿Â∫Ò∏¶ º±≈√«œººø‰."));
 			m_alarm->show();
 			return;
 		}
 		if (!m_tableCommon->item(m_tableCommon->currentRow(), 0)->isSelected()) {
-			m_alarm->initSize(350, 120)->setMessage(kr("ÏàòÏ†ïÌï† Ïû•ÎπÑÎ•º ÏÑ†ÌÉùÌïòÏÑ∏Ïöî."));
+			m_alarm->initSize(350, 120)->setMessage(kr("ºˆ¡§«“ ¿Â∫Ò∏¶ º±≈√«œººø‰."));
 			m_alarm->show();
 			return;
 		}
@@ -1013,12 +1012,12 @@ void ViewHome::initButtonsDVC()
 		[=]()
 	{
 		if (m_tableCommon->currentRow() < 0) {
-			m_alarm->initSize(350, 120)->setMessage(kr("ÏÇ≠Ï†úÌï† Ïû•ÎπÑÎ•º ÏÑ†ÌÉùÌïòÏÑ∏Ïöî."));
+			m_alarm->initSize(350, 120)->setMessage(kr("ªË¡¶«“ ¿Â∫Ò∏¶ º±≈√«œººø‰."));
 			m_alarm->show();
 			return;
 		}
 		if (!m_tableCommon->item(m_tableCommon->currentRow(), 0)->isSelected()) {
-			m_alarm->initSize(350, 120)->setMessage(kr("ÏÇ≠Ï†úÌï† Ïû•ÎπÑÎ•º ÏÑ†ÌÉùÌïòÏÑ∏Ïöî."));
+			m_alarm->initSize(350, 120)->setMessage(kr("ªË¡¶«“ ¿Â∫Ò∏¶ º±≈√«œººø‰."));
 			m_alarm->show();
 			return;
 		}
@@ -1027,7 +1026,7 @@ void ViewHome::initButtonsDVC()
 
 		QString strNameDevice = m->devices().at(m_tableCommon->currentRow())->nameDevice();
 		QString strNoAsset = m->devices().at(m_tableCommon->currentRow())->noAsset();
-		m_question->initSize(350, 120)->setMessage(kr("ÏÑ†ÌÉùÌïú Ïû•ÎπÑÎ•º ÏÇ≠Ï†ú ÌïòÏãúÍ≤†ÏäµÎãàÍπå?\n\nÏû•ÎπÑÎ™Ö: ") + strNameDevice + kr("\nÏûêÏÇ∞Î≤àÌò∏: ") + strNoAsset);
+		m_question->initSize(350, 120)->setMessage(kr("º±≈√«— ¿Â∫Ò∏¶ ªË¡¶ «œΩ√∞⁄Ω¿¥œ±Ó?\n\n¿Â∫Ò∏Ì: ") + strNameDevice + kr("\n¿⁄ªÍπ¯»£: ") + strNoAsset);
 		m_question->func = [=]() {
 			n->removeDevice(m->devices().at(m_tableCommon->currentRow())->noDevice())->request();
 		};
@@ -1045,7 +1044,7 @@ void ViewHome::initButtonsDVC()
 
 	m_contentGrid1_3->append(m_btnNew)->append(m_btnEdit)->append(m_btnRemove)->append(m_btnPrint);
 }
-void ViewHome::initSlide()
+void ViewHomeTablet::initSlide()
 {
 	m_slide = new QWidget(this);
 	m_slide->setLayout(new QHBoxLayout);
@@ -1076,7 +1075,7 @@ void ViewHome::initSlide()
 	m_slideCol02->append(m_emptyArea);
 	m_slideCol02->append(m_btnImExport);
 }
-void ViewHome::initButtonsMNG()
+void ViewHomeTablet::initButtonsMNG()
 {
 	if (m_cmdProviderView != nullptr) m_cmdProviderView->clear();
 	else m_cmdProviderView = new CommandProvider();
@@ -1148,7 +1147,7 @@ void ViewHome::initButtonsMNG()
 	m_cmdProviderView->select(TAG_VIEW_ALL);
 
 }
-void ViewHome::initButtonsMNT()
+void ViewHomeTablet::initButtonsMNT()
 {
 	m_btnPrint = new Command(m_styleContent->btnPrint(),
 		[=]()
@@ -1175,7 +1174,7 @@ void ViewHome::initButtonsMNT()
 
 	m_contentGrid1_3->append(m_btnPrint);
 }
-void ViewHome::initButtonsEMP()
+void ViewHomeTablet::initButtonsEMP()
 {
 	m_btnPrint = new Command(m_styleContent->btnPrint(),
 		[=]()
@@ -1185,14 +1184,14 @@ void ViewHome::initButtonsEMP()
 	m_contentGrid1_3->append(m_btnPrint);
 	m_btnPrint->initIcon(m_styleContent->btnPrint()->icon(), kr(m_styleContent->btnPrint()->name()));
 }
-void ViewHome::initMNGNaviCalendar()
+void ViewHomeTablet::initMNGNaviCalendar()
 {
 	m_lbCalendar = (new CPLabel(120, 30, getCurrentDate(0)))->initVisible(false)
 		->initAlignment(Qt::AlignCenter)->initFontSize(15);
 	m_contentGrid1_2->append(m_btnCalendarPrev)->append(m_lbCalendar)->append(m_btnCalendarNext);
 	m_contentGrid1_3->append(m_btnViewAll)->append(m_btnViewDate)->append(m_btnPrint);
 }
-void ViewHome::initTableDVC()
+void ViewHomeTablet::initTableDVC()
 {
 	newTable(m->devices().size(), TAG_DVC_LIST);
 	newNavi();
@@ -1230,7 +1229,7 @@ void ViewHome::initTableDVC()
 		item2->setTextAlignment(Qt::AlignCenter);
 		m_tableCommon->setItem(row, 2, item2);
 
-		QTableWidgetItem* item3 = new QTableWidgetItem(QString(kr("%L1Ïõê  ")).arg(dv->price()));
+		QTableWidgetItem* item3 = new QTableWidgetItem(QString(kr("%L1ø¯  ")).arg(dv->price()));
 		item3->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 		m_tableCommon->setItem(row, 3, item3);
 
@@ -1247,7 +1246,7 @@ void ViewHome::initTableDVC()
 		m_tableCommon->setItem(row, 6, item6);
 	}
 }
-void ViewHome::initTableMNG()
+void ViewHomeTablet::initTableMNG()
 {
 	newTable(m->rents().size(), TAG_MNG_LIST);
 	MetaTableMNG* castedMetaTable = qobject_cast<MetaTableMNG*>(m_metaTable);
@@ -1257,18 +1256,18 @@ void ViewHome::initTableMNG()
 	m_tableCommon->setFixedSize(m_metaTable->width(), m_metaTable->height());
 	m_tableCommon->setHorizontalHeaderLabels(m_metaTable->header()->meta());
 	m_tableCommon->horizontalHeader()->setFixedHeight(m_metaTable->header()->height());
-	m_tableCommon->setColumnWidth(0, castedMetaTable->width() * 0.03); //1. Î≤àÌò∏
-	m_tableCommon->setColumnWidth(1, castedMetaTable->width() * 0.08); //2. ÏûêÏÇ∞Î≤àÌò∏
-	m_tableCommon->setColumnWidth(2, castedMetaTable->width() * 0.10); //3. Ïû•ÎπÑÎ™Ö
-	m_tableCommon->setColumnWidth(3, castedMetaTable->width() * 0.12 - 7); //4. ÎåÄÏ∂úÎÇ†Ïßú
-	m_tableCommon->setColumnWidth(4, castedMetaTable->width() * 0.09); //5. ÎåÄÏ∂úÏûê
-	m_tableCommon->setColumnWidth(5, castedMetaTable->width() * 0.10); //6. ÏÑúÎ™Ö
-	m_tableCommon->setColumnWidth(6, castedMetaTable->width() * 0.09); //. Ïö©ÎèÑ
-	m_tableCommon->setColumnWidth(7, castedMetaTable->width() * 0.12 - 7); //7. Î∞òÎÇ©ÎÇ†Ïßú
-	m_tableCommon->setColumnWidth(8, castedMetaTable->width() * 0.09); //8. ÌôïÏù∏Ïûê
-	m_tableCommon->setColumnWidth(9, castedMetaTable->width() * 0.10); //9. ÏÑúÎ™Ö
-	m_tableCommon->setColumnWidth(10, castedMetaTable->width() * 0.05); //9. Î≥¥ÏïàÏ†êÍ≤Ä
-	m_tableCommon->setColumnWidth(11, castedMetaTable->width() * 0.03); //10. ÌôïÏù∏
+	m_tableCommon->setColumnWidth(0, castedMetaTable->width() * 0.03); //1. π¯»£
+	m_tableCommon->setColumnWidth(1, castedMetaTable->width() * 0.08); //2. ¿⁄ªÍπ¯»£
+	m_tableCommon->setColumnWidth(2, castedMetaTable->width() * 0.10); //3. ¿Â∫Ò∏Ì
+	m_tableCommon->setColumnWidth(3, castedMetaTable->width() * 0.12 - 7); //4. ¥Î√‚≥Ø¬•
+	m_tableCommon->setColumnWidth(4, castedMetaTable->width() * 0.09); //5. ¥Î√‚¿⁄
+	m_tableCommon->setColumnWidth(5, castedMetaTable->width() * 0.10); //6. º≠∏Ì
+	m_tableCommon->setColumnWidth(6, castedMetaTable->width() * 0.09); //. øÎµµ
+	m_tableCommon->setColumnWidth(7, castedMetaTable->width() * 0.12 - 7); //7. π›≥≥≥Ø¬•
+	m_tableCommon->setColumnWidth(8, castedMetaTable->width() * 0.09); //8. »Æ¿Œ¿⁄
+	m_tableCommon->setColumnWidth(9, castedMetaTable->width() * 0.10); //9. º≠∏Ì
+	m_tableCommon->setColumnWidth(10, castedMetaTable->width() * 0.05); //9. ∫∏æ»¡°∞À
+	m_tableCommon->setColumnWidth(11, castedMetaTable->width() * 0.03); //10. »Æ¿Œ
 	for (int row = 0; row < m->rents().size(); row++)
 	{
 		//m_tableCommon->setRowHeight(row, 50);
@@ -1355,7 +1354,7 @@ void ViewHome::initTableMNG()
 
 	updateMNGSign();
 }
-void ViewHome::initTableMNT()
+void ViewHomeTablet::initTableMNT()
 {
 	MetaTableMNT* metaTable = qobject_cast<MetaTableMNT*>(m_metaTable);
 	m_metaTable->setWidth(m_content->width());
@@ -1413,9 +1412,9 @@ void ViewHome::initTableMNT()
 			int typeComplete = s->typeComplete();
 
 			bool enable = false;
-			if (typeAdmin == User::SpecialList) enable = typeComplete == 2 ? true : false; //Î≥¥ÏßÅÏûê
-			else if (typeAdmin == User::PartChair) enable = typeComplete == 1 ? true : false; //ÌååÌä∏Ïû•
-			else if (typeAdmin == User::PartManager) enable = typeComplete == 0 ? true : false; //Îã¥ÎãπÏûê			
+			if (typeAdmin == User::SpecialList) enable = typeComplete == 2 ? true : false; //∫∏¡˜¿⁄
+			else if (typeAdmin == User::PartChair) enable = typeComplete == 1 ? true : false; //∆ƒ∆Æ¿Â
+			else if (typeAdmin == User::PartManager) enable = typeComplete == 0 ? true : false; //¥„¥Á¿⁄			
 			zoneSign->initEanbleButton(enable);
 			break;
 		}
@@ -1423,7 +1422,7 @@ void ViewHome::initTableMNT()
 		//m_mntTables.at(i)->initWidth(m_content->width())->initPage();
 	}
 }
-void ViewHome::initTableEMP()
+void ViewHomeTablet::initTableEMP()
 {
 	MetaTableEMP* metaTable = qobject_cast<MetaTableEMP*>(m_metaTable);
 	m_metaTable->setWidth(m_content->width());
@@ -1451,32 +1450,32 @@ void ViewHome::initTableEMP()
 		m_tableCommon->setItem(row, 2, item2);
 	}
 }
-void ViewHome::updateBody()
+void ViewHomeTablet::updateBody()
 {
 	int wBody = m_styleBody->width();
 	int hBody = m_styleBody->height();
 	m_body->setFixedSize(wBody, hBody);
 }
-void ViewHome::updateContent()
+void ViewHomeTablet::updateContent()
 {
 	int wContent = m_styleContent->width();
 	int hContent = m_styleContent->height();
 	m_content->setFixedSize(wContent, hContent);
 }
-void ViewHome::updateHeader()
+void ViewHomeTablet::updateHeader()
 {
 	int wHeader = m_styleHeader->width();
 	int hHeader = m_styleHeader->height();
 	m_header->setFixedSize(wHeader, hHeader);
 	m_headerCol02->initWidth(m_styleHeader->width() - m_styleHeader->wCol01);
 }
-void ViewHome::updateFooter()
+void ViewHomeTablet::updateFooter()
 {
 	int wFooter = m_styleFooter->width();
 	int hFooter = m_styleFooter->height();
 	m_footer->setFixedSize(wFooter, hFooter);
 }
-void ViewHome::updateSlideButtons()
+void ViewHomeTablet::updateSlideButtons()
 {
 	Button* metaBtn;
 	metaBtn = m_styleSlide->btnDVCList();
@@ -1494,7 +1493,7 @@ void ViewHome::updateSlideButtons()
 	metaBtn = m_styleSlide->btnImExport();
 	m_btnImExport->initWidth(metaBtn->width())->initIcon(metaBtn->icon(), kr(metaBtn->name()));
 }
-void ViewHome::updateSlide()
+void ViewHomeTablet::updateSlide()
 {
 	int wSlide = m_styleSlide->width();
 	int wSlideCol01 = m_styleSlide->wCol01;
@@ -1519,7 +1518,7 @@ void ViewHome::updateSlide()
 	int hBtn = m_cmdProviderList->totalHeight() / m_cmdProviderList->count();
 	m_emptyArea->setFixedSize(1, hSlide - (hBtn * count) - 10 * (count + 2));
 }
-void ViewHome::updateContentRow1()
+void ViewHomeTablet::updateContentRow1()
 {
 	int wContent = m_styleContent->width();
 	m_contentRow1->initWidth(wContent);
@@ -1538,7 +1537,7 @@ void ViewHome::updateContentRow1()
 	m_contentGrid1_2->setFixedWidth(wGrid1_2);
 	m_contentGrid1_3->setFixedWidth(wGrid1_3);
 }
-void ViewHome::updateContentRow2()
+void ViewHomeTablet::updateContentRow2()
 {
 	int wContent = m_styleContent->width();
 
@@ -1553,7 +1552,7 @@ void ViewHome::updateContentRow2()
 	m_contentRow2->append(m_zoneSign)->append(m_btnSign);
 	//m_tableSign->setHorizontalHeaderLabels(castedMetaTable->headerSign);
 }
-void ViewHome::updateMNGSign()
+void ViewHomeTablet::updateMNGSign()
 {
 	if (m_cmdProviderList->selectedTag().compare(TAG_MNG_LIST)) return;
 	foreach(Sign* s, m->signatures())
@@ -1615,16 +1614,16 @@ void ViewHome::updateMNGSign()
 		int typeComplete = s->typeComplete();
 		bool enable = false;
 
-		if (typeAdmin == User::SpecialList) enable = typeComplete == 2 ? true : false; //Î≥¥ÏßÅÏûê
-		else if (typeAdmin == User::PartChair) enable = typeComplete == 1 ? true : false; //ÌååÌä∏Ïû•
-		else if (typeAdmin == User::PartManager) enable = typeComplete == 0 ? true : false; //Îã¥ÎãπÏûê
+		if (typeAdmin == User::SpecialList) enable = typeComplete == 2 ? true : false; //∫∏¡˜¿⁄
+		else if (typeAdmin == User::PartChair) enable = typeComplete == 1 ? true : false; //∆ƒ∆Æ¿Â
+		else if (typeAdmin == User::PartManager) enable = typeComplete == 0 ? true : false; //¥„¥Á¿⁄
 
 		int noSign = s->noSign();
 		m_btnSign->initEnabled(enable);
 		break;
 	}
 }
-void ViewHome::updateMNTCheckTable()
+void ViewHomeTablet::updateMNTCheckTable()
 {
 	if (m_cmdProviderList->selectedTag().compare(TAG_MNT_LIST)) return;
 	m_checkTable->updateTable();
@@ -1743,7 +1742,7 @@ void ViewHome::updateMNTCheckTable()
 		}
 	}
 }
-ViewHome::~ViewHome()
+ViewHomeTablet::~ViewHomeTablet()
 {
 
 }

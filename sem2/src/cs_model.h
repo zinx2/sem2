@@ -547,6 +547,7 @@ public:
 
 	void request(bool result, Notificator::UpdateType type, QString message="")
 	{
+		bool tmp = m_alarmed; 
 		setNotificator(new Notificator(result, type, message));
 	}
 signals:

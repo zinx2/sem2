@@ -36,7 +36,7 @@ public:
 
 			QString id = m_edID->text();
 			QString pass = m_edPass->text();
-			if (id.isEmpty() || pass.isEmpty())
+			if (id.isEmpty() || pass.isEmpty())	
 			{
 				Notificator* noti = new Notificator();
 				noti->setType(Notificator::None);

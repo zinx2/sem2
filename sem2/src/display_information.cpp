@@ -1,4 +1,4 @@
-#include "cs_display_information.h"
+#include "display_information.h"
 #include <QScreen>
 #include <QGuiApplication>
 #include <QDebug>
@@ -76,8 +76,8 @@ DisplayInfo::DisplayInfo(/*int dpWidth,*/QObject *parent)
     //      m_ratio = refDpi / dotsLogical / 160.0;
     //    #endif
 
-    qreal refDpi = 96;
-    qreal refHeight = 1080.;
+    qreal refDpi = 189.;
+    qreal refHeight = 1920.;
     QRect deviceRes = QGuiApplication::primaryScreen()->geometry();
     m_width = deviceRes.width();
     m_height = deviceRes.height();
@@ -85,6 +85,7 @@ DisplayInfo::DisplayInfo(/*int dpWidth,*/QObject *parent)
 
     qreal dotsLogical = QGuiApplication::primaryScreen()->logicalDotsPerInch();
     qreal dotsPhysical = QGuiApplication::primaryScreen()->physicalDotsPerInch();
+	
     m_ratioFont = (refDpi / dotsLogical) * m_ratio;
 
     qDebug() << "dotsLogical :: " << dotsLogical;
